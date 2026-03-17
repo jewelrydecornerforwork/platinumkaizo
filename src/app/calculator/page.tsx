@@ -8,7 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import { useKaizoCalc } from '@/hooks/useKaizoCalc';
 import { DamageCalcInput, DamageCalcResult, KaizoModifier, WeatherType, FieldType } from '@/types/damage';
-import { garchomp, garchomp as garchompInstance } from '@/data/sampleData';
+import { garchompInstance } from '@/data/sampleData';
 import Image from 'next/image';
 
 interface CalculatorState {
@@ -373,7 +373,7 @@ export default function DamageCalculatorPage() {
               ) : (
                 <div className="flex h-64 items-center justify-center text-center">
                   <p className="text-slate-400">
-                    👈 选择参数后点击"计算伤害"<br />
+                    👈 选择参数后点击 &quot;计算伤害&quot;<br />
                     查看结果
                   </p>
                 </div>

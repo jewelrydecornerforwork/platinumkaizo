@@ -159,7 +159,7 @@ export default function CardDemoPage(): React.ReactElement {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* 基础用法 */}
             <div className="p-6 rounded-lg bg-slate-900/50 border border-emerald-500/20 font-mono text-xs overflow-x-auto">
-              <p className="text-emerald-400 mb-4 font-bold">// 基础用法</p>
+              <p className="text-emerald-400 mb-4 font-bold">基础用法</p>
               <pre className="text-slate-300 whitespace-pre-wrap break-words">
 {`import { TacticalPokemonCard } from '@/components/cards/TacticalPokemonCard';
 
@@ -173,7 +173,7 @@ export default function CardDemoPage(): React.ReactElement {
 
             {/* 网格用法 */}
             <div className="p-6 rounded-lg bg-slate-900/50 border border-emerald-500/20 font-mono text-xs overflow-x-auto">
-              <p className="text-emerald-400 mb-4 font-bold">// 网格布局</p>
+              <p className="text-emerald-400 mb-4 font-bold">网格布局</p>
               <pre className="text-slate-300 whitespace-pre-wrap break-words">
 {`import { TacticalPokemonCardGrid } from '@/components/cards/TacticalPokemonCard';
 

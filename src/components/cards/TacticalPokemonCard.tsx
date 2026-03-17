@@ -157,13 +157,6 @@ export function TacticalPokemonCard({
     },
   };
 
-  const hoverVariants = {
-    hover: {
-      scale: 1.02,
-      transition: { duration: 0.3 },
-    },
-  };
-
   return (
     <motion.div
       ref={containerRef}
@@ -176,8 +169,7 @@ export function TacticalPokemonCard({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      whileHover="hover"
-      variants={hoverVariants}
+      whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
