@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import type { SidebarContextType } from '@/types';
 import { createContext, useContext, useState } from 'react';
@@ -22,15 +22,13 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     closeSidebar,
   };
 
-  return (
-    <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
-  );
+  return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
 }
 
 export function useSidebar(): SidebarContextType {
   const context = useContext(SidebarContext);
   if (!context) {
-    throw new Error('useSidebar must be used within a SidebarProvider');
+    throw new Error('useSidebar 必须在 SidebarProvider 内部使用');
   }
   return context;
 }

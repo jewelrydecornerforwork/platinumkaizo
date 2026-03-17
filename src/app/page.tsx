@@ -1,69 +1,68 @@
+﻿import Link from 'next/link';
+
+const features = [
+  {
+    title: '全图鉴',
+    description: '快速查询宝可梦基础信息、属性与战术定位。',
+    href: '/pokedex',
+  },
+  {
+    title: '馆主对战',
+    description: '查看关键馆主阵容思路与针对策略。',
+    href: '/bosses',
+  },
+  {
+    title: '伤害计算',
+    description: '模拟对战伤害区间，辅助队伍与配招决策。',
+    href: '/calculator',
+  },
+  {
+    title: '队伍构建',
+    description: '规划队伍核心、补盲点并构建对战节奏。',
+    href: '/teambuilder',
+  },
+];
+
 export default function Home(): React.ReactElement {
   return (
     <div className="px-6 py-12 md:px-12">
-      <div className="max-w-4xl mx-auto">
-        {/* Hero Section */}
-        <div className="mb-12 pt-6">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-emerald-400 to-emerald-500 bg-clip-text text-transparent">
-              Platinum Kaizo
+      <div className="mx-auto max-w-5xl">
+        <section className="mb-12 pt-6">
+          <h1 className="title-strong mb-4 text-5xl md:text-6xl">
+            <span className="bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-transparent">
+              Platinum Kaizo 数字化作战指挥系统
             </span>
-            <br />
-            <span className="text-slate-300">Wiki</span>
           </h1>
-          <p className="text-lg text-slate-400 max-w-2xl mb-8">
-            欢迎来到 Platinum Kaizo Wiki！这是一个全面的游戏指南，包含图鉴、馆主战术、伤害计算器和队伍配置工具。
+          <p className="max-w-3xl text-lg text-slate-300">
+            为顶尖训练家定制的硬核数据支持
           </p>
-        </div>
+        </section>
 
-        {/* Feature Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {[
-            {
-              title: '全图鉴',
-              description: '浏览所有 Pokémon 的详细信息',
-              href: '/pokedex',
-            },
-            {
-              title: '馆主战术',
-              description: '查看馆主战斗的详细攻略',
-              href: '/bosses',
-            },
-            {
-              title: '伤害计算器',
-              description: '计算伤害和战斗数据',
-              href: '/calc',
-            },
-            {
-              title: '队伍配置',
-              description: '构建和优化你的队伍',
-              href: '/teambuilder',
-            },
-          ].map((feature) => (
-            <a
+        <section className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-2">
+          {features.map((feature) => (
+            <Link
               key={feature.title}
               href={feature.href}
-              className="group p-6 rounded-lg bg-slate-800/50 border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-slate-800/80 transition-all duration-300"
+              className="glass-card group p-6 transition-colors duration-200 hover:border-emerald-500/45"
             >
-              <h3 className="text-xl font-bold text-emerald-400 mb-2 group-hover:text-emerald-300">
+              <h2 className="title-strong mb-2 text-xl text-emerald-300 group-hover:text-emerald-200">
                 {feature.title}
-              </h3>
-              <p className="text-slate-400 group-hover:text-slate-300">
-                {feature.description}
-              </p>
-            </a>
+              </h2>
+              <p className="text-slate-300">{feature.description}</p>
+              <span className="mt-4 inline-flex text-sm text-emerald-300">进入模块</span>
+            </Link>
           ))}
-        </div>
+        </section>
 
-        {/* Info Section */}
-        <div className="p-6 rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-400/5 border border-emerald-500/20">
-          <h2 className="text-2xl font-bold text-emerald-400 mb-2">
-            🎮 开始游戏
-          </h2>
-          <p className="text-slate-300">
-            使用左侧导航菜单探索 Wiki 的各个部分，或选择上方的功能开始游戏指南之旅。
+        <section className="glass-card p-6">
+          <h2 className="title-strong mb-2 text-2xl text-emerald-300">开始探索</h2>
+          <p className="mb-4 text-slate-300">
+            你可以从左侧导航进入任意模块，或直接打开伤害计算器进行战术验证。
           </p>
-        </div>
+          <Link href="/calculator" className="tech-button">
+            打开伤害计算器
+          </Link>
+        </section>
       </div>
     </div>
   );

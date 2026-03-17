@@ -1,11 +1,10 @@
-'use client';
+﻿'use client';
 
 import { navItems } from '@/lib/navigation';
 import { useSidebar } from '@/components/providers/SidebarProvider';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import styles from './Sidebar.module.css';
 
 export function Sidebar(): React.ReactElement {
   const { isOpen, closeSidebar } = useSidebar();
@@ -13,10 +12,9 @@ export function Sidebar(): React.ReactElement {
 
   return (
     <>
-      {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          className="fixed inset-0 z-30 bg-black/55 backdrop-blur-sm md:hidden"
           onClick={closeSidebar}
           role="button"
           tabIndex={-1}
@@ -24,30 +22,27 @@ export function Sidebar(): React.ReactElement {
         />
       )}
 
-      {/* Sidebar Container */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-sidebar bg-slate-900/80 backdrop-blur-md border-r border-emerald-500/20 transition-transform duration-300 ease-in-out z-40 flex flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        className={`glass-card fixed left-0 top-0 z-40 flex h-screen w-sidebar flex-col rounded-r-2xl border-r border-emerald-500/30 bg-black/45 shadow-[0_0_26px_rgba(59,130,246,0.22)] backdrop-blur-xl transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100'
         }`}
         role="navigation"
-        aria-label="Main navigation"
+        aria-label="主导航"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-emerald-500/20">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-500 bg-clip-text text-transparent">
-            Platinum Wiki
+        <div className="flex items-center justify-between border-b border-emerald-500/25 p-6">
+          <h1 className="title-strong bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-2xl text-transparent">
+            白金改版
           </h1>
           <button
             onClick={closeSidebar}
-            className="md:hidden p-2 hover:bg-slate-800 rounded-lg transition-colors"
-            aria-label="Close sidebar"
+            className="tech-button h-10 w-10 px-0 py-0 md:hidden"
+            aria-label="关闭侧边栏"
           >
-            <X size={20} className="text-emerald-500" />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Navigation Items */}
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+        <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -55,26 +50,27 @@ export function Sidebar(): React.ReactElement {
                 key={item.id}
                 href={item.href}
                 onClick={closeSidebar}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                className={`group relative flex items-center gap-3 rounded-lg px-4 py-3 transition-all duration-300 ${
                   isActive
-                    ? 'bg-emerald-500/20 text-emerald-400 border-l-2 border-emerald-500'
-                    : 'text-slate-300 hover:bg-slate-800/50 hover:text-emerald-400'
+                    ? 'translate-x-1 border-l-2 border-emerald-500 bg-emerald-500/20 text-emerald-200'
+                    : 'text-slate-200 hover:translate-x-1 hover:bg-black/30 hover:text-emerald-200'
                 }`}
               >
                 <span className="flex-1 font-medium">{item.label}</span>
-                {isActive && (
-                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                )}
+                {isActive && <div className="h-2 w-2 rounded-full bg-emerald-400" />}
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute bottom-1 left-1/2 h-px -translate-x-1/2 bg-emerald-400/90 transition-all duration-300 ${
+                    isActive ? 'w-[78%]' : 'w-0 group-hover:w-[78%]'
+                  }`}
+                />
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="border-t border-emerald-500/20 p-4">
-          <p className="text-xs text-slate-400 text-center">
-            Platinum Kaizo Wiki v1.0
-          </p>
+        <div className="border-t border-emerald-500/25 p-4">
+          <p className="text-center text-xs text-slate-400">白金改版百科 1.0 版</p>
         </div>
       </aside>
     </>
