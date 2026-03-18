@@ -232,11 +232,6 @@ function getKoDisplay(koText: string | undefined): string {
   return '暂不构成稳定击杀';
 }
 
-function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength).trim()}...`;
-}
-
 function createDamageRolls(min: number, max: number): Array<{ factor: number; value: number }> {
   const factors = Array.from({ length: 16 }, (_, index) => 85 + index);
   const spread = max - min;
@@ -365,76 +360,6 @@ function DamageResultBar({ min, max }: { min: number; max: number }) {
       <div className="flex justify-between font-mono text-[10px] text-slate-500">
         <span>0% / SAFE</span>
         <span className="text-red-400">100% / LETHAL</span>
-      </div>
-    </div>
-  );
-}
-
-function TacticalReadoutCard({
-  attackerName,
-  defenderName,
-  moveLabel,
-  defenderTypes,
-  koDisplay,
-  desc,
-}: {
-  attackerName: string;
-  defenderName: string;
-  moveLabel: string;
-  defenderTypes: string[];
-  koDisplay: string;
-  desc: string;
-}) {
-  const compactDesc = truncateText(desc.replace(/\s+/g, ' '), 108);
-
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-cyan-500/15 bg-cyan-500/5 p-4 backdrop-blur-md">
-      <div className="absolute right-0 top-0 p-3 opacity-10">
-        <Crosshair className="h-14 w-14 text-cyan-300" />
-      </div>
-
-      <div className="flex items-start gap-3">
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-2 text-red-300">
-          <ShieldAlert className="h-4 w-4" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-            Tactical_Readout
-          </p>
-
-          <div className="mt-3 grid gap-2">
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-800/80 bg-slate-950/55 px-3 py-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
-                攻击链路
-              </span>
-              <span className="truncate font-mono text-xs text-cyan-100">
-                {attackerName} / {moveLabel}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-800/80 bg-slate-950/55 px-3 py-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
-                防守目标
-              </span>
-              <span className="truncate font-mono text-xs text-red-100">
-                {defenderName} / {defenderTypes.join(' / ')}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-800/80 bg-slate-950/55 px-3 py-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
-                击杀判定
-              </span>
-              <span className="truncate font-mono text-xs font-bold text-white">
-                {koDisplay}
-              </span>
-            </div>
-          </div>
-
-          <p className="mt-3 font-mono text-[11px] leading-5 text-slate-300">
-            {compactDesc}
-          </p>
-        </div>
       </div>
     </div>
   );
@@ -929,20 +854,27 @@ export default function DamageCalculatorPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-                  <DamageRolls rolls={damageRolls} />
+                <DamageRolls rolls={damageRolls} />
 
-                  <TacticalReadoutCard
-                    attackerName={selectedAttackerPreset.name}
-                    defenderName={selectedDefenderPreset.name}
-                    moveLabel={currentMove?.label || move}
-                    defenderTypes={selectedDefenderPreset.types}
-                    koDisplay={koDisplay}
-                    desc={
-                      result?.desc ||
-                      '参数正在同步中。请选择双方单位并微调等级、努力值或招式。'
-                    }
-                  />
+                <div className="relative overflow-hidden rounded-[1.5rem] border border-cyan-500/15 bg-cyan-500/5 p-5 backdrop-blur-md">
+                  <div className="absolute right-0 top-0 p-4 opacity-10">
+                    <Crosshair className="h-20 w-20 text-cyan-300" />
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-2 text-red-300">
+                      <ShieldAlert className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                        Tactical_Readout
+                      </p>
+                      <p className="mt-2 font-mono text-sm leading-6 text-slate-300">
+                        {result?.desc ||
+                          '参数正在同步中。请选择双方单位并微调等级、努力值或招式。'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>
