@@ -26,9 +26,7 @@ type IntelSelectorProps = {
 const themeMap = {
   attacker: {
     accentText: 'text-cyan-300',
-    accentBorder: 'border-cyan-400/20',
     accentFocus: 'focus:border-cyan-300',
-    accentBg: 'bg-cyan-400/10',
     accentGlow: 'shadow-[0_0_18px_rgba(34,211,238,0.12)]',
     accentStrip: 'bg-cyan-400/60',
     accentDot: 'bg-cyan-400',
@@ -37,9 +35,7 @@ const themeMap = {
   },
   defender: {
     accentText: 'text-red-300',
-    accentBorder: 'border-red-400/20',
     accentFocus: 'focus:border-red-300',
-    accentBg: 'bg-red-500/10',
     accentGlow: 'shadow-[0_0_18px_rgba(248,113,113,0.12)]',
     accentStrip: 'bg-red-500/60',
     accentDot: 'bg-red-500',
@@ -53,7 +49,7 @@ export default function IntelSelector({
   title,
   searchValue,
   onSearchChange,
-  placeholder = '搜索战术单位...',
+  placeholder = '搜索战术单位 / 拼音缩写...',
   options,
   selectedId,
   onSelect,
@@ -82,7 +78,7 @@ export default function IntelSelector({
           <input
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
-            className={`w-full rounded-md border border-slate-800 bg-black/40 p-2 pr-16 text-sm font-mono text-slate-100 outline-none ${theme.accentFocus}`}
+            className={`w-full rounded-md border border-slate-800 bg-black/40 p-2 pr-16 text-sm font-mono text-slate-100 outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)] ${theme.accentFocus}`}
             placeholder={placeholder}
           />
           <span className="absolute right-2 top-2 font-mono text-[10px] text-slate-700">
@@ -116,7 +112,7 @@ export default function IntelSelector({
 
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: 'LEVEL', value: levelValue },
+            { label: '等级', value: levelValue },
             { label: '努力值', value: effortValue },
           ].map((item) => (
             <div
