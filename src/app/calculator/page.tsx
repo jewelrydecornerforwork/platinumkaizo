@@ -3,6 +3,8 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Crosshair, Radar, ShieldAlert, Swords, Target } from 'lucide-react';
+import { DamageRolls } from '@/components/calc/DamageRolls';
+import { TypeIcon } from '@/components/calc/TypeIcon';
 import IntelSelector from '@/components/calculator/IntelSelector';
 import { StatAdjuster } from '@/components/StatAdjuster';
 import { TYPE_CHART } from '@/constants/typeChart';
@@ -230,6 +232,17 @@ function getKoDisplay(koText: string | undefined): string {
   return '暂不构成稳定击杀';
 }
 
+function createDamageRolls(min: number, max: number): number[] {
+  if (min === max) {
+    return Array.from({ length: 16 }, () => min);
+  }
+
+  return Array.from({ length: 16 }, (_, index) => {
+    const ratio = index / 15;
+    return Number((min + (max - min) * ratio).toFixed(1));
+  });
+}
+
 function PanelInput({
   label,
   value,
@@ -309,12 +322,18 @@ function DamageResultBar({ min, max }: { min: number; max: number }) {
           <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-slate-500">
             Ballistic_Output
           </p>
-          <p className="mt-2 text-sm text-slate-400">实时伤害区间</p>
+          <p className="mt-2 font-mono text-sm uppercase tracking-[0.2em] text-slate-400">
+            实时伤害区间
+          </p>
         </div>
-        <div className="font-mono text-4xl font-black italic text-white md:text-5xl">
-          {min.toFixed(1)}%
-          <span className="px-2 text-xl text-slate-600">-</span>
-          {max.toFixed(1)}%
+        <div className="font-mono text-[2.4rem] font-black leading-none tracking-[0.08em] text-white drop-shadow-[0_0_18px_rgba(226,232,240,0.15)] md:text-[4.25rem]">
+          <span className="inline-block text-cyan-100 [text-shadow:0_0_8px_rgba(34,211,238,0.25),0_0_18px_rgba(255,255,255,0.12)]">
+            {min.toFixed(1)}%
+          </span>
+          <span className="px-2 text-xl text-slate-600 md:text-3xl">-</span>
+          <span className="inline-block text-slate-100 [text-shadow:0_0_8px_rgba(248,250,252,0.22),0_0_18px_rgba(255,255,255,0.12)]">
+            {max.toFixed(1)}%
+          </span>
         </div>
       </div>
 
@@ -399,6 +418,12 @@ export default function DamageCalculatorPage() {
 
   const minDamage = result?.range[0] ?? 0;
   const maxDamage = result?.range[1] ?? 0;
+  const damageRolls = useMemo(
+    () => createDamageRolls(minDamage, maxDamage),
+    [minDamage, maxDamage]
+  );
+  const koDisplay = useMemo(() => getKoDisplay(result?.ko), [result?.ko]);
+  const isOhko = koDisplay.includes('确一');
 
   const effectiveness = useMemo(() => {
     const moveType = mappedMoveIntel?.type || currentMove?.type || 'Normal';
@@ -672,15 +697,31 @@ export default function DamageCalculatorPage() {
               >
                 <DamageResultBar min={minDamage} max={maxDamage} />
 
+                <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800 bg-slate-950/55 p-4 backdrop-blur-md">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                    Type_Intel
+                  </span>
+                  <TypeIcon type={mappedMoveIntel?.type || currentMove?.type || 'Normal'} />
+                  {selectedDefenderPreset.types.map((type) => (
+                    <TypeIcon key={type} type={type} />
+                  ))}
+                </div>
+
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-2xl border border-cyan-500/15 bg-slate-950/70 p-5 backdrop-blur-md">
                     <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
                       击杀概率
                     </p>
-                    <p className="mt-3 text-2xl font-black text-white">
-                      {getKoDisplay(result?.ko)}
+                    <p
+                      className={`mt-3 font-mono text-2xl font-black uppercase tracking-[0.08em] ${
+                        isOhko
+                          ? 'animate-pulse text-red-300 [text-shadow:0_0_12px_rgba(248,113,113,0.7),0_0_28px_rgba(239,68,68,0.45)]'
+                          : 'text-white'
+                      }`}
+                    >
+                      {koDisplay}
                     </p>
-                    <p className="mt-2 text-xs text-slate-400">
+                    <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
                       {result?.ko === '变化招式'
                         ? '当前招式为变化系，仅提供节奏控制。'
                         : '移动参数后将自动重新判定斩杀窗口。'}
@@ -694,7 +735,7 @@ export default function DamageCalculatorPage() {
                     <p className="mt-3 font-mono text-2xl font-black text-white">
                       {mappedMoveIntel?.power ?? currentMove?.power ?? 0} BP
                     </p>
-                    <p className="mt-2 text-xs text-slate-400">
+                    <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
                       {currentMove?.label || move}
                       <span className="font-mono text-red-300">
                         {' '}
@@ -715,7 +756,7 @@ export default function DamageCalculatorPage() {
                     <p className="mt-3 font-mono text-2xl font-black text-white">
                       {effectiveness.toFixed(2)}x
                     </p>
-                    <p className="mt-2 text-xs text-slate-400">
+                    <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
                       {getEffectivenessLabel(effectiveness)} / 目标属性:
                       <span className="font-mono text-emerald-300">
                         {' '}
@@ -734,11 +775,13 @@ export default function DamageCalculatorPage() {
                     <p className="mt-3 font-mono text-2xl font-black text-white">
                       {selectedAttackerPreset.stats.atk} / {selectedDefenderPreset.stats.def}
                     </p>
-                    <p className="mt-2 text-xs text-slate-400">
+                    <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
                       进攻方攻击基值对位守方物防基值，适合快速判断是否需要强化。
                     </p>
                   </div>
                 </div>
+
+                <DamageRolls rolls={damageRolls} />
 
                 <div className="relative overflow-hidden rounded-[1.5rem] border border-cyan-500/15 bg-cyan-500/5 p-5 backdrop-blur-md">
                   <div className="absolute right-0 top-0 p-4 opacity-10">
@@ -753,7 +796,7 @@ export default function DamageCalculatorPage() {
                       <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
                         Tactical_Readout
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">
+                      <p className="mt-2 font-mono text-sm leading-6 text-slate-300">
                         {result?.desc ||
                           '参数正在同步中。请选择双方单位并微调等级、努力值或招式。'}
                       </p>
