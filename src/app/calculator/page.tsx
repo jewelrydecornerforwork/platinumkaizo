@@ -1,37 +1,42 @@
 'use client';
 
-import {
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Crosshair, Shield, Swords, Target } from 'lucide-react';
+import IntelSelector from '@/components/calculator/IntelSelector';
+import { GYM_MOVE_INTEL, getGymMoveIntelByName } from '@/data/gymMoveIntel';
+import { trainersData } from '@/data/trainers';
 import { useKaizoCalc } from '@/hooks/useKaizoCalc';
+import type { TrainerIntelProfile, TrainerPokemonIntel } from '@/types';
 import type { DamageCalcInput, FieldType, WeatherType } from '@/types/damage';
+
+type MoveOption = {
+  value: string;
+  label: string;
+  category: 'physical' | 'special' | 'status';
+  power: number;
+  type: string;
+};
 
 type CombatantPreset = {
   id: string;
+  trainerId: string;
+  trainerName: string;
   name: string;
   enName: string;
-  searchKey: string;
   role: string;
+  specialty: string;
   level: number;
   hp: number;
   atk: number;
   def: number;
   spA: number;
   spD: number;
-  spe: number;
   ability: string;
   item: string;
   nature: string;
-  moves: Array<{
-    name: string;
-    category: 'physical' | 'special';
-    powerHint: string;
-  }>;
+  searchKey: string;
+  moves: MoveOption[];
 };
 
 type AttackerState = {
@@ -56,105 +61,19 @@ type DefenderState = {
   nature: string;
 };
 
-type BattleState = {
-  weather: WeatherType;
-  field: FieldType;
+const GYM_KEY_MAP: Record<string, keyof typeof GYM_MOVE_INTEL.gym_leaders> = {
+  roark: 'Roark',
+  gardenia: 'Gardenia',
+  maylene: 'Maylene',
+  wake: 'Wake',
 };
 
-const COMBATANT_PRESETS: CombatantPreset[] = [
-  {
-    id: 'garchomp',
-    name: '烈咬陆鲨',
-    enName: 'Garchomp',
-    searchKey: 'ljls garchomp lieyaolusha',
-    role: '高速物攻压制',
-    level: 80,
-    hp: 289,
-    atk: 244,
-    def: 176,
-    spA: 156,
-    spD: 178,
-    spe: 205,
-    ability: '粗糙皮肤',
-    item: '生命宝珠',
-    nature: '固执',
-    moves: [
-      { name: '地震', category: 'physical', powerHint: '100 BP' },
-      { name: '逆鳞', category: 'physical', powerHint: '120 BP' },
-      { name: '尖石攻击', category: 'physical', powerHint: '100 BP' },
-      { name: '火焰牙', category: 'physical', powerHint: '65 BP' },
-    ],
-  },
-  {
-    id: 'lucario',
-    name: '路卡利欧',
-    enName: 'Lucario',
-    searchKey: 'lklo lucario lukaliou',
-    role: '先制斩杀终端',
-    level: 72,
-    hp: 241,
-    atk: 223,
-    def: 156,
-    spA: 206,
-    spD: 156,
-    spe: 177,
-    ability: '适应力',
-    item: '生命宝珠',
-    nature: '固执',
-    moves: [
-      { name: '近身战', category: 'physical', powerHint: '120 BP' },
-      { name: '神速', category: 'physical', powerHint: '80 BP' },
-      { name: '子弹拳', category: 'physical', powerHint: '40 BP' },
-      { name: '剑舞', category: 'physical', powerHint: '强化' },
-    ],
-  },
-  {
-    id: 'gyarados',
-    name: '暴鲤龙',
-    enName: 'Gyarados',
-    searchKey: 'bll gyarados baolilong',
-    role: '威吓推队核心',
-    level: 74,
-    hp: 284,
-    atk: 228,
-    def: 173,
-    spA: 132,
-    spD: 194,
-    spe: 174,
-    ability: '威吓',
-    item: '吃剩的东西',
-    nature: '开朗',
-    moves: [
-      { name: '龙之舞', category: 'physical', powerHint: '强化' },
-      { name: '攀瀑', category: 'physical', powerHint: '80 BP' },
-      { name: '冰冻牙', category: 'physical', powerHint: '65 BP' },
-      { name: '咬碎', category: 'physical', powerHint: '80 BP' },
-    ],
-  },
-  {
-    id: 'roserade',
-    name: '罗丝雷朵',
-    enName: 'Roserade',
-    searchKey: 'lsld roserade luosileiduo',
-    role: '高速特攻爆破',
-    level: 68,
-    hp: 218,
-    atk: 135,
-    def: 146,
-    spA: 234,
-    spD: 205,
-    spe: 189,
-    ability: '技师',
-    item: '达人带',
-    nature: '胆小',
-    moves: [
-      { name: '能量球', category: 'special', powerHint: '90 BP' },
-      { name: '污泥炸弹', category: 'special', powerHint: '90 BP' },
-      { name: '觉醒力量火', category: 'special', powerHint: '70 BP' },
-      { name: '毒菱', category: 'special', powerHint: '布场' },
-    ],
-  },
-];
+const CORE_MOVE_OVERRIDE_MAP: Record<string, keyof typeof GYM_MOVE_INTEL.gym_leaders> = {
+  'roark-cranidos': 'Roark',
+  'gardenia-roserade': 'Gardenia',
+  'maylene-lucario': 'Maylene',
+  'wake-gyarados': 'Wake',
+};
 
 const WEATHER_OPTIONS: Array<{ label: string; value: WeatherType }> = [
   { label: '无天气', value: 'null' },
@@ -172,146 +91,177 @@ const FIELD_OPTIONS: Array<{ label: string; value: FieldType }> = [
   { label: '薄雾场地', value: 'misty' },
 ];
 
+const STATUS_MOVE_LABELS = ['龙之舞', '剑舞', '隐形岩', '毒菱', '蘑菇孢子', '寄生种子', '大晴天'];
+
 const KO_LABEL_MAP: Record<string, string> = {
   OHKO: '确一 (OHKO)',
   '2HKO': '确二 (2HKO)',
   '3HKO': '确三 (3HKO)',
   '4HKO': '确四 (4HKO)',
-  survives: '无法稳定击杀',
+  survives: '暂不构成稳定击杀',
 };
+
+function mapMoveCategory(move: {
+  category?: string;
+  name?: string;
+  label?: string;
+}): 'physical' | 'special' | 'status' {
+  if (move.category === 'Status') return 'status';
+  if (move.category === 'Special') return 'special';
+  if (move.category === 'Physical') return 'physical';
+
+  const label = `${move.label || ''}${move.name || ''}`;
+  return STATUS_MOVE_LABELS.some((keyword) => label.includes(keyword)) ? 'status' : 'physical';
+}
+
+function createOverrideMoves(
+  leaderKey: keyof typeof GYM_MOVE_INTEL.gym_leaders
+): MoveOption[] {
+  return GYM_MOVE_INTEL.gym_leaders[leaderKey].core_moves.map((move) => ({
+    value: move.name,
+    label: move.label || move.name,
+    category: mapMoveCategory(move),
+    power: move.power,
+    type: move.type,
+  }));
+}
+
+function createDefaultMoves(pokemon: TrainerPokemonIntel): MoveOption[] {
+  return pokemon.moves.map((move) => {
+    const intel = getGymMoveIntelByName(move);
+    return {
+      value: intel?.name || move,
+      label: intel?.label || move,
+      category: mapMoveCategory(intel || { name: move }),
+      power: intel?.power ?? 100,
+      type: intel?.type ?? 'Normal',
+    };
+  });
+}
+
+function createCombatantPresets(data: TrainerIntelProfile[]): CombatantPreset[] {
+  return data.flatMap((trainer) =>
+    trainer.pokemon.map((pokemon) => {
+      const overrideLeader = CORE_MOVE_OVERRIDE_MAP[pokemon.id];
+      const moves = overrideLeader
+        ? createOverrideMoves(overrideLeader)
+        : createDefaultMoves(pokemon);
+
+      return {
+        id: pokemon.id,
+        trainerId: trainer.id,
+        trainerName: trainer.name,
+        name: pokemon.name,
+        enName: pokemon.enName,
+        role: pokemon.role,
+        specialty: trainer.specialty,
+        level: Number(pokemon.level.replace(/[^\d]/g, '')) || 100,
+        hp: pokemon.stats.hp,
+        atk: pokemon.stats.atk,
+        def: pokemon.stats.def,
+        spA: pokemon.stats.spA,
+        spD: pokemon.stats.spD,
+        ability: pokemon.ability,
+        item: pokemon.item,
+        nature: pokemon.nature,
+        searchKey: `${pokemon.name} ${pokemon.enName} ${trainer.name} ${trainer.specialty} ${trainer.id}`.toLowerCase(),
+        moves,
+      };
+    })
+  );
+}
+
+const COMBATANT_PRESETS = createCombatantPresets(trainersData);
 
 function getPreset(presetId: string): CombatantPreset {
   return COMBATANT_PRESETS.find((preset) => preset.id === presetId) ?? COMBATANT_PRESETS[0];
 }
 
-function getBarColorClass(value: number): string {
+function getDamageGradient(min: number, max: number): string {
+  if (max >= 100) {
+    return 'linear-gradient(90deg, #22c55e 0%, #f59e0b 45%, #ef4444 100%)';
+  }
+  if (max >= 75) {
+    return 'linear-gradient(90deg, #22c55e 0%, #f59e0b 70%, #f97316 100%)';
+  }
+  return 'linear-gradient(90deg, #22c55e 0%, #84cc16 50%, #facc15 100%)';
+}
+
+function getBarColor(value: number): string {
   if (value < 50) return 'bg-emerald-500';
   if (value < 100) return 'bg-orange-500';
   return 'bg-red-600 animate-pulse';
 }
 
-function getDamageGradient(min: number, max: number): string {
-  const lethal = max >= 100;
-  if (lethal) {
-    return 'linear-gradient(90deg, #f59e0b 0%, #ef4444 55%, #991b1b 100%)';
-  }
-  if (max >= 70) {
-    return 'linear-gradient(90deg, #10b981 0%, #f59e0b 65%, #f97316 100%)';
-  }
-  return 'linear-gradient(90deg, #10b981 0%, #22c55e 60%, #84cc16 100%)';
-}
-
 function getKoDisplay(result: ReturnType<typeof useKaizoCalc>['result']): string {
   if (!result) {
-    return '等待演算指令';
+    return '等待演算结果';
   }
 
-  if (result.ko === 'OHKO') {
-    return '确一 (OHKO)';
-  }
-
-  if (result.ko === '2HKO') {
-    if (result.minDamagePercent < 50) {
-      return '确二 (2HKO) 且需隐形岩伤害';
-    }
-    return '确二 (2HKO)';
+  if (result.ko === '2HKO' && result.minDamagePercent < 50) {
+    return '确二 (2HKO) 且需隐形岩伤害';
   }
 
   return KO_LABEL_MAP[result.ko] || result.ko;
 }
 
-function SearchSelect({
-  title,
-  accent,
-  value,
-  query,
-  onQueryChange,
-  onChange,
-  filtered,
-}: {
-  title: string;
-  accent: 'blue' | 'red';
-  value: string;
-  query: string;
-  onQueryChange: (value: string) => void;
-  onChange: (value: string) => void;
-  filtered: CombatantPreset[];
-}): React.ReactElement {
-  const accentClasses =
-    accent === 'blue'
-      ? 'border-cyan-400/20 focus:border-cyan-300 text-cyan-200'
-      : 'border-red-400/20 focus:border-red-300 text-red-200';
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <label className="text-xs uppercase tracking-[0.28em] text-slate-500">{title}</label>
-        <span className="font-mono text-[10px] text-slate-500">支持拼音 / 首字母检索</span>
-      </div>
-      <input
-        value={query}
-        onChange={(event) => onQueryChange(event.target.value)}
-        placeholder="输入名称、拼音或首字母"
-        className={`w-full rounded-xl border bg-slate-950/70 px-4 py-3 text-sm outline-none transition-colors placeholder:text-slate-600 ${accentClasses}`}
-      />
-      <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-2">
-        <div className="max-h-48 space-y-1 overflow-y-auto">
-          {filtered.map((preset) => {
-            const active = preset.id === value;
-            return (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => onChange(preset.id)}
-                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-all ${
-                  active
-                    ? accent === 'blue'
-                      ? 'bg-cyan-400/10 text-cyan-100 shadow-[inset_0_0_0_1px_rgba(34,211,238,0.25)]'
-                      : 'bg-red-500/10 text-red-100 shadow-[inset_0_0_0_1px_rgba(248,113,113,0.25)]'
-                    : 'text-slate-300 hover:bg-slate-800/80'
-                }`}
-              >
-                <div>
-                  <p className="text-sm font-semibold">{preset.name}</p>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                    {preset.role}
-                  </p>
-                </div>
-                <span className="font-mono text-[11px] text-slate-500">{preset.level}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function NumberField({
+function PanelInput({
   label,
   value,
   onChange,
   accent,
+  type = 'text',
 }: {
   label: string;
-  value: number;
-  onChange: (value: number) => void;
-  accent: 'blue' | 'red';
+  value: string | number;
+  onChange: (value: string) => void;
+  accent: 'cyan' | 'red';
+  type?: 'text' | 'number';
 }): React.ReactElement {
-  const accentClasses =
-    accent === 'blue'
-      ? 'border-cyan-500/20 focus:border-cyan-300'
-      : 'border-red-500/20 focus:border-red-300';
+  const border = accent === 'cyan' ? 'focus:border-cyan-300 border-cyan-500/20' : 'focus:border-red-300 border-red-500/20';
 
   return (
     <label className="space-y-2">
-      <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">{label}</span>
+      <span className="block text-[10px] uppercase tracking-[0.24em] text-slate-500">{label}</span>
       <input
-        type="number"
+        type={type}
         value={value}
-        onChange={(event) => onChange(Math.max(1, Number(event.target.value) || 1))}
-        className={`w-full rounded-xl border bg-slate-950/75 px-4 py-3 font-mono text-sm text-slate-100 outline-none ${accentClasses}`}
+        onChange={(event) => onChange(event.target.value)}
+        className={`w-full rounded-lg border bg-black/40 px-3 py-2 font-mono text-sm text-slate-100 outline-none ${border}`}
       />
+    </label>
+  );
+}
+
+function PanelSelect({
+  label,
+  value,
+  onChange,
+  options,
+  accent,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+  accent: 'cyan' | 'red';
+}): React.ReactElement {
+  const border = accent === 'cyan' ? 'focus:border-cyan-300 border-cyan-500/20' : 'focus:border-red-300 border-red-500/20';
+
+  return (
+    <label className="space-y-2">
+      <span className="block text-[10px] uppercase tracking-[0.24em] text-slate-500">{label}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className={`w-full rounded-lg border bg-black/40 px-3 py-2 font-mono text-sm text-slate-100 outline-none ${border}`}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </label>
   );
 }
@@ -323,10 +273,8 @@ function DamageResultBar({
   min: number;
   max: number;
 }): React.ReactElement {
-  const gradient = getDamageGradient(min, max);
-
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-[0_0_24px_rgba(14,165,233,0.08)]">
+    <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-[0_0_26px_rgba(14,165,233,0.08)]">
       <div className="flex items-end justify-between">
         <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
           Calculated_Damage
@@ -342,15 +290,13 @@ function DamageResultBar({
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(min, 100)}%` }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
-          className={`absolute left-0 top-0 h-full opacity-45 ${getBarColorClass(min)}`}
+          className={`absolute left-0 top-0 h-full opacity-50 ${getBarColor(min)}`}
         />
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(max, 100)}%` }}
-          transition={{ duration: 0.45, ease: 'easeOut' }}
           className="absolute left-0 top-0 h-full"
-          style={{ background: gradient }}
+          style={{ background: getDamageGradient(min, max) }}
         />
         <div className="absolute right-0 top-0 h-full w-px bg-red-500 shadow-[0_0_10px_red]" />
       </div>
@@ -366,71 +312,77 @@ function DamageResultBar({
 export default function DamageCalculatorPage(): React.ReactElement {
   const { result, isLoading, error, calculate } = useKaizoCalc();
 
-  const [attackerQuery, setAttackerQuery] = useState('');
-  const [defenderQuery, setDefenderQuery] = useState('');
-  const attackerQueryDeferred = useDeferredValue(attackerQuery);
-  const defenderQueryDeferred = useDeferredValue(defenderQuery);
+  const [attackerSearch, setAttackerSearch] = useState('');
+  const [defenderSearch, setDefenderSearch] = useState('');
+  const deferredAttackerSearch = useDeferredValue(attackerSearch);
+  const deferredDefenderSearch = useDeferredValue(defenderSearch);
 
-  const attackerPreset = getPreset('garchomp');
-  const defenderPreset = getPreset('gyarados');
+  const defaultAttacker = getPreset('roark-cranidos');
+  const defaultDefender = getPreset('wake-gyarados');
 
   const [attacker, setAttacker] = useState<AttackerState>({
-    presetId: attackerPreset.id,
-    level: attackerPreset.level,
-    atk: attackerPreset.atk,
-    spA: attackerPreset.spA,
-    ability: attackerPreset.ability,
-    item: attackerPreset.item,
-    nature: attackerPreset.nature,
-    move: attackerPreset.moves[0].name,
+    presetId: defaultAttacker.id,
+    level: defaultAttacker.level,
+    atk: defaultAttacker.atk,
+    spA: defaultAttacker.spA,
+    ability: defaultAttacker.ability,
+    item: defaultAttacker.item,
+    nature: defaultAttacker.nature,
+    move: defaultAttacker.moves[0]?.value ?? '',
   });
 
   const [defender, setDefender] = useState<DefenderState>({
-    presetId: defenderPreset.id,
-    level: defenderPreset.level,
-    hp: defenderPreset.hp,
-    def: defenderPreset.def,
-    spD: defenderPreset.spD,
-    ability: defenderPreset.ability,
-    item: defenderPreset.item,
-    nature: defenderPreset.nature,
+    presetId: defaultDefender.id,
+    level: defaultDefender.level,
+    hp: defaultDefender.hp,
+    def: defaultDefender.def,
+    spD: defaultDefender.spD,
+    ability: defaultDefender.ability,
+    item: defaultDefender.item,
+    nature: defaultDefender.nature,
   });
 
-  const [battle, setBattle] = useState<BattleState>({
-    weather: 'null',
-    field: 'null',
+  const [battle, setBattle] = useState({
+    weather: 'null' as WeatherType,
+    field: 'null' as FieldType,
   });
-
-  const filteredAttackers = useMemo(() => {
-    const query = attackerQueryDeferred.trim().toLowerCase();
-    if (!query) return COMBATANT_PRESETS;
-    return COMBATANT_PRESETS.filter(
-      (preset) =>
-        preset.name.toLowerCase().includes(query) ||
-        preset.searchKey.includes(query) ||
-        preset.enName.toLowerCase().includes(query)
-    );
-  }, [attackerQueryDeferred]);
-
-  const filteredDefenders = useMemo(() => {
-    const query = defenderQueryDeferred.trim().toLowerCase();
-    if (!query) return COMBATANT_PRESETS;
-    return COMBATANT_PRESETS.filter(
-      (preset) =>
-        preset.name.toLowerCase().includes(query) ||
-        preset.searchKey.includes(query) ||
-        preset.enName.toLowerCase().includes(query)
-    );
-  }, [defenderQueryDeferred]);
 
   const selectedAttackerPreset = useMemo(() => getPreset(attacker.presetId), [attacker.presetId]);
   const selectedDefenderPreset = useMemo(() => getPreset(defender.presetId), [defender.presetId]);
 
-  const attackerMoves = selectedAttackerPreset.moves;
-  const selectedMoveMeta =
-    attackerMoves.find((move) => move.name === attacker.move) ?? attackerMoves[0];
+  const attackerOptions = useMemo(() => {
+    const query = deferredAttackerSearch.trim().toLowerCase();
+    return COMBATANT_PRESETS.filter((preset) => !query || preset.searchKey.includes(query)).map((preset) => ({
+      id: preset.id,
+      name: preset.name,
+      subtitle: `${preset.trainerName} / ${preset.role}`,
+      meta: preset.specialty,
+    }));
+  }, [deferredAttackerSearch]);
 
-  const input = useMemo<DamageCalcInput>(
+  const defenderOptions = useMemo(() => {
+    const query = deferredDefenderSearch.trim().toLowerCase();
+    return COMBATANT_PRESETS.filter((preset) => !query || preset.searchKey.includes(query)).map((preset) => ({
+      id: preset.id,
+      name: preset.name,
+      subtitle: `${preset.trainerName} / ${preset.role}`,
+      meta: preset.specialty,
+    }));
+  }, [deferredDefenderSearch]);
+
+  const currentMove = useMemo(
+    () =>
+      selectedAttackerPreset.moves.find((move) => move.value === attacker.move) ??
+      selectedAttackerPreset.moves[0],
+    [attacker.move, selectedAttackerPreset.moves]
+  );
+
+  const mappedMoveIntel = useMemo(
+    () => getGymMoveIntelByName(attacker.move),
+    [attacker.move]
+  );
+
+  const calculateInput = useMemo<DamageCalcInput>(
     () => ({
       attacker: {
         name: selectedAttackerPreset.name,
@@ -464,24 +416,24 @@ export default function DamageCalculatorPage(): React.ReactElement {
   );
 
   useEffect(() => {
-    let active = true;
+    let canceled = false;
 
     const run = async (): Promise<void> => {
       try {
-        await calculate(input);
+        await calculate(calculateInput);
       } catch {
-        if (!active) return;
+        if (canceled) return;
       }
     };
 
     void run();
 
     return () => {
-      active = false;
+      canceled = true;
     };
-  }, [calculate, input]);
+  }, [calculate, calculateInput]);
 
-  const handleSelectAttacker = (presetId: string): void => {
+  const handleAttackerSelect = (presetId: string): void => {
     const preset = getPreset(presetId);
     setAttacker({
       presetId: preset.id,
@@ -491,11 +443,11 @@ export default function DamageCalculatorPage(): React.ReactElement {
       ability: preset.ability,
       item: preset.item,
       nature: preset.nature,
-      move: preset.moves[0].name,
+      move: preset.moves[0]?.value ?? '',
     });
   };
 
-  const handleSelectDefender = (presetId: string): void => {
+  const handleDefenderSelect = (presetId: string): void => {
     const preset = getPreset(presetId);
     setDefender({
       presetId: preset.id,
@@ -510,7 +462,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(8,47,73,0.35),transparent_25%),linear-gradient(180deg,#020617_0%,#04111d_40%,#020617_100%)] px-4 py-6 text-slate-100 md:px-8 lg:px-10">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(8,47,73,0.35),transparent_25%),linear-gradient(180deg,#020617_0%,#04111d_38%,#020617_100%)] px-4 py-6 text-slate-100 md:px-8 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <header className="mb-8 flex flex-col gap-3 border-b border-cyan-500/20 pb-6 md:flex-row md:items-end md:justify-between">
           <div>
@@ -519,7 +471,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
             </p>
             <h1 className="title-strong text-4xl text-white md:text-5xl">精密弹道伤害计算</h1>
             <p className="mt-2 text-sm text-slate-400">
-              针对 Kaizo 对战环境的实时伤害演算中枢，所有数值同步刷新。
+              以馆主战术情报为底板的实时伤害演算中枢，输入变更后中枢自动刷新。
             </p>
           </div>
           <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3">
@@ -527,117 +479,84 @@ export default function DamageCalculatorPage(): React.ReactElement {
               Sync Status
             </p>
             <p className="mt-1 font-mono text-sm text-cyan-300">
-              {isLoading ? 'LIVE_RECACLULATING' : 'LOCKED_ON_TARGET'}
+              {isLoading ? 'LIVE_RECALCULATING' : 'LOCKED_ON_TARGET'}
             </p>
           </div>
         </header>
 
-        <div className="grid gap-6 xl:grid-cols-[1.1fr_1.2fr_1.1fr]">
-          <section className="rounded-3xl border border-cyan-500/20 bg-slate-900/55 p-5 shadow-[0_0_30px_rgba(34,211,238,0.08)] backdrop-blur-xl">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/10 p-2 text-cyan-300">
-                <Swords className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cyan-300/80">
-                  攻击方终端
-                </p>
-                <h2 className="text-xl font-bold text-white">攻击方参数锁定</h2>
-              </div>
-            </div>
-
-            <SearchSelect
-              title="攻击方目标检索"
-              accent="blue"
-              value={attacker.presetId}
-              query={attackerQuery}
-              onQueryChange={setAttackerQuery}
-              onChange={handleSelectAttacker}
-              filtered={filteredAttackers}
-            />
-
-            <div className="mt-5 grid grid-cols-2 gap-4">
-              <NumberField
+        <div className="grid gap-6 xl:grid-cols-[1.05fr_1.15fr_1.05fr]">
+          <IntelSelector
+            side="attacker"
+            title="Attacker Intel"
+            searchValue={attackerSearch}
+            onSearchChange={setAttackerSearch}
+            options={attackerOptions}
+            selectedId={attacker.presetId}
+            onSelect={handleAttackerSelect}
+            levelValue={attacker.level}
+            effortValue={252}
+          >
+            <div className="grid grid-cols-2 gap-3">
+              <PanelInput
                 label="等级"
+                type="number"
                 value={attacker.level}
-                onChange={(value) => setAttacker((prev) => ({ ...prev, level: value }))}
-                accent="blue"
+                onChange={(value) =>
+                  setAttacker((prev) => ({ ...prev, level: Math.max(1, Number(value) || 1) }))
+                }
+                accent="cyan"
               />
-              <NumberField
+              <PanelSelect
+                label="招式"
+                value={attacker.move}
+                onChange={(value) => setAttacker((prev) => ({ ...prev, move: value }))}
+                accent="cyan"
+                options={selectedAttackerPreset.moves.map((move) => ({
+                  value: move.value,
+                  label: `${move.label} / ${move.power} BP`,
+                }))}
+              />
+              <PanelInput
                 label="攻击"
+                type="number"
                 value={attacker.atk}
-                onChange={(value) => setAttacker((prev) => ({ ...prev, atk: value }))}
-                accent="blue"
+                onChange={(value) =>
+                  setAttacker((prev) => ({ ...prev, atk: Math.max(1, Number(value) || 1) }))
+                }
+                accent="cyan"
               />
-              <NumberField
+              <PanelInput
                 label="特攻"
+                type="number"
                 value={attacker.spA}
-                onChange={(value) => setAttacker((prev) => ({ ...prev, spA: value }))}
-                accent="blue"
+                onChange={(value) =>
+                  setAttacker((prev) => ({ ...prev, spA: Math.max(1, Number(value) || 1) }))
+                }
+                accent="cyan"
               />
-              <div className="space-y-2">
-                <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">招式</span>
-                <select
-                  value={attacker.move}
-                  onChange={(event) =>
-                    setAttacker((prev) => ({ ...prev, move: event.target.value }))
-                  }
-                  className="w-full rounded-xl border border-cyan-500/20 bg-slate-950/75 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-300"
-                >
-                  {attackerMoves.map((move) => (
-                    <option key={move.name} value={move.name}>
-                      {move.name} / {move.powerHint}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
 
-            <div className="mt-5 grid gap-4">
-              <label className="space-y-2">
-                <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">特性</span>
-                <input
-                  value={attacker.ability}
-                  onChange={(event) =>
-                    setAttacker((prev) => ({ ...prev, ability: event.target.value }))
-                  }
-                  className="w-full rounded-xl border border-cyan-500/20 bg-slate-950/75 px-4 py-3 text-sm outline-none focus:border-cyan-300"
-                />
-              </label>
-              <label className="space-y-2">
-                <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">道具</span>
-                <input
-                  value={attacker.item}
-                  onChange={(event) =>
-                    setAttacker((prev) => ({ ...prev, item: event.target.value }))
-                  }
-                  className="w-full rounded-xl border border-cyan-500/20 bg-slate-950/75 px-4 py-3 text-sm outline-none focus:border-cyan-300"
-                />
-              </label>
-              <label className="space-y-2">
-                <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">性格</span>
-                <input
-                  value={attacker.nature}
-                  onChange={(event) =>
-                    setAttacker((prev) => ({ ...prev, nature: event.target.value }))
-                  }
-                  className="w-full rounded-xl border border-cyan-500/20 bg-slate-950/75 px-4 py-3 text-sm outline-none focus:border-cyan-300"
-                />
-              </label>
+            <div className="grid grid-cols-1 gap-3">
+              <PanelInput
+                label="特性"
+                value={attacker.ability}
+                onChange={(value) => setAttacker((prev) => ({ ...prev, ability: value }))}
+                accent="cyan"
+              />
+              <PanelInput
+                label="道具"
+                value={attacker.item}
+                onChange={(value) => setAttacker((prev) => ({ ...prev, item: value }))}
+                accent="cyan"
+              />
+              <PanelInput
+                label="性格"
+                value={attacker.nature}
+                onChange={(value) => setAttacker((prev) => ({ ...prev, nature: value }))}
+                accent="cyan"
+              />
             </div>
-
-            <div className="mt-5 rounded-2xl border border-cyan-500/15 bg-slate-950/75 p-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                攻击方战术摘要
-              </p>
-              <p className="mt-2 text-sm text-slate-300">
-                {selectedAttackerPreset.name} / {selectedAttackerPreset.role}
-              </p>
-              <p className="mt-1 font-mono text-xs text-cyan-300">
-                当前招式：{selectedMoveMeta.name} / {selectedMoveMeta.category === 'physical' ? '物理' : '特殊'}
-              </p>
-            </div>
-          </section>
+          </IntelSelector>
 
           <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 shadow-[0_0_30px_rgba(15,23,42,0.5)] backdrop-blur-xl">
             <div className="mb-5 flex items-center gap-3">
@@ -654,10 +573,10 @@ export default function DamageCalculatorPage(): React.ReactElement {
 
             <AnimatePresence mode="wait">
               <motion.div
-                key={`${result?.minDamagePercent ?? 0}-${result?.maxDamagePercent ?? 0}-${attacker.move}-${defender.hp}`}
-                initial={{ opacity: 0.25, y: 14 }}
+                key={`${result?.minDamagePercent ?? 0}-${result?.maxDamagePercent ?? 0}-${attacker.move}-${defender.hp}-${battle.weather}-${battle.field}`}
+                initial={{ opacity: 0.4, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0.2, y: -10 }}
+                exit={{ opacity: 0.25, y: -10 }}
                 transition={{ duration: 0.28, ease: 'easeOut' }}
                 className="space-y-5"
               >
@@ -673,12 +592,26 @@ export default function DamageCalculatorPage(): React.ReactElement {
                     </p>
                     <p className="mt-3 text-2xl font-black text-white">{getKoDisplay(result)}</p>
                     <p className="mt-2 font-mono text-xs text-cyan-300">
-                      OHKO {result?.ohkoPercent.toFixed(1) ?? '0.0'}% / 2HKO{' '}
-                      {result?.twoHkoPercent.toFixed(1) ?? '0.0'}%
+                      OHKO {result?.ohkoPercent.toFixed(1) ?? '0.0'}% / 2HKO {result?.twoHkoPercent.toFixed(1) ?? '0.0'}%
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-red-500/15 bg-slate-950/75 p-5">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                      威力映射
+                    </p>
+                    <p className="mt-3 font-mono text-2xl font-black text-white">
+                      {mappedMoveIntel?.power ?? currentMove?.power ?? 100} BP
+                    </p>
+                    <p className="mt-2 text-xs text-slate-400">
+                      {currentMove?.label || attacker.move}
+                      <span className="font-mono text-red-300"> / {mappedMoveIntel?.type || currentMove?.type || 'Normal'}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5">
                     <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
                       绝对伤害值
                     </p>
@@ -686,187 +619,135 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       {result?.minDamage ?? 0} - {result?.maxDamage ?? 0}
                     </p>
                     <p className="mt-2 text-xs text-slate-400">
-                      目标当前体力：<span className="font-mono text-red-300">{defender.hp}</span>
+                      目标体力 <span className="font-mono text-red-300">{defender.hp}</span>
                     </p>
                   </div>
-                </div>
 
-                <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5">
-                  <div className="mb-4 flex items-center justify-between">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                      交战环境参数
-                    </p>
-                    <p className="font-mono text-[11px] text-slate-500">
-                      MODIFIERS_LOCKED
-                    </p>
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label className="space-y-2">
-                      <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">天气</span>
-                      <select
-                        value={battle.weather}
-                        onChange={(event) =>
-                          setBattle((prev) => ({
-                            ...prev,
-                            weather: event.target.value as WeatherType,
-                          }))
-                        }
-                        className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-3 text-sm outline-none focus:border-cyan-300"
-                      >
-                        {WEATHER_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="space-y-2">
-                      <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">场地</span>
-                      <select
-                        value={battle.field}
-                        onChange={(event) =>
-                          setBattle((prev) => ({
-                            ...prev,
-                            field: event.target.value as FieldType,
-                          }))
-                        }
-                        className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-3 text-sm outline-none focus:border-cyan-300"
-                      >
-                        {FIELD_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-                </div>
-
-                {(error || result) && (
                   <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5">
                     <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                      系统回传
+                      环境修正
                     </p>
-                    {error ? (
-                      <p className="mt-3 text-sm text-red-300">计算失败：{error}</p>
-                    ) : (
-                      <div className="mt-3 space-y-2 text-sm text-slate-300">
-                        <p>
-                          进攻方：<span className="font-mono text-cyan-300">{selectedAttackerPreset.name}</span>
-                        </p>
-                        <p>
-                          防守方：<span className="font-mono text-red-300">{selectedDefenderPreset.name}</span>
-                        </p>
-                        <p>
-                          推算剩余体力：
-                          <span className="font-mono text-white">
-                            {' '}
-                            {result?.survivingHPPercent?.toFixed(1) ?? '0.0'}%
-                          </span>
-                        </p>
-                      </div>
-                    )}
+                    <div className="mt-3 grid gap-3">
+                      <PanelSelect
+                        label="天气"
+                        value={battle.weather}
+                        onChange={(value) =>
+                          setBattle((prev) => ({ ...prev, weather: value as WeatherType }))
+                        }
+                        options={WEATHER_OPTIONS}
+                        accent="cyan"
+                      />
+                      <PanelSelect
+                        label="场地"
+                        value={battle.field}
+                        onChange={(value) =>
+                          setBattle((prev) => ({ ...prev, field: value as FieldType }))
+                        }
+                        options={FIELD_OPTIONS}
+                        accent="cyan"
+                      />
+                    </div>
                   </div>
-                )}
+                </div>
+
+                <div className="relative overflow-hidden rounded-2xl border border-cyan-500/15 bg-cyan-500/5 p-5">
+                  <div className="absolute right-0 top-0 p-4 opacity-10">
+                    <Crosshair className="h-20 w-20 text-cyan-300" />
+                  </div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                    交战摘要
+                  </p>
+                  {error ? (
+                    <p className="mt-3 text-sm text-red-300">计算失败：{error}</p>
+                  ) : (
+                    <div className="mt-3 space-y-2 text-sm text-slate-300">
+                      <p>
+                        进攻方：<span className="font-mono text-cyan-300">{selectedAttackerPreset.name}</span>
+                      </p>
+                      <p>
+                        防守方：<span className="font-mono text-red-300">{selectedDefenderPreset.name}</span>
+                      </p>
+                      <p>
+                        预估剩余体力：<span className="font-mono text-white">{result?.survivingHPPercent?.toFixed(1) ?? '0.0'}%</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
               </motion.div>
             </AnimatePresence>
           </section>
 
-          <section className="rounded-3xl border border-red-500/20 bg-slate-900/55 p-5 shadow-[0_0_30px_rgba(239,68,68,0.08)] backdrop-blur-xl">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="rounded-xl border border-red-400/20 bg-red-500/10 p-2 text-red-300">
-                <Shield className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-red-300/80">
-                  防御方终端
-                </p>
-                <h2 className="text-xl font-bold text-white">防守方参数锁定</h2>
-              </div>
-            </div>
-
-            <SearchSelect
-              title="防守方目标检索"
-              accent="red"
-              value={defender.presetId}
-              query={defenderQuery}
-              onQueryChange={setDefenderQuery}
-              onChange={handleSelectDefender}
-              filtered={filteredDefenders}
-            />
-
-            <div className="mt-5 grid grid-cols-2 gap-4">
-              <NumberField
+          <IntelSelector
+            side="defender"
+            title="Defender Intel"
+            searchValue={defenderSearch}
+            onSearchChange={setDefenderSearch}
+            options={defenderOptions}
+            selectedId={defender.presetId}
+            onSelect={handleDefenderSelect}
+            levelValue={defender.level}
+            effortValue={252}
+          >
+            <div className="grid grid-cols-2 gap-3">
+              <PanelInput
                 label="等级"
+                type="number"
                 value={defender.level}
-                onChange={(value) => setDefender((prev) => ({ ...prev, level: value }))}
+                onChange={(value) =>
+                  setDefender((prev) => ({ ...prev, level: Math.max(1, Number(value) || 1) }))
+                }
                 accent="red"
               />
-              <NumberField
+              <PanelInput
                 label="体力"
+                type="number"
                 value={defender.hp}
-                onChange={(value) => setDefender((prev) => ({ ...prev, hp: value }))}
+                onChange={(value) =>
+                  setDefender((prev) => ({ ...prev, hp: Math.max(1, Number(value) || 1) }))
+                }
                 accent="red"
               />
-              <NumberField
+              <PanelInput
                 label="防御"
+                type="number"
                 value={defender.def}
-                onChange={(value) => setDefender((prev) => ({ ...prev, def: value }))}
+                onChange={(value) =>
+                  setDefender((prev) => ({ ...prev, def: Math.max(1, Number(value) || 1) }))
+                }
                 accent="red"
               />
-              <NumberField
+              <PanelInput
                 label="特防"
+                type="number"
                 value={defender.spD}
-                onChange={(value) => setDefender((prev) => ({ ...prev, spD: value }))}
+                onChange={(value) =>
+                  setDefender((prev) => ({ ...prev, spD: Math.max(1, Number(value) || 1) }))
+                }
                 accent="red"
               />
             </div>
 
-            <div className="mt-5 grid gap-4">
-              <label className="space-y-2">
-                <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">特性</span>
-                <input
-                  value={defender.ability}
-                  onChange={(event) =>
-                    setDefender((prev) => ({ ...prev, ability: event.target.value }))
-                  }
-                  className="w-full rounded-xl border border-red-500/20 bg-slate-950/75 px-4 py-3 text-sm outline-none focus:border-red-300"
-                />
-              </label>
-              <label className="space-y-2">
-                <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">道具</span>
-                <input
-                  value={defender.item}
-                  onChange={(event) =>
-                    setDefender((prev) => ({ ...prev, item: event.target.value }))
-                  }
-                  className="w-full rounded-xl border border-red-500/20 bg-slate-950/75 px-4 py-3 text-sm outline-none focus:border-red-300"
-                />
-              </label>
-              <label className="space-y-2">
-                <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">性格</span>
-                <input
-                  value={defender.nature}
-                  onChange={(event) =>
-                    setDefender((prev) => ({ ...prev, nature: event.target.value }))
-                  }
-                  className="w-full rounded-xl border border-red-500/20 bg-slate-950/75 px-4 py-3 text-sm outline-none focus:border-red-300"
-                />
-              </label>
+            <div className="grid grid-cols-1 gap-3">
+              <PanelInput
+                label="特性"
+                value={defender.ability}
+                onChange={(value) => setDefender((prev) => ({ ...prev, ability: value }))}
+                accent="red"
+              />
+              <PanelInput
+                label="道具"
+                value={defender.item}
+                onChange={(value) => setDefender((prev) => ({ ...prev, item: value }))}
+                accent="red"
+              />
+              <PanelInput
+                label="性格"
+                value={defender.nature}
+                onChange={(value) => setDefender((prev) => ({ ...prev, nature: value }))}
+                accent="red"
+              />
             </div>
-
-            <div className="mt-5 rounded-2xl border border-red-500/15 bg-slate-950/75 p-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                防御方战术摘要
-              </p>
-              <p className="mt-2 text-sm text-slate-300">
-                {selectedDefenderPreset.name} / {selectedDefenderPreset.role}
-              </p>
-              <p className="mt-1 font-mono text-xs text-red-300">
-                体力 {defender.hp} / 防御 {defender.def} / 特防 {defender.spD}
-              </p>
-            </div>
-          </section>
+          </IntelSelector>
         </div>
       </div>
     </main>

@@ -18,6 +18,7 @@ import {
   WeatherType,
   FieldType,
 } from '@/types/damage';
+import { getGymMoveIntelByName } from '@/data/gymMoveIntel';
 
 /**
  * 调用 @smogon/calc 库进行基础伤害计算
@@ -32,15 +33,21 @@ function calculateBaseDamage(input: DamageCalcInput): {
   
   const attacker = input.attacker;
   const defender = input.defender;
+  const moveIntel = getGymMoveIntelByName(attacker.move);
+  const isSpecialMove = moveIntel?.category === 'Special';
   
   // 简化的伤害公式
   // 实际的 Pokémon 伤害公式：
   // Damage = (((2 * Level / 5 + 2) * Power * Attack / Defense) / 50 + 2) * Modifiers
   
   const level = attacker.level;
-  const power = 100; // 默认技能威力，实际应从技能数据库获取
-  const attack = attacker.atk;
-  const defense = defender.def;
+  const power = moveIntel?.power ?? 100;
+  const attack = isSpecialMove ? attacker.spA : attacker.atk;
+  const defense = isSpecialMove ? defender.spD : defender.def;
+
+  if (power <= 0) {
+    return { minDamage: 0, maxDamage: 0 };
+  }
   
   // 基础伤害计算
   const baseDamage = Math.floor(
@@ -163,8 +170,8 @@ export function useKaizoCalc(): UseKaizoCalcReturn {
       const { minDamage: baseminDamage, maxDamage: baseMaxDamage } =
         calculateBaseDamage(input);
 
-      // 推断攻击技能的类型（简化处理）
-      const moveType = 'normal'; // 实际应从技能数据库获取
+      // 推断攻击技能的类型（优先使用馆主招式情报映射）
+      const moveType = getGymMoveIntelByName(input.attacker.move)?.type.toLowerCase() || 'normal';
 
       // 应用类型相性
       const effectiveness = getEffectivenessMultiplier(
@@ -226,7 +233,7 @@ export function useKaizoCalc(): UseKaizoCalcReturn {
         metadata: {
           attackerLevel: input.attacker.level,
           defenderLevel: input.defender.level,
-          basePower: 100,
+          basePower: getGymMoveIntelByName(input.attacker.move)?.power ?? 100,
           effectiveness,
           modifierTotal:
             effectiveness *
