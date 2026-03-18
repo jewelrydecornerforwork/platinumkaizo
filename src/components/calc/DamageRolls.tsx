@@ -5,17 +5,19 @@ type DamageRollEntry = {
 
 export const DamageRolls = ({ rolls }: { rolls: DamageRollEntry[] }) => {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h3 className="font-mono text-xl font-bold text-white">伤害分布 (DAMAGE ROLLS)</h3>
+    <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-white">
+          伤害分布 / Damage Rolls
+        </h3>
         <span className="font-mono text-[10px] uppercase text-slate-600">Seed: 0xDEADBEEF</span>
       </div>
 
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-2 md:grid-cols-8">
         {rolls.map((roll, i) => (
           <div
             key={i}
-            className="group rounded border border-slate-800 bg-slate-950 p-2"
+            className="group rounded-lg border border-slate-800 bg-slate-950 px-2 py-1.5"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="font-mono text-[9px] uppercase text-slate-600 transition-colors group-hover:text-cyan-400">
