@@ -232,15 +232,18 @@ function getKoDisplay(koText: string | undefined): string {
   return '暂不构成稳定击杀';
 }
 
-function createDamageRolls(min: number, max: number): number[] {
-  if (min === max) {
-    return Array.from({ length: 16 }, () => min);
+function createDamageRolls(min: number, max: number): Array<{ factor: number; value: number }> {
+  const factors = Array.from({ length: 16 }, (_, index) => 85 + index);
+  const spread = max - min;
+
+  if (spread <= 0) {
+    return factors.map((factor) => ({ factor, value: Number(max.toFixed(1)) }));
   }
 
-  return Array.from({ length: 16 }, (_, index) => {
-    const ratio = index / 15;
-    return Number((min + (max - min) * ratio).toFixed(1));
-  });
+  return factors.map((factor, index) => ({
+    factor,
+    value: Number((min + (spread * index) / 15).toFixed(1)),
+  }));
 }
 
 function PanelInput({
@@ -424,6 +427,16 @@ export default function DamageCalculatorPage() {
   );
   const koDisplay = useMemo(() => getKoDisplay(result?.ko), [result?.ko]);
   const isOhko = koDisplay.includes('确一');
+  const offenseStatLabel = currentMove?.category === 'special' ? '特攻轴' : '攻击轴';
+  const offenseStatValue =
+    currentMove?.category === 'special'
+      ? selectedAttackerPreset.stats.spA
+      : selectedAttackerPreset.stats.atk;
+  const defenseStatLabel = currentMove?.category === 'special' ? '特防甲' : '物防甲';
+  const defenseStatValue =
+    currentMove?.category === 'special'
+      ? selectedDefenderPreset.stats.spD
+      : selectedDefenderPreset.stats.def;
 
   const effectiveness = useMemo(() => {
     const moveType = mappedMoveIntel?.type || currentMove?.type || 'Normal';
@@ -697,14 +710,74 @@ export default function DamageCalculatorPage() {
               >
                 <DamageResultBar min={minDamage} max={maxDamage} />
 
-                <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800 bg-slate-950/55 p-4 backdrop-blur-md">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                    Type_Intel
-                  </span>
-                  <TypeIcon type={mappedMoveIntel?.type || currentMove?.type || 'Normal'} />
-                  {selectedDefenderPreset.types.map((type) => (
-                    <TypeIcon key={type} type={type} />
-                  ))}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.05] p-4 backdrop-blur-md shadow-[inset_0_0_0_1px_rgba(34,211,238,0.06)]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cyan-300/70">
+                          Attack_Vector
+                        </p>
+                        <h3 className="mt-2 font-mono text-lg font-black uppercase text-white">
+                          {currentMove?.label || move}
+                        </h3>
+                      </div>
+                      <TypeIcon type={mappedMoveIntel?.type || currentMove?.type || 'Normal'} />
+                    </div>
+                    <div className="mt-4 flex items-end justify-between">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                          {offenseStatLabel}
+                        </p>
+                        <p className="mt-1 font-mono text-2xl font-black text-cyan-100">
+                          {offenseStatValue}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                          Base_Power
+                        </p>
+                        <p className="mt-1 font-mono text-2xl font-black text-white">
+                          {mappedMoveIntel?.power ?? currentMove?.power ?? 0}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-red-500/15 bg-red-500/[0.05] p-4 backdrop-blur-md shadow-[inset_0_0_0_1px_rgba(239,68,68,0.06)]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-red-300/70">
+                          Defense_Armor
+                        </p>
+                        <h3 className="mt-2 font-mono text-lg font-black uppercase text-white">
+                          {selectedDefenderPreset.name}
+                        </h3>
+                      </div>
+                      <div className="flex flex-wrap justify-end gap-2">
+                        {selectedDefenderPreset.types.map((type) => (
+                          <TypeIcon key={type} type={type} />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-end justify-between">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                          {defenseStatLabel}
+                        </p>
+                        <p className="mt-1 font-mono text-2xl font-black text-red-100">
+                          {defenseStatValue}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                          Effectiveness
+                        </p>
+                        <p className="mt-1 font-mono text-2xl font-black text-white">
+                          {effectiveness.toFixed(2)}x
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
