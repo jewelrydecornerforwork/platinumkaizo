@@ -29,6 +29,22 @@ const commandLinks = [
   { label: 'Docs', href: '#' },
 ] as const;
 
+const NavCard = ({
+  href,
+  className = '',
+  children,
+}: {
+  href: string;
+  className?: string;
+  children: React.ReactNode;
+}) => (
+  <Link href={href} className={`group block h-full w-full cursor-pointer ${className}`}>
+    <div className="h-full w-full transition-all duration-300 group-hover:scale-[1.02] group-active:scale-[0.99]">
+      {children}
+    </div>
+  </Link>
+);
+
 export default function Home(): React.ReactElement {
   return (
     <div className="relative min-h-screen overflow-hidden px-6 pb-8 pt-12 md:px-12 md:pt-14">
@@ -74,12 +90,11 @@ export default function Home(): React.ReactElement {
         </section>
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-4 xl:auto-rows-[minmax(160px,1fr)]">
-          <Link
-            href="/calculator"
-            aria-label="进入伤害计算"
-            className="xl:col-span-2 xl:row-span-2"
-          >
-            <TacticalFrame title="Core Module" className="h-full">
+          <NavCard href="/calculator" className="xl:col-span-2 xl:row-span-2">
+            <TacticalFrame
+              title="Core Module"
+              className="h-full transition-all duration-300 group-hover:border-emerald-500/50"
+            >
               <div className="flex h-full flex-col justify-between gap-8">
                 <div className="flex items-start justify-between gap-4">
                   <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-emerald-300">
@@ -113,17 +128,18 @@ export default function Home(): React.ReactElement {
                     <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-slate-500">
                       Tactical Status
                     </div>
-                    <div className="mt-2 text-sm text-emerald-300">
-                      演算引擎持续运行
-                    </div>
+                    <div className="mt-2 text-sm text-emerald-300">演算引擎持续运行</div>
                   </div>
                 </div>
               </div>
             </TacticalFrame>
-          </Link>
+          </NavCard>
 
-          <Link href="/pokedex" aria-label="进入全图鉴" className="xl:col-span-2">
-            <TacticalFrame title="Dex Module" className="h-full">
+          <NavCard href="/pokedex" className="xl:col-span-2">
+            <TacticalFrame
+              title="Dex Module"
+              className="h-full transition-all duration-300 group-hover:border-emerald-500/50"
+            >
               <div className="flex h-full items-start justify-between gap-4">
                 <div>
                   <div className="mb-4 inline-flex rounded-2xl border border-cyan-500/20 bg-cyan-500/10 p-3 text-cyan-300">
@@ -139,10 +155,13 @@ export default function Home(): React.ReactElement {
                 </div>
               </div>
             </TacticalFrame>
-          </Link>
+          </NavCard>
 
-          <Link href="/trainers" aria-label="进入馆主对战" className="xl:col-span-2">
-            <TacticalFrame title="Boss Intel" className="h-full">
+          <NavCard href="/trainers" className="xl:col-span-2">
+            <TacticalFrame
+              title="Boss Intel"
+              className="h-full transition-all duration-300 group-hover:border-emerald-500/50"
+            >
               <div className="flex h-full items-start justify-between gap-4">
                 <div>
                   <div className="mb-4 inline-flex rounded-2xl border border-orange-500/20 bg-orange-500/10 p-3 text-orange-300">
@@ -158,7 +177,7 @@ export default function Home(): React.ReactElement {
                 </div>
               </div>
             </TacticalFrame>
-          </Link>
+          </NavCard>
 
           <TacticalFrame title="Gym Quick-Access" className="xl:col-span-4">
             <div className="grid grid-cols-4 gap-3 md:grid-cols-4 xl:grid-cols-8">
@@ -185,7 +204,7 @@ export default function Home(): React.ReactElement {
             </div>
           </TacticalFrame>
 
-          <TacticalFrame title="News Feed" className="xl:col-span-3">
+          <TacticalFrame title="News Feed" className="xl:col-span-2">
             <div className="space-y-3">
               {newsFeed.map((item) => (
                 <div
@@ -202,6 +221,28 @@ export default function Home(): React.ReactElement {
               ))}
             </div>
           </TacticalFrame>
+
+          <NavCard href="/teambuilder">
+            <TacticalFrame
+              title="Build Matrix"
+              className="h-full transition-all duration-300 group-hover:border-emerald-500/50"
+            >
+              <div className="flex h-full flex-col justify-between gap-4">
+                <div className="inline-flex w-fit rounded-2xl border border-violet-500/20 bg-violet-500/10 p-3 text-violet-300">
+                  <Users size={22} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <h2 className="mb-2 text-xl font-black text-white">队伍构建</h2>
+                  <p className="text-sm leading-6 text-slate-300">
+                    统筹输出曲线、抗性链路与作战稳定性。
+                  </p>
+                </div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-violet-300/55">
+                  Team Matrix Synced
+                </div>
+              </div>
+            </TacticalFrame>
+          </NavCard>
 
           <TacticalFrame title="System Status" className="h-full">
             <div className="flex h-full flex-col justify-between gap-4">
