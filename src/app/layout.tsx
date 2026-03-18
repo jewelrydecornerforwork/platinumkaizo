@@ -2,6 +2,7 @@
 import { SidebarProvider } from '@/components/providers/SidebarProvider';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
+import { TacticalFooter } from '@/components/layout/TacticalFooter';
 import '@/globals.css';
 
 export const metadata: Metadata = {
@@ -31,11 +32,14 @@ export default function RootLayout({ children }: RootLayoutProps): React.ReactEl
         <SidebarProvider>
           <Header />
 
-          <div className="flex h-screen pt-16 md:pt-0">
+          <div className="flex h-screen">
             <Sidebar />
 
             <main className="ml-0 flex-1 overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 md:ml-sidebar">
-              <div className="min-h-full">{children}</div>
+              <div className="flex min-h-full flex-col">
+                <div className="flex-1">{children}</div>
+                <TacticalFooter />
+              </div>
             </main>
           </div>
         </SidebarProvider>

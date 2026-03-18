@@ -7,18 +7,14 @@ export function Header(): React.ReactElement {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-30 h-16 border-b border-emerald-500/30 bg-black/45 backdrop-blur-xl md:hidden">
-      <div className="flex h-full items-center justify-between px-4">
-        <button
-          onClick={toggleSidebar}
-          className="tech-button h-10 w-10 px-0 py-0"
-          aria-label="切换侧边栏"
-        >
-          <Menu size={20} />
-        </button>
-        <span className="title-strong text-lg text-emerald-300">白金改版百科</span>
-        <div className="w-10" />
-      </div>
-    </header>
+    <div className="fixed left-4 top-4 z-30 md:hidden">
+      <button
+        onClick={toggleSidebar}
+        className="flex h-11 w-11 items-center justify-center rounded-xl border border-emerald-500/25 bg-black/55 text-emerald-300 shadow-[0_0_18px_rgba(16,185,129,0.12)] backdrop-blur-xl transition-all hover:border-emerald-400/40"
+        aria-label="切换侧边栏"
+      >
+        <Menu size={20} />
+      </button>
+    </div>
   );
 }

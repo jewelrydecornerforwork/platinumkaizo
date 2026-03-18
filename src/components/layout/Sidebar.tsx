@@ -2,7 +2,7 @@
 
 import { navItems } from '@/lib/navigation';
 import { useSidebar } from '@/components/providers/SidebarProvider';
-import { X } from 'lucide-react';
+import { Radar, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -29,17 +29,29 @@ export function Sidebar(): React.ReactElement {
         role="navigation"
         aria-label="主导航"
       >
-        <div className="flex items-center justify-between border-b border-emerald-500/25 p-6">
-          <h1 className="title-strong bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-2xl text-transparent">
-            白金改版
-          </h1>
-          <button
-            onClick={closeSidebar}
-            className="tech-button h-10 w-10 px-0 py-0 md:hidden"
-            aria-label="关闭侧边栏"
-          >
-            <X size={18} />
-          </button>
+        <div className="border-b border-emerald-500/25 p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 shadow-[0_0_18px_rgba(16,185,129,0.12)]">
+                <Radar size={22} />
+              </div>
+              <div>
+                <h1 className="title-strong bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-2xl text-transparent">
+                  PKZ SYS
+                </h1>
+                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-emerald-400/45">
+                  Tactical Command
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={closeSidebar}
+              className="tech-button h-10 w-10 px-0 py-0 md:hidden"
+              aria-label="关闭侧边栏"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">

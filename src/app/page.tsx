@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { BookOpenText, Calculator, Github, Shield, Users } from 'lucide-react';
-import Navbar from '@/components/Navbar';
 import { TacticalFrame } from '@/components/ui/TacticalFrame';
 
 const statusBadges = [
@@ -32,9 +31,7 @@ const commandLinks = [
 
 export default function Home(): React.ReactElement {
   return (
-    <div className="relative min-h-screen overflow-hidden px-6 pb-16 pt-24 md:px-12">
-      <Navbar />
-
+    <div className="relative min-h-screen overflow-hidden px-6 pb-8 pt-12 md:px-12 md:pt-14">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12),transparent_24%),radial-gradient(circle_at_center,rgba(14,165,233,0.08),transparent_48%)]"
