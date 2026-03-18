@@ -3,7 +3,6 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Crosshair, Radar, ShieldAlert, Swords, Target } from 'lucide-react';
-import { DamageRolls } from '@/components/calc/DamageRolls';
 import { TypeIcon } from '@/components/calc/TypeIcon';
 import IntelSelector from '@/components/calculator/IntelSelector';
 import { StatAdjuster } from '@/components/StatAdjuster';
@@ -232,20 +231,6 @@ function getKoDisplay(koText: string | undefined): string {
   return '暂不构成稳定击杀';
 }
 
-function createDamageRolls(min: number, max: number): Array<{ factor: number; value: number }> {
-  const factors = Array.from({ length: 16 }, (_, index) => 85 + index);
-  const spread = max - min;
-
-  if (spread <= 0) {
-    return factors.map((factor) => ({ factor, value: Number(max.toFixed(1)) }));
-  }
-
-  return factors.map((factor, index) => ({
-    factor,
-    value: Number((min + (spread * index) / 15).toFixed(1)),
-  }));
-}
-
 function PanelInput({
   label,
   value,
@@ -317,49 +302,65 @@ function PanelSelect({
   );
 }
 
-function DamageResultBar({ min, max }: { min: number; max: number }) {
+function TacticalDmgHud({
+  min,
+  max,
+  koDisplay,
+}: {
+  min: number;
+  max: number;
+  koDisplay: string;
+}) {
+  const getDmgColor = (val: number): string => {
+    if (val < 50) return 'text-emerald-500 [text-shadow:0_0_10px_#10b981]';
+    if (val < 100) return 'text-orange-500 [text-shadow:0_0_10px_#f97316]';
+    return 'animate-pulse text-red-600 [text-shadow:0_0_10px_red]';
+  };
+
   return (
-    <div className="space-y-4 rounded-[1.75rem] border border-slate-700/80 bg-slate-900/55 p-6 backdrop-blur-xl shadow-[0_24px_60px_rgba(2,6,23,0.55)]">
-      <div className="flex items-end justify-between gap-4">
+    <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)]">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-slate-500">
-            Ballistic_Output
+            Tactical_Damage_Hud
           </p>
-          <p className="mt-2 font-mono text-sm uppercase tracking-[0.2em] text-slate-400">
-            实时伤害区间
-          </p>
-        </div>
-        <div className="font-mono text-[2.4rem] font-black leading-none tracking-[0.08em] text-white drop-shadow-[0_0_18px_rgba(226,232,240,0.15)] md:text-[4.25rem]">
-          <span className="inline-block text-cyan-100 [text-shadow:0_0_8px_rgba(34,211,238,0.25),0_0_18px_rgba(255,255,255,0.12)]">
+          <div
+            className={`mt-2 font-mono text-5xl font-black italic tracking-tighter md:text-[3.6rem] ${getDmgColor(
+              max
+            )}`}
+          >
             {min.toFixed(1)}%
-          </span>
-          <span className="px-2 text-xl text-slate-600 md:text-3xl">-</span>
-          <span className="inline-block text-slate-100 [text-shadow:0_0_8px_rgba(248,250,252,0.22),0_0_18px_rgba(255,255,255,0.12)]">
+            <span className="px-2 text-3xl font-light text-slate-700">-</span>
             {max.toFixed(1)}%
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col gap-2 md:w-auto md:min-w-[220px] md:items-end">
+          <div className="relative h-2 w-full overflow-hidden rounded-full border border-slate-700 bg-slate-900">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(min, 100)}%` }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="absolute left-0 top-0 h-full bg-orange-500/50"
+            />
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(max, 100)}%` }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+              className="absolute left-0 top-0 h-full"
+              style={{ background: getDamageGradient(min, max) }}
+            />
+          </div>
+          <span
+            className={`font-mono text-[10px] uppercase tracking-[0.28em] ${
+              koDisplay.includes('确一')
+                ? 'animate-pulse text-red-400 [text-shadow:0_0_10px_rgba(248,113,113,0.7)]'
+                : 'text-red-500/80 [text-shadow:0_0_8px_rgba(248,113,113,0.25)]'
+            }`}
+          >
+            {koDisplay}
           </span>
         </div>
-      </div>
-
-      <div className="relative h-4 overflow-hidden rounded-full border border-slate-800 bg-slate-950">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(max, 100)}%` }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="absolute left-0 top-0 h-full"
-          style={{ background: getDamageGradient(min, max) }}
-        />
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(min, 100)}%` }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="absolute left-0 top-0 h-full bg-white/15"
-        />
-        <div className="absolute right-0 top-0 h-full w-px bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.9)]" />
-      </div>
-
-      <div className="flex justify-between font-mono text-[10px] text-slate-500">
-        <span>0% / SAFE</span>
-        <span className="text-red-400">100% / LETHAL</span>
       </div>
     </div>
   );
@@ -421,12 +422,7 @@ export default function DamageCalculatorPage() {
 
   const minDamage = result?.range[0] ?? 0;
   const maxDamage = result?.range[1] ?? 0;
-  const damageRolls = useMemo(
-    () => createDamageRolls(minDamage, maxDamage),
-    [minDamage, maxDamage]
-  );
   const koDisplay = useMemo(() => getKoDisplay(result?.ko), [result?.ko]);
-  const isOhko = koDisplay.includes('确一');
   const offenseStatLabel = currentMove?.category === 'special' ? '特攻轴' : '攻击轴';
   const offenseStatValue =
     currentMove?.category === 'special'
@@ -708,7 +704,11 @@ export default function DamageCalculatorPage() {
                 transition={{ duration: 0.28, ease: 'easeOut' }}
                 className="space-y-5"
               >
-                <DamageResultBar min={minDamage} max={maxDamage} />
+                <TacticalDmgHud
+                  min={minDamage}
+                  max={maxDamage}
+                  koDisplay={koDisplay}
+                />
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.05] p-4 backdrop-blur-md shadow-[inset_0_0_0_1px_rgba(34,211,238,0.06)]">
@@ -787,7 +787,7 @@ export default function DamageCalculatorPage() {
                     </p>
                     <p
                       className={`mt-3 font-mono text-2xl font-black uppercase tracking-[0.08em] ${
-                        isOhko
+                        koDisplay.includes('确一')
                           ? 'animate-pulse text-red-300 [text-shadow:0_0_12px_rgba(248,113,113,0.7),0_0_28px_rgba(239,68,68,0.45)]'
                           : 'text-white'
                       }`}
@@ -853,8 +853,6 @@ export default function DamageCalculatorPage() {
                     </p>
                   </div>
                 </div>
-
-                <DamageRolls rolls={damageRolls} />
 
                 <div className="relative overflow-hidden rounded-[1.5rem] border border-cyan-500/15 bg-cyan-500/5 p-5 backdrop-blur-md">
                   <div className="absolute right-0 top-0 p-4 opacity-10">
