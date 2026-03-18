@@ -17,6 +17,35 @@ export interface SidebarContextType {
   closeSidebar: () => void;
 }
 
+export interface TrainerPokemonIntel {
+  id: string;
+  name: string;
+  enName: string;
+  level: string;
+  role: string;
+  ability: string;
+  nature: string;
+  item: string;
+  note: string;
+  tactic: string;
+  moves: string[];
+  stats: BaseStats;
+}
+
+export interface TrainerIntelProfile {
+  id: string;
+  code: string;
+  name: string;
+  specialty: string;
+  intel: string;
+  threatLevel: number;
+  portraitLabel: string;
+  recommendation: string;
+  primaryColor: string;
+  silhouetteAsset: string;
+  pokemon: TrainerPokemonIntel[];
+}
+
 /**
  * ==========================================
  * 宝可梦和训练师数据类型定义

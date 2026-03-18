@@ -1,79 +1,28 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Crosshair, ShieldAlert, Zap } from 'lucide-react';
+import { defaultTrainerId, trainersData } from '@/data/trainers';
+import type { TrainerIntelProfile, TrainerPokemonIntel } from '@/types';
 
-type UnitIntel = {
-  id: string;
-  name: string;
-  enName: string;
-  level: string;
-  role: string;
-  summary: string;
-  threat: string;
-  nature: string;
-  item: string;
-  stats: {
-    hp: number;
-    atk: number;
-    def: number;
-    spe: number;
-  };
-};
+function hexToRgba(hex: string, alpha: number): string {
+  const normalized = hex.replace('#', '');
+  const value =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((char) => char + char)
+          .join('')
+      : normalized;
 
-const roarkUnits: UnitIntel[] = [
-  {
-    id: 'cranidos',
-    name: '头盖龙',
-    enName: 'Cranidos',
-    level: 'LV. 14',
-    role: '首发破盾手',
-    summary: '依靠极高攻击种族值与生命玉修正进行正面强攻，是开局最危险的减员点。',
-    threat: '生命玉强攻',
-    nature: '固执',
-    item: '生命宝珠',
-    stats: {
-      hp: 67,
-      atk: 125,
-      def: 40,
-      spe: 58,
-    },
-  },
-  {
-    id: 'onix',
-    name: '大岩蛇',
-    enName: 'Onix',
-    level: 'LV. 12',
-    role: '布场中转位',
-    summary: '高防御配合岩石抗性链，常用于接管回合并铺设压制节奏。',
-    threat: '生命玉强攻',
-    nature: '固执',
-    item: '生命宝珠',
-    stats: {
-      hp: 35,
-      atk: 45,
-      def: 160,
-      spe: 70,
-    },
-  },
-  {
-    id: 'geodude',
-    name: '小拳石',
-    enName: 'Geodude',
-    level: 'LV. 11',
-    role: '低速压制位',
-    summary: '依靠地面与岩石双本联防施压，在残局中仍具备强制换人的威慑力。',
-    threat: '生命玉强攻',
-    nature: '固执',
-    item: '生命宝珠',
-    stats: {
-      hp: 40,
-      atk: 80,
-      def: 100,
-      spe: 20,
-    },
-  },
-];
+  const int = parseInt(value, 16);
+  const r = (int >> 16) & 255;
+  const g = (int >> 8) & 255;
+  const b = int & 255;
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 function StatBar({
   label,
@@ -87,85 +36,215 @@ function StatBar({
   const width = `${Math.min((value / max) * 100, 100)}%`;
 
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.24em] text-slate-400">
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.28em] text-slate-500">
         <span>{label}</span>
-        <span className="text-emerald-300">{value}</span>
+        <span style={{ color: 'var(--trainer-primary)' }}>{value}</span>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-slate-800/90 ring-1 ring-emerald-500/15">
-        <div
-          className="h-full rounded-full bg-[linear-gradient(90deg,rgba(16,185,129,0.25),rgba(74,222,128,0.88),rgba(187,247,208,1))] shadow-[0_0_14px_rgba(74,222,128,0.55)]"
-          style={{ width }}
+      <div
+        className="h-2 overflow-hidden rounded-full bg-slate-900/90"
+        style={{ boxShadow: 'inset 0 0 0 1px var(--trainer-primary-faint)' }}
+      >
+        <motion.div
+          className="h-full rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width }}
+          transition={{ duration: 0.42, ease: 'easeOut' }}
+          style={{
+            background:
+              'linear-gradient(90deg, var(--trainer-primary-faint), var(--trainer-primary-soft), var(--trainer-primary))',
+            boxShadow: '0 0 16px var(--trainer-primary-glow)',
+          }}
         />
       </div>
     </div>
   );
 }
 
-function PixelPortrait(): React.ReactElement {
-  const pixels = [
-    [3, 1], [4, 1], [5, 1],
-    [2, 2], [3, 2], [4, 2], [5, 2], [6, 2],
-    [2, 3], [3, 3], [4, 3], [5, 3], [6, 3],
-    [2, 4], [3, 4], [4, 4], [5, 4], [6, 4],
-    [1, 5], [2, 5], [3, 5], [4, 5], [5, 5], [6, 5], [7, 5],
-    [1, 6], [2, 6], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6],
-    [2, 7], [3, 7], [4, 7], [5, 7], [6, 7],
-    [2, 8], [3, 8], [4, 8], [5, 8], [6, 8],
-    [2, 9], [3, 9], [4, 9], [5, 9], [6, 9],
-    [2, 10], [3, 10], [5, 10], [6, 10],
-    [2, 11], [3, 11], [5, 11], [6, 11],
-  ] as const;
-
+function TargetButton({
+  trainer,
+  isActive,
+  onClick,
+}: {
+  trainer: TrainerIntelProfile;
+  isActive: boolean;
+  onClick: () => void;
+}): React.ReactElement {
   return (
-    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-emerald-500/20 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.98))]">
-      <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(16,185,129,0.10)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.10)_1px,transparent_1px)] [background-size:18px_18px]" />
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-emerald-400/15 to-transparent" />
-      <div className="absolute inset-6 rounded-xl border border-slate-800/80" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative h-56 w-40">
-          {pixels.map(([x, y]) => (
-            <div
-              key={`${x}-${y}`}
-              className="absolute bg-emerald-300/75 shadow-[0_0_12px_rgba(74,222,128,0.25)]"
-              style={{
-                width: '12.5%',
-                height: '8.333%',
-                left: `${x * 12.5}%`,
-                top: `${y * 8.333}%`,
-              }}
-            />
-          ))}
+    <motion.button
+      type="button"
+      onClick={onClick}
+      whileTap={{ scale: 0.975, y: 1 }}
+      className="group relative w-full overflow-hidden rounded-xl border px-4 py-3 text-left"
+      style={{
+        borderColor: isActive ? 'var(--trainer-primary-border)' : 'rgba(51, 65, 85, 0.9)',
+        background: isActive ? 'var(--trainer-primary-faint)' : 'rgba(15, 23, 42, 0.82)',
+        boxShadow: isActive
+          ? 'inset 0 0 18px var(--trainer-primary-faint), 0 0 16px var(--trainer-primary-faint)'
+          : 'none',
+      }}
+    >
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage:
+            'linear-gradient(var(--trainer-primary-grid) 1px, transparent 1px), linear-gradient(90deg, var(--trainer-primary-grid) 1px, transparent 1px)',
+          backgroundSize: '14px 14px',
+        }}
+      />
+      <div
+        className="absolute left-3 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full transition-all"
+        style={{
+          backgroundColor: isActive ? 'var(--trainer-primary)' : 'rgba(71, 85, 105, 0.85)',
+          boxShadow: isActive ? '0 0 10px var(--trainer-primary-glow)' : 'none',
+        }}
+      />
+      <div className="absolute inset-x-3 bottom-0 h-px origin-center scale-x-0 bg-white/0 transition-transform duration-200 group-hover:scale-x-100" />
+      <div className="relative flex items-center justify-between gap-3 pl-5">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-slate-500">
+            Target {trainer.code}
+          </p>
+          <p className={`mt-1 text-sm font-semibold ${isActive ? 'text-white' : 'text-slate-300'}`}>
+            {trainer.name}
+          </p>
         </div>
+        <p
+          className="font-mono text-[10px] uppercase tracking-[0.24em]"
+          style={{ color: isActive ? 'var(--trainer-primary)' : '#64748b' }}
+        >
+          {trainer.specialty}
+        </p>
       </div>
-      <div className="absolute bottom-4 left-4 text-[10px] font-mono uppercase tracking-[0.32em] text-emerald-300/70">
-        Roark silhouette
+    </motion.button>
+  );
+}
+
+function TrainerPortrait({
+  trainer,
+}: {
+  trainer: TrainerIntelProfile;
+}): React.ReactElement {
+  return (
+    <div
+      className="relative aspect-[4/5] overflow-hidden rounded-2xl border bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.98))]"
+      style={{
+        borderColor: 'var(--trainer-primary-border)',
+        boxShadow: '0 0 32px var(--trainer-primary-faint)',
+      }}
+    >
+      <div
+        className="absolute inset-0 opacity-30"
+        style={{
+          backgroundImage:
+            'linear-gradient(var(--trainer-primary-grid) 1px, transparent 1px), linear-gradient(90deg, var(--trainer-primary-grid) 1px, transparent 1px)',
+          backgroundSize: '18px 18px',
+        }}
+      />
+      <div
+        className="absolute inset-x-0 top-0 h-24"
+        style={{ background: 'linear-gradient(180deg, var(--trainer-primary-faint), transparent)' }}
+      />
+      <div
+        className="absolute left-4 top-4 rounded-lg border bg-slate-950/80 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.28em]"
+        style={{ borderColor: 'var(--trainer-primary-border)', color: 'var(--trainer-primary)' }}
+      >
+        {trainer.code}
+      </div>
+      <div className="absolute right-4 top-4 rounded-lg border border-slate-700 bg-slate-950/80 px-3 py-1 text-[10px] tracking-[0.22em] text-slate-300">
+        {trainer.specialty}
+      </div>
+      <motion.div
+        className="absolute bottom-8 left-1/2 h-24 w-24 -translate-x-1/2 rounded-full blur-3xl"
+        animate={{ scale: [1, 1.08, 1] }}
+        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ backgroundColor: 'var(--trainer-primary-glow)' }}
+      />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="h-56 w-44"
+          style={{
+            backgroundColor: 'var(--trainer-primary)',
+            WebkitMaskImage: `url(${trainer.silhouetteAsset})`,
+            maskImage: `url(${trainer.silhouetteAsset})`,
+            WebkitMaskRepeat: 'no-repeat',
+            maskRepeat: 'no-repeat',
+            WebkitMaskPosition: 'center',
+            maskPosition: 'center',
+            WebkitMaskSize: 'contain',
+            maskSize: 'contain',
+            filter: 'drop-shadow(0 0 18px var(--trainer-primary-glow))',
+          }}
+        />
+      </div>
+      <div
+        className="absolute bottom-4 left-4 font-mono text-[10px] uppercase tracking-[0.32em]"
+        style={{ color: 'var(--trainer-primary)' }}
+      >
+        {trainer.portraitLabel}
       </div>
     </div>
   );
 }
 
-function UnitCard({ unit }: { unit: UnitIntel }): React.ReactElement {
+function UnitCard({
+  unit,
+}: {
+  unit: TrainerPokemonIntel;
+}): React.ReactElement {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/45 p-6 shadow-[0_0_24px_rgba(16,185,129,0.08)] backdrop-blur-sm transition-all hover:border-emerald-500/45 hover:shadow-[0_0_28px_rgba(16,185,129,0.18)]">
-      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(16,185,129,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.06)_1px,transparent_1px)] [background-size:16px_16px]" />
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent" />
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.28, ease: 'easeOut' }}
+      className="relative h-full overflow-hidden rounded-2xl border bg-slate-900/45 p-5 backdrop-blur-sm"
+      style={{
+        borderColor: 'rgba(30, 41, 59, 0.95)',
+        boxShadow: '0 0 20px var(--trainer-primary-faint)',
+      }}
+    >
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage:
+            'linear-gradient(var(--trainer-primary-grid) 1px, transparent 1px), linear-gradient(90deg, var(--trainer-primary-grid) 1px, transparent 1px)',
+          backgroundSize: '16px 16px',
+        }}
+      />
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, var(--trainer-primary), transparent)' }}
+      />
 
       <div className="relative z-10">
-        <div className="mb-5 flex items-start justify-between gap-4">
+        <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-emerald-400/80">{unit.level}</p>
-            <h3 className="mt-2 text-xl font-black tracking-tight text-white">{unit.name}</h3>
-            <p className="text-xs font-mono uppercase tracking-[0.24em] text-slate-500">{unit.enName}</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em]" style={{ color: 'var(--trainer-primary)' }}>
+              {unit.level}
+            </p>
+            <h3 className="mt-2 text-lg font-black tracking-tight text-white">{unit.name}</h3>
+            <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-slate-500">{unit.enName}</p>
           </div>
-          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/8 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-300">
+          <div
+            className="rounded-lg border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em]"
+            style={{
+              borderColor: 'var(--trainer-primary-border)',
+              backgroundColor: 'var(--trainer-primary-faint)',
+              color: 'var(--trainer-primary)',
+            }}
+          >
             {unit.role}
           </div>
         </div>
 
-        <p className="mb-5 text-sm leading-relaxed text-slate-400">{unit.summary}</p>
+        <p className="mb-4 text-[13px] leading-6 text-slate-400">{unit.tactic}</p>
 
-        <div className="mb-5 space-y-3 rounded-xl bg-slate-950/70 p-4 ring-1 ring-emerald-500/10">
+        <div
+          className="mb-4 space-y-2 rounded-xl bg-slate-950/75 p-4"
+          style={{ boxShadow: 'inset 0 0 0 1px var(--trainer-primary-faint)' }}
+        >
           <StatBar label="HP" value={unit.stats.hp} />
           <StatBar label="ATK" value={unit.stats.atk} />
           <StatBar label="DEF" value={unit.stats.def} />
@@ -173,25 +252,61 @@ function UnitCard({ unit }: { unit: UnitIntel }): React.ReactElement {
         </div>
 
         <div className="space-y-2 text-xs">
-          <div className="flex items-center justify-between rounded-lg bg-slate-950/60 px-3 py-2 text-slate-300">
-            <span className="tracking-wide text-slate-500">核心威胁</span>
-            <span className="font-semibold text-emerald-300">{unit.threat}</span>
+          <div className="flex items-center justify-between rounded-lg bg-slate-950/70 px-3 py-2">
+            <span className="text-slate-500">核心威胁</span>
+            <span style={{ color: 'var(--trainer-primary)' }}>{unit.note}</span>
           </div>
-          <div className="flex items-center justify-between rounded-lg bg-slate-950/60 px-3 py-2 text-slate-300">
-            <span className="tracking-wide text-slate-500">性格</span>
-            <span className="font-semibold text-emerald-300">{unit.nature}</span>
+          <div className="flex items-center justify-between rounded-lg bg-slate-950/70 px-3 py-2">
+            <span className="text-slate-500">特性</span>
+            <span style={{ color: 'var(--trainer-primary)' }}>{unit.ability}</span>
           </div>
-          <div className="flex items-center justify-between rounded-lg bg-slate-950/60 px-3 py-2 text-slate-300">
-            <span className="tracking-wide text-slate-500">携带道具</span>
-            <span className="font-semibold text-emerald-300">{unit.item}</span>
+          <div className="flex items-center justify-between rounded-lg bg-slate-950/70 px-3 py-2">
+            <span className="text-slate-500">性格</span>
+            <span style={{ color: 'var(--trainer-primary)' }}>{unit.nature}</span>
+          </div>
+          <div className="flex items-center justify-between rounded-lg bg-slate-950/70 px-3 py-2">
+            <span className="text-slate-500">携带道具</span>
+            <span style={{ color: 'var(--trainer-primary)' }}>{unit.item}</span>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">关键战术招式</p>
+          <div className="flex flex-wrap gap-2">
+            {unit.moves.map((move) => (
+              <span
+                key={move}
+                className="rounded-full border px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.16em]"
+                style={{
+                  borderColor: 'var(--trainer-primary-border)',
+                  backgroundColor: 'var(--trainer-primary-faint)',
+                  color: 'var(--trainer-primary)',
+                }}
+              >
+                {move}
+              </span>
+            ))}
           </div>
         </div>
       </div>
-    </div>
+    </motion.article>
   );
 }
 
 export default function BossIntelPage(): React.ReactElement {
+  const [activeTrainer, setActiveTrainer] = useState(defaultTrainerId);
+  const currentTrainer =
+    trainersData.find((trainer) => trainer.id === activeTrainer) ?? trainersData[0];
+
+  const themeVars = {
+    '--trainer-primary': currentTrainer.primaryColor,
+    '--trainer-primary-soft': hexToRgba(currentTrainer.primaryColor, 0.2),
+    '--trainer-primary-faint': hexToRgba(currentTrainer.primaryColor, 0.11),
+    '--trainer-primary-border': hexToRgba(currentTrainer.primaryColor, 0.35),
+    '--trainer-primary-glow': hexToRgba(currentTrainer.primaryColor, 0.46),
+    '--trainer-primary-grid': hexToRgba(currentTrainer.primaryColor, 0.08),
+  } as React.CSSProperties;
+
   return (
     <>
       <style jsx>{`
@@ -201,21 +316,53 @@ export default function BossIntelPage(): React.ReactElement {
           50% { opacity: 0.85; }
           100% { transform: translateY(118%); opacity: 0; }
         }
+
+        @keyframes dataPulse {
+          0% { opacity: 0.3; transform: translateX(-8px); }
+          50% { opacity: 0.9; transform: translateX(0); }
+          100% { opacity: 0.3; transform: translateX(8px); }
+        }
       `}</style>
 
-      <div className="relative min-h-screen overflow-hidden bg-[#020617] p-6 text-slate-200 lg:p-12">
-        <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(16,185,129,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.08)_1px,transparent_1px)] [background-size:40px_40px]" />
-        <div className="absolute inset-0 opacity-15 [background-image:repeating-linear-gradient(180deg,rgba(148,163,184,0.08)_0px,rgba(148,163,184,0.08)_1px,transparent_1px,transparent_6px)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(16,185,129,0.16),transparent_24%),radial-gradient(circle_at_80%_25%,rgba(59,130,246,0.12),transparent_22%),radial-gradient(circle_at_50%_100%,rgba(16,185,129,0.08),transparent_28%)]" />
+      <motion.div
+        style={themeVars}
+        animate={themeVars as any}
+        transition={{ duration: 0.45, ease: 'easeInOut' }}
+        className="relative min-h-screen overflow-hidden bg-[#020617] p-6 text-slate-200 lg:p-12"
+      >
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-transparent via-emerald-400/12 to-transparent"
-          style={{ animation: 'radarSweep 7s linear infinite' }}
+          className="absolute inset-0 opacity-40"
+          style={{
+            backgroundImage:
+              'linear-gradient(var(--trainer-primary-grid) 1px, transparent 1px), linear-gradient(90deg, var(--trainer-primary-grid) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+          }}
+        />
+        <div className="absolute inset-0 opacity-15 [background-image:repeating-linear-gradient(180deg,rgba(148,163,184,0.08)_0px,rgba(148,163,184,0.08)_1px,transparent_1px,transparent_6px)]" />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 20% 15%, var(--trainer-primary-soft), transparent 24%), radial-gradient(circle at 80% 25%, rgba(59,130,246,0.12), transparent 22%), radial-gradient(circle at 50% 100%, var(--trainer-primary-faint), transparent 28%)',
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-40"
+          style={{
+            animation: 'radarSweep 7s linear infinite',
+            background: 'linear-gradient(180deg, transparent, var(--trainer-primary-faint), transparent)',
+          }}
         />
 
-        <div className="relative mx-auto mb-12 flex max-w-7xl items-end justify-between border-b border-emerald-500/30 pb-6">
+        <div
+          className="relative mx-auto mb-12 flex max-w-7xl items-end justify-between border-b pb-6"
+          style={{ borderColor: 'var(--trainer-primary-border)' }}
+        >
           <div>
             <h1 className="text-4xl font-black tracking-tighter text-white">馆主战术情报中心</h1>
-            <p className="mt-2 font-mono text-sm text-emerald-500">CLASSIFIED // PLATINUM KAIZO TACTICAL DATA</p>
+            <p className="mt-2 font-mono text-sm" style={{ color: 'var(--trainer-primary)' }}>
+              CLASSIFIED // PLATINUM KAIZO TACTICAL DATA
+            </p>
           </div>
           <div className="hidden text-right md:block">
             <p className="font-mono text-xs text-slate-500">ENCRYPTION: AES-256</p>
@@ -225,65 +372,166 @@ export default function BossIntelPage(): React.ReactElement {
 
         <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-4">
           <div className="space-y-6 lg:col-span-1">
-            <PixelPortrait />
-
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 shadow-[0_0_26px_rgba(16,185,129,0.08)]">
-              <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-white">
-                <ShieldAlert className="h-5 w-5 text-red-500" /> 瓢太 (Roark)
-              </h2>
-              <p className="text-sm leading-relaxed text-slate-400">
-                白金改版第一道关卡。瓢太的队伍在 Kaizo 版中不再是教学强度，而是围绕岩石系高压首发与耐久联防构建的完整试炼。
-                若在开局让出节奏，头盖龙会迅速把对局推进到减员交换阶段。
-              </p>
-              <div className="mt-6 space-y-2">
-                <div className="text-[10px] font-mono uppercase text-slate-500">核心威胁度</div>
-                <div className="h-1.5 w-full rounded-full bg-slate-800">
-                  <div className="h-full w-[72%] rounded-full bg-[linear-gradient(90deg,#10b981,#4ade80,#bbf7d0)] shadow-[0_0_14px_rgba(74,222,128,0.55)]" />
-                </div>
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/55 p-4 shadow-[0_0_22px_rgba(15,23,42,0.7)]">
+              <div className="mb-4 flex items-center justify-between">
+                <p className="font-mono text-[11px] uppercase tracking-[0.32em]" style={{ color: 'var(--trainer-primary)' }}>
+                  Target Selection
+                </p>
+                <div
+                  className="h-2 w-10 rounded-full"
+                  style={{
+                    animation: 'dataPulse 1.8s linear infinite',
+                    background: 'linear-gradient(90deg, transparent, var(--trainer-primary), transparent)',
+                  }}
+                />
+              </div>
+              <div className="space-y-3">
+                {trainersData.map((trainer) => (
+                  <TargetButton
+                    key={trainer.id}
+                    trainer={trainer}
+                    isActive={trainer.id === currentTrainer.id}
+                    onClick={() => setActiveTrainer(trainer.id)}
+                  />
+                ))}
               </div>
             </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`left-${currentTrainer.id}`}
+                initial={{ opacity: 0, x: -18 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 12 }}
+                transition={{ duration: 0.28, ease: 'easeOut' }}
+                className="space-y-6"
+              >
+                <TrainerPortrait trainer={currentTrainer} />
+
+                <div
+                  className="rounded-2xl border bg-slate-900/50 p-6"
+                  style={{
+                    borderColor: 'rgba(30, 41, 59, 0.95)',
+                    boxShadow: '0 0 26px var(--trainer-primary-faint)',
+                  }}
+                >
+                  <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-white">
+                    <ShieldAlert className="h-5 w-5 text-red-500" /> {currentTrainer.name}
+                  </h2>
+                  <p className="text-sm leading-relaxed text-slate-400">
+                    {currentTrainer.intel}
+                  </p>
+                  <div className="mt-6 space-y-2">
+                    <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                      核心威胁度
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-slate-800">
+                      <motion.div
+                        key={`${currentTrainer.id}-threat`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${currentTrainer.threatLevel}%` }}
+                        transition={{ duration: 0.45, ease: 'easeOut' }}
+                        className="h-full rounded-full"
+                        style={{
+                          background:
+                            'linear-gradient(90deg, var(--trainer-primary-faint), var(--trainer-primary-soft), var(--trainer-primary))',
+                          boxShadow: '0 0 14px var(--trainer-primary-glow)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           <div className="space-y-8 lg:col-span-3">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {roarkUnits.map((unit) => (
-                <UnitCard key={unit.id} unit={unit} />
-              ))}
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`right-${currentTrainer.id}`}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="space-y-8"
+              >
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <p className="font-mono text-[11px] uppercase tracking-[0.32em]" style={{ color: 'var(--trainer-primary)' }}>
+                      Live Target Feed
+                    </p>
+                    <h2 className="mt-2 text-3xl font-black tracking-tight text-white">
+                      {currentTrainer.name}
+                    </h2>
+                  </div>
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-2 text-right">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                      Specialty
+                    </p>
+                    <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--trainer-primary)' }}>
+                      {currentTrainer.specialty}系战区
+                    </p>
+                  </div>
+                </div>
 
-            <div className="relative overflow-hidden rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-8 shadow-[0_0_30px_rgba(16,185,129,0.10)]">
-              <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(16,185,129,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.08)_1px,transparent_1px)] [background-size:22px_22px]" />
-              <div
-                className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-transparent via-emerald-400/10 to-transparent"
-                style={{ animation: 'radarSweep 5.6s linear infinite' }}
-              />
-              <div className="absolute right-0 top-0 p-4 opacity-10">
-                <Crosshair className="h-24 w-24" />
-              </div>
+                <motion.div
+                  className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: { staggerChildren: 0.08, delayChildren: 0.05 },
+                    },
+                  }}
+                >
+                  {currentTrainer.pokemon.map((unit) => (
+                    <UnitCard key={`${currentTrainer.id}-${unit.id}`} unit={unit} />
+                  ))}
+                </motion.div>
 
-              <div className="relative z-10">
-                <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-emerald-400">
-                  <Zap className="h-5 w-5" /> 战场决策建议
-                </h3>
-                <ul className="space-y-3 text-sm text-slate-300">
-                  <li className="flex gap-2">
-                    <span className="text-emerald-500">▶</span>
-                    注意头盖龙的生命玉强攻轴，非抵抗属性切入将直接暴露减员风险。
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="text-emerald-500">▶</span>
-                    大岩蛇的高防中转会拖长对局，请提前准备草系或水系稳定突破点。
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="text-emerald-500">▶</span>
-                    小拳石虽速度低，但在残局交换中依旧能凭双本覆盖强制逼退脆皮单位。
-                  </li>
-                </ul>
-              </div>
-            </div>
+                <div
+                  className="relative overflow-hidden rounded-3xl border p-8"
+                  style={{
+                    borderColor: 'var(--trainer-primary-border)',
+                    backgroundColor: 'var(--trainer-primary-faint)',
+                    boxShadow: '0 0 30px var(--trainer-primary-faint)',
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(var(--trainer-primary-grid) 1px, transparent 1px), linear-gradient(90deg, var(--trainer-primary-grid) 1px, transparent 1px)',
+                      backgroundSize: '22px 22px',
+                    }}
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-x-0 top-0 h-28"
+                    style={{
+                      animation: 'radarSweep 5.6s linear infinite',
+                      background: 'linear-gradient(180deg, transparent, var(--trainer-primary-faint), transparent)',
+                    }}
+                  />
+                  <div className="absolute right-0 top-0 p-4 opacity-10">
+                    <Crosshair className="h-24 w-24" style={{ color: 'var(--trainer-primary)' }} />
+                  </div>
+
+                  <div className="relative z-10">
+                    <h3 className="mb-4 flex items-center gap-2 text-xl font-bold" style={{ color: 'var(--trainer-primary)' }}>
+                      <Zap className="h-5 w-5" /> 战场决策建议
+                    </h3>
+                    <p className="text-sm leading-7 text-slate-300">
+                      {currentTrainer.recommendation}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }

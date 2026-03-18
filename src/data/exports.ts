@@ -21,6 +21,8 @@ export type {
   PokemonInstance,
   TrainerTactic,
   Trainer,
+  TrainerPokemonIntel,
+  TrainerIntelProfile,
   DamageCalcInput,
   DamageCalcResult,
 } from '@/types';
@@ -37,6 +39,8 @@ export {
   sampleTrainerData,
   allSampleData,
 } from '@/data/sampleData';
+
+export { defaultTrainerId, trainersData } from '@/data/trainers';
 
 // ==========================================
 // 工具函数导出
