@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 const navItems = [
-  { name: '情报主页', href: '/' },
+  { name: '首页', href: '/' },
   { name: '全图鉴', href: '/pokedex' },
   { name: '伤害演算', href: '/calculator' },
-  { name: '馆主数据', href: '/bosses' },
+  { name: '馆主对战', href: '/trainers' },
   { name: '队伍构建', href: '/teambuilder' },
 ];
 

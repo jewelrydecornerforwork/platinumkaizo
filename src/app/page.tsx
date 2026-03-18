@@ -19,9 +19,9 @@ const modules = [
     actionLabel: '演算引擎持续运行',
   },
   {
-    title: '馆主数据',
-    desc: '汇总关键馆主阵容、技能覆盖与压制节奏，制定针对性突破方案。',
-    href: '/bosses',
+    title: '馆主对战',
+    desc: '汇总关键馆主阵容、技能覆盖与压制节奏，制定针对 Platinum Kaizo 的突破方案。',
+    href: '/trainers',
     icon: <Shield size={24} strokeWidth={2.2} />,
     actionLabel: '敌方情报持续更新',
   },

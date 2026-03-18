@@ -14,9 +14,9 @@ export const navItems: NavItem[] = [
     icon: null,
   },
   {
-    id: 'bosses',
+    id: 'trainers',
     label: '馆主对战',
-    href: '/bosses',
+    href: '/trainers',
     icon: null,
   },
   {

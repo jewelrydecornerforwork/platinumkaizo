@@ -11,7 +11,7 @@ export default function CalcPage(): React.ReactElement {
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/calculator" className="tech-button">进入高级计算器</Link>
-            <Link href="/bosses" className="tech-button">查看馆主对战</Link>
+            <Link href="/trainers" className="tech-button">查看馆主对战</Link>
           </div>
         </section>
       </div>
