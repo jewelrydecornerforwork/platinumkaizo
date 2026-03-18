@@ -1,7 +1,34 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { BookOpenText, Calculator, Shield, Users } from 'lucide-react';
+import { BookOpenText, Calculator, Github, Shield, Users } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { TacticalFrame } from '@/components/ui/TacticalFrame';
+
+const statusBadges = [
+  'DATABASE: ONLINE',
+  'VERSION: KAIZO_V1.1',
+  'SECURITY: ACTIVE',
+] as const;
+
+const gymQuickAccess = [
+  { id: '01', name: '瓢太', href: '/trainers', asset: '/silhouettes/roark.svg' },
+  { id: '02', name: '菜种', href: '/trainers', asset: '/silhouettes/gardenia.svg' },
+  { id: '03', name: '阿李', href: '/trainers', asset: '/silhouettes/maylene.svg' },
+  { id: '04', name: '吉宪', href: '/trainers', asset: '/silhouettes/wake.svg' },
+] as const;
+
+const newsFeed = [
+  { time: '07:14', text: '伤害演算中枢完成同步，核心击杀阈值表已刷新。' },
+  { time: '08:32', text: '馆主战术库新增 AI 换人链路注释与高危首发标记。' },
+  { time: '09:05', text: '图鉴数据库完成招式映射校验，字段一致性通过。' },
+  { time: '10:21', text: '队伍构建矩阵已接入最新 Kaizo 环境威胁优先级。' },
+] as const;
+
+const commandLinks = [
+  { label: 'Discord', href: '#' },
+  { label: 'GitHub', href: '#' },
+  { label: 'Docs', href: '#' },
+] as const;
 
 export default function Home(): React.ReactElement {
   return (
@@ -21,13 +48,39 @@ export default function Home(): React.ReactElement {
           <p className="mx-auto max-w-3xl text-sm text-emerald-300 md:text-base">
             多源战斗数据融合、实时态势分析与策略级推演平台
           </p>
+
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            {statusBadges.map((badge) => (
+              <div
+                key={badge}
+                className="rounded-full border border-emerald-500/15 bg-slate-900/40 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.28em] text-emerald-300/70 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.45)]"
+              >
+                {badge}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-wrap justify-center gap-4 border-y border-emerald-500/10 py-4 font-mono text-[10px] uppercase tracking-widest text-emerald-500/60">
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 animate-ping rounded-full bg-emerald-500" />
+              DATABASE_SYNC: SUCCESSFUL
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+              UPLOADER: CHIEF_ARCHITECT
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+              VERSION: PLATINUM_KAIZO_V1.1
+            </div>
+          </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4 xl:auto-rows-[minmax(180px,1fr)]">
+        <section className="grid grid-cols-1 gap-6 xl:grid-cols-4 xl:auto-rows-[minmax(160px,1fr)]">
           <Link
             href="/calculator"
             aria-label="进入伤害计算"
-            className="md:col-span-2 xl:col-span-2 xl:row-span-2"
+            className="xl:col-span-2 xl:row-span-2"
           >
             <TacticalFrame title="Core Module" className="h-full">
               <div className="flex h-full flex-col justify-between gap-8">
@@ -72,11 +125,7 @@ export default function Home(): React.ReactElement {
             </TacticalFrame>
           </Link>
 
-          <Link
-            href="/pokedex"
-            aria-label="进入全图鉴"
-            className="md:col-span-2 xl:col-span-2"
-          >
+          <Link href="/pokedex" aria-label="进入全图鉴" className="xl:col-span-2">
             <TacticalFrame title="Dex Module" className="h-full">
               <div className="flex h-full items-start justify-between gap-4">
                 <div>
@@ -95,11 +144,7 @@ export default function Home(): React.ReactElement {
             </TacticalFrame>
           </Link>
 
-          <Link
-            href="/trainers"
-            aria-label="进入馆主对战"
-            className="md:col-span-2 xl:col-span-2"
-          >
+          <Link href="/trainers" aria-label="进入馆主对战" className="xl:col-span-2">
             <TacticalFrame title="Boss Intel" className="h-full">
               <div className="flex h-full items-start justify-between gap-4">
                 <div>
@@ -118,30 +163,50 @@ export default function Home(): React.ReactElement {
             </TacticalFrame>
           </Link>
 
-          <Link
-            href="/teambuilder"
-            aria-label="进入队伍构建"
-            className="xl:col-start-2"
-          >
-            <TacticalFrame title="Build Matrix" className="h-full">
-              <div className="flex h-full flex-col justify-between gap-4">
-                <div className="inline-flex w-fit rounded-2xl border border-violet-500/20 bg-violet-500/10 p-3 text-violet-300">
-                  <Users size={22} strokeWidth={2.2} />
-                </div>
-                <div>
-                  <h2 className="mb-2 text-xl font-black text-white">队伍构建</h2>
-                  <p className="text-sm leading-6 text-slate-300">
-                    统筹输出曲线、抗性链路与作战稳定性。
-                  </p>
-                </div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-violet-300/55">
-                  Team Matrix Synced
-                </div>
-              </div>
-            </TacticalFrame>
-          </Link>
+          <TacticalFrame title="Gym Quick-Access" className="xl:col-span-4">
+            <div className="grid grid-cols-4 gap-3 md:grid-cols-4 xl:grid-cols-8">
+              {gymQuickAccess.map((leader) => (
+                <Link
+                  key={leader.id}
+                  href={leader.href}
+                  aria-label={`进入${leader.name}情报`}
+                  className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center backdrop-blur-md transition-all hover:border-emerald-500/35 hover:shadow-[0_0_18px_rgba(16,185,129,0.12)]"
+                >
+                  <div className="relative mx-auto mb-3 h-12 w-12 overflow-hidden rounded-lg border border-slate-800 bg-black/25">
+                    <Image
+                      src={leader.asset}
+                      alt={leader.name}
+                      fill
+                      className="object-contain p-2 opacity-85"
+                    />
+                  </div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-300">
+                    {leader.name}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </TacticalFrame>
 
-          <TacticalFrame title="System Status" className="h-full xl:col-start-3">
+          <TacticalFrame title="News Feed" className="xl:col-span-3">
+            <div className="space-y-3">
+              {newsFeed.map((item) => (
+                <div
+                  key={`${item.time}-${item.text}`}
+                  className="flex items-start gap-4 rounded-xl border border-slate-800 bg-black/15 px-4 py-3"
+                >
+                  <span className="min-w-14 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/60">
+                    {item.time}
+                  </span>
+                  <span className="font-mono text-xs leading-6 text-slate-400">
+                    {item.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </TacticalFrame>
+
+          <TacticalFrame title="System Status" className="h-full">
             <div className="flex h-full flex-col justify-between gap-4">
               <div className="flex items-center gap-2">
                 <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
@@ -164,6 +229,21 @@ export default function Home(): React.ReactElement {
               </div>
             </div>
           </TacticalFrame>
+
+          <div className="xl:col-span-4">
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              {commandLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 font-mono text-xs uppercase tracking-[0.24em] text-slate-200 backdrop-blur-md transition-all hover:border-emerald-500/40 hover:text-emerald-300 hover:shadow-[0_0_18px_rgba(16,185,129,0.22)]"
+                >
+                  {link.label === 'GitHub' ? <Github size={14} /> : null}
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </section>
       </div>
     </div>
