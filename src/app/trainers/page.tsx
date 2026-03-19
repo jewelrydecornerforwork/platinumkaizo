@@ -162,13 +162,13 @@ function TrainerPortrait({
         transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
         style={{ backgroundColor: 'var(--trainer-primary-glow)' }}
       />
-      <div className="absolute inset-0 flex items-center justify-center px-5 pb-6 pt-16">
-        <div className="relative h-full w-full overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-950/45">
+      <div className="absolute inset-0 flex items-center justify-center px-8 pb-8 pt-16">
+        <div className="relative h-[86%] w-[86%] overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-950/45">
           <Image
             src={LEADER_ART_ASSETS[trainer.id] || trainer.silhouetteAsset}
             alt={trainer.name}
             fill
-            className="object-contain object-bottom p-3"
+            className="object-contain object-bottom p-5"
           />
         </div>
       </div>
@@ -196,8 +196,8 @@ function UnitCard({
       transition={{ duration: 0.28, ease: 'easeOut' }}
       className="relative h-full overflow-hidden rounded-2xl border bg-slate-900/45 p-5 backdrop-blur-sm"
       style={{
-        borderColor: 'rgba(30, 41, 59, 0.95)',
-        boxShadow: '0 0 20px var(--trainer-primary-faint)',
+        borderColor: 'var(--trainer-primary-border)',
+        boxShadow: '0 0 16px rgba(15, 23, 42, 0.55)',
       }}
     >
       <div
@@ -349,11 +349,11 @@ export default function BossIntelPage(): React.ReactElement {
           background:
             linear-gradient(
               180deg,
-              var(--trainer-primary-soft),
+              rgba(255, 255, 255, 0.1),
               var(--trainer-primary)
             );
           box-shadow:
-            0 0 12px var(--trainer-primary-glow),
+            0 0 16px var(--trainer-primary-glow),
             inset 0 0 10px rgba(255, 255, 255, 0.06);
         }
 
@@ -447,24 +447,24 @@ export default function BossIntelPage(): React.ReactElement {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 12 }}
                 transition={{ duration: 0.28, ease: 'easeOut' }}
-                className="space-y-6"
+                className="space-y-4"
               >
                 <TrainerPortrait trainer={currentTrainer} />
 
                 <div
-                  className="rounded-2xl border bg-slate-900/50 p-6"
+                  className="rounded-2xl border bg-slate-900/50 p-5"
                   style={{
-                    borderColor: 'rgba(30, 41, 59, 0.95)',
-                    boxShadow: '0 0 26px var(--trainer-primary-faint)',
+                    borderColor: 'var(--trainer-primary-border)',
+                    boxShadow: '0 0 18px rgba(15, 23, 42, 0.52)',
                   }}
                 >
-                  <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-white">
-                    <ShieldAlert className="h-5 w-5 text-red-500" /> {currentTrainer.name}
+                  <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-white">
+                    <ShieldAlert className="h-4 w-4 text-red-500" /> {currentTrainer.name}
                   </h2>
-                  <p className="text-sm leading-relaxed text-slate-400">
+                  <p className="text-sm leading-8 text-slate-400">
                     {currentTrainer.intel}
                   </p>
-                  <div className="mt-6 space-y-2">
+                  <div className="mt-4 space-y-2">
                     <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
                       THREAT INDEX
                     </div>
@@ -503,7 +503,7 @@ export default function BossIntelPage(): React.ReactElement {
                     <p className="font-mono text-[11px] uppercase tracking-[0.32em]" style={{ color: 'var(--trainer-primary)' }}>
                       LIVE TARGET FEED
                     </p>
-                    <h2 className="mt-2 text-3xl font-black tracking-tight text-white">
+                    <h2 className="mt-1 text-3xl font-black tracking-tight text-white">
                       {currentTrainer.name}
                     </h2>
                   </div>
@@ -517,38 +517,65 @@ export default function BossIntelPage(): React.ReactElement {
                   </div>
                 </div>
 
-                <div
-                  className="trainer-feed-scroll max-h-[calc(100vh-22rem)] overflow-y-auto pr-3"
-                  style={{
-                    maskImage: 'linear-gradient(180deg, transparent 0, black 2rem, black calc(100% - 2rem), transparent 100%)',
-                    WebkitMaskImage:
-                      'linear-gradient(180deg, transparent 0, black 2rem, black calc(100% - 2rem), transparent 100%)',
-                  }}
-                >
-                  <motion.div
-                    className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-                    initial="hidden"
-                    animate="visible"
-                    variants={{
-                      hidden: { opacity: 0 },
-                      visible: {
-                        opacity: 1,
-                        transition: { staggerChildren: 0.08, delayChildren: 0.05 },
-                      },
+                <div className="relative">
+                  <div className="pointer-events-none absolute right-0 top-0 z-10 flex h-full w-10 flex-col items-center justify-between py-3">
+                    <div
+                      className="rounded-full border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em]"
+                      style={{
+                        borderColor: 'var(--trainer-primary-border)',
+                        color: 'var(--trainer-primary)',
+                        backgroundColor: 'rgba(2, 6, 23, 0.82)',
+                        boxShadow: '0 0 14px var(--trainer-primary-faint)',
+                      }}
+                    >
+                      Up
+                    </div>
+                    <div
+                      className="rounded-full border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em]"
+                      style={{
+                        borderColor: 'var(--trainer-primary-border)',
+                        color: 'var(--trainer-primary)',
+                        backgroundColor: 'rgba(2, 6, 23, 0.82)',
+                        boxShadow: '0 0 14px var(--trainer-primary-faint)',
+                      }}
+                    >
+                      Down
+                    </div>
+                  </div>
+
+                  <div
+                    className="trainer-feed-scroll max-h-[calc(100vh-22rem)] overflow-y-auto pr-5 pt-1"
+                    style={{
+                      maskImage: 'linear-gradient(180deg, transparent 0, black 1rem, black calc(100% - 2rem), transparent 100%)',
+                      WebkitMaskImage:
+                        'linear-gradient(180deg, transparent 0, black 1rem, black calc(100% - 2rem), transparent 100%)',
                     }}
                   >
-                    {currentTrainer.pokemon.map((unit) => (
-                      <UnitCard key={`${currentTrainer.id}-${unit.id}`} unit={unit} />
-                    ))}
-                  </motion.div>
+                    <motion.div
+                      className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+                      initial="hidden"
+                      animate="visible"
+                      variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                          opacity: 1,
+                          transition: { staggerChildren: 0.08, delayChildren: 0.05 },
+                        },
+                      }}
+                    >
+                      {currentTrainer.pokemon.map((unit) => (
+                        <UnitCard key={`${currentTrainer.id}-${unit.id}`} unit={unit} />
+                      ))}
+                    </motion.div>
+                  </div>
                 </div>
 
                 <div
-                  className="relative overflow-hidden rounded-3xl border p-8"
+                  className="relative overflow-hidden rounded-3xl border p-6"
                   style={{
                     borderColor: 'var(--trainer-primary-border)',
                     backgroundColor: 'var(--trainer-primary-faint)',
-                    boxShadow: '0 0 30px var(--trainer-primary-faint)',
+                    boxShadow: '0 0 20px rgba(15, 23, 42, 0.5)',
                   }}
                 >
                   <div
@@ -571,10 +598,10 @@ export default function BossIntelPage(): React.ReactElement {
                   </div>
 
                   <div className="relative z-10">
-                    <h3 className="mb-4 flex items-center gap-2 text-xl font-bold" style={{ color: 'var(--trainer-primary)' }}>
-                      <Zap className="h-5 w-5" /> BATTLEFIELD DECISION BRIEF
+                    <h3 className="mb-3 flex items-center gap-2 text-lg font-bold" style={{ color: 'var(--trainer-primary)' }}>
+                      <Zap className="h-4 w-4" /> BATTLEFIELD DECISION BRIEF
                     </h3>
-                    <p className="text-sm leading-7 text-slate-300">
+                    <p className="text-sm leading-6 text-slate-300">
                       {currentTrainer.recommendation}
                     </p>
                   </div>
@@ -587,4 +614,5 @@ export default function BossIntelPage(): React.ReactElement {
     </>
   );
 }
+
 
