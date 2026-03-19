@@ -1,59 +1,34 @@
 export const LEADER_ART_ASSETS: Record<string, string> = {
-  roark: 'https://archives.bulbagarden.net/media/upload/3/36/Brilliant_Diamond_Shining_Pearl_Roark.png',
-  gardenia:
-    'https://archives.bulbagarden.net/media/upload/9/97/Brilliant_Diamond_Shining_Pearl_Gardenia.png',
-  maylene:
-    'https://archives.bulbagarden.net/media/upload/1/1a/Brilliant_Diamond_Shining_Pearl_Maylene.png',
-  wake: 'https://archives.bulbagarden.net/media/upload/4/4f/Brilliant_Diamond_Shining_Pearl_Crasher_Wake.png',
+  roark: '/assets/leaders/roark.png',
+  gardenia: '/assets/leaders/gardenia.png',
+  maylene: '/assets/leaders/maylene.png',
+  wake: '/assets/leaders/wake.png',
 };
 
 export const POKEMON_ART_ASSETS: Record<string, string> = {
-  Cranidos:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/408.png',
-  Onix:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/95.png',
-  Geodude:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/74.png',
-  Shieldon:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/410.png',
-  Nosepass:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/299.png',
-  Aron:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/304.png',
-  Roserade:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/407.png',
-  Breloom:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/286.png',
-  Tangela:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/114.png',
-  Cherrim:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/421.png',
-  Grovyle:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/253.png',
-  Grotle:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/388.png',
-  Lucario:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png',
-  Medicham:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/308.png',
-  Machoke:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/67.png',
-  Hariyama:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/297.png',
-  Toxicroak:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/454.png',
-  Heracross:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/214.png',
-  Gyarados:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png',
-  Floatzel:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/419.png',
-  Quagsire:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/195.png',
-  Azumarill:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/184.png',
-  Pelipper:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/279.png',
-  Poliwrath:
-    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/62.png',
+  Cranidos: '/assets/pokemon/cranidos.png',
+  Onix: '/assets/pokemon/onix.png',
+  Geodude: '/assets/pokemon/geodude.png',
+  Shieldon: '/assets/pokemon/shieldon.png',
+  Nosepass: '/assets/pokemon/nosepass.png',
+  Aron: '/assets/pokemon/aron.png',
+  Roserade: '/assets/pokemon/roserade.png',
+  Breloom: '/assets/pokemon/breloom.png',
+  Tangela: '/assets/pokemon/tangela.png',
+  Cherrim: '/assets/pokemon/cherrim.png',
+  Grovyle: '/assets/pokemon/grovyle.png',
+  Grotle: '/assets/pokemon/grotle.png',
+  Lucario: '/assets/pokemon/lucario.png',
+  Medicham: '/assets/pokemon/medicham.png',
+  Machoke: '/assets/pokemon/machoke.png',
+  Hariyama: '/assets/pokemon/hariyama.png',
+  Toxicroak: '/assets/pokemon/toxicroak.png',
+  Heracross: '/assets/pokemon/heracross.png',
+  Gyarados: '/assets/pokemon/gyarados.png',
+  Floatzel: '/assets/pokemon/floatzel.png',
+  Quagsire: '/assets/pokemon/quagsire.png',
+  Azumarill: '/assets/pokemon/azumarill.png',
+  Pelipper: '/assets/pokemon/pelipper.png',
+  Poliwrath: '/assets/pokemon/poliwrath.png',
+  Garchomp: '/assets/pokemon/garchomp.png',
 };

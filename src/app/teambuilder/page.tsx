@@ -1,9 +1,11 @@
 ﻿'use client';
 
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { Search, ShieldCheck, Sparkles, Swords } from 'lucide-react';
 import { TacticalFrame } from '@/components/ui/TacticalFrame';
 import { SynergyMatrix } from '@/components/teambuilder/SynergyMatrix';
+import { POKEMON_ART_ASSETS } from '@/data/remoteAssets';
 import { trainersData } from '@/data/trainers';
 
 type CatalogEntry = {
@@ -15,6 +17,7 @@ type CatalogEntry = {
   note: string;
   tactic: string;
   types: string[];
+  art: string;
 };
 
 const trainerLabels: Record<string, string> = {
@@ -61,6 +64,7 @@ const catalog: CatalogEntry[] = trainersData.flatMap((trainer) =>
     note: pokemon.note,
     tactic: pokemon.tactic,
     types: typeMap[pokemon.enName] || ['Normal'],
+    art: POKEMON_ART_ASSETS[pokemon.enName] || '',
   }))
 );
 
@@ -95,6 +99,11 @@ function TeamSlot({
         <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
           {member ? `${member.enName} / ${member.trainer}` : 'CLICK TO OPEN THE TACTICAL ARMORY'}
         </p>
+        {member ? (
+          <div className="relative mt-3 h-16 w-16 overflow-hidden rounded-xl border border-slate-800 bg-black/20">
+            <Image src={member.art} alt={member.name} fill className="object-contain p-2" />
+          </div>
+        ) : null}
         <div className="mt-3 flex flex-wrap gap-2">
           {(member?.types || ['SCAN']).map((type) => (
             <span
@@ -234,11 +243,16 @@ export default function TeambuilderPage(): React.ReactElement {
                     className="rounded-2xl border border-slate-800 bg-slate-900/40 p-4 text-left transition-all hover:border-emerald-500/35 hover:bg-emerald-500/5"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-base font-black text-white">{entry.name}</h3>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                          {entry.enName} / {entry.trainer}
-                        </p>
+                      <div className="flex items-start gap-3">
+                        <div className="relative h-16 w-16 overflow-hidden rounded-xl border border-slate-800 bg-black/20">
+                          <Image src={entry.art} alt={entry.name} fill className="object-contain p-2" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-black text-white">{entry.name}</h3>
+                          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                            {entry.enName} / {entry.trainer}
+                          </p>
+                        </div>
                       </div>
                       <div className="flex flex-wrap justify-end gap-2">
                         {entry.types.map((type) => (
@@ -262,3 +276,4 @@ export default function TeambuilderPage(): React.ReactElement {
     </div>
   );
 }
+

@@ -1,8 +1,10 @@
 ﻿'use client';
 
+import Image from 'next/image';
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, ScanSearch, ShieldAlert, X } from 'lucide-react';
 import { PinyinSearchInput } from '@/components/ui/PinyinSearchInput';
+import { POKEMON_ART_ASSETS } from '@/data/remoteAssets';
 import { trainersData } from '@/data/trainers';
 import { garchomp } from '@/data/sampleData';
 
@@ -18,6 +20,7 @@ type PokedexEntry = {
   item: string;
   nature: string;
   types: string[];
+  art: string;
   threatScore: number;
   hasKaizoRevision: boolean;
   stats: {
@@ -265,6 +268,7 @@ const pokedexEntries: PokedexEntry[] = trainersData.flatMap((trainer) =>
       item: pokemon.item,
       nature: pokemon.nature,
       types: typeMap[pokemon.enName] || ['Normal'],
+      art: POKEMON_ART_ASSETS[pokemon.enName] || '',
       threatScore,
       hasKaizoRevision: true,
       stats: pokemon.stats,
@@ -291,6 +295,7 @@ const supplementalDexEntries: PokedexEntry[] = [
 
       return [typeLabelMap[type] || type];
     }),
+    art: POKEMON_ART_ASSETS.Garchomp,
     threatScore: Math.round(
       (garchomp.baseStats.atk + garchomp.baseStats.spA + garchomp.baseStats.spe) / 3
     ),
@@ -470,14 +475,19 @@ function DetailDrawer({
     <div className="fixed inset-0 z-40 flex items-end justify-end bg-black/65 backdrop-blur-sm">
       <div className="h-full w-full max-w-xl border-l border-emerald-500/15 bg-slate-950/95 p-6 shadow-[-20px_0_80px_rgba(2,6,23,0.7)]">
         <div className="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/60">
-              DEX_UNIT_RECORD
-            </p>
-            <h2 className="mt-2 text-3xl font-black text-white">{entry.name}</h2>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
-              {entry.enName} / {entry.trainer}
-            </p>
+          <div className="flex items-start gap-4">
+            <div className="relative h-24 w-24 overflow-hidden rounded-2xl border border-slate-800 bg-black/20">
+              <Image src={entry.art} alt={entry.name} fill className="object-contain p-2" />
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/60">
+                DEX_UNIT_RECORD
+              </p>
+              <h2 className="mt-2 text-3xl font-black text-white">{entry.name}</h2>
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
+                {entry.enName} / {entry.trainer}
+              </p>
+            </div>
           </div>
 
           <button
@@ -610,9 +620,14 @@ export default function PokedexPage(): React.ReactElement {
               </div>
 
               <div className="mb-3 flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-base font-black text-white">{entry.name}</h2>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{entry.enName}</p>
+                <div className="flex items-start gap-3">
+                  <div className="relative h-16 w-16 overflow-hidden rounded-xl border border-slate-800 bg-black/20">
+                    <Image src={entry.art} alt={entry.name} fill className="object-contain p-2" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-black text-white">{entry.name}</h2>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{entry.enName}</p>
+                  </div>
                 </div>
                 <span className="rounded-full border border-emerald-500/15 bg-emerald-500/10 px-2 py-1 font-mono text-[9px] uppercase text-emerald-300/70">
                   {entry.trainer}
@@ -643,3 +658,4 @@ export default function PokedexPage(): React.ReactElement {
     </div>
   );
 }
+
