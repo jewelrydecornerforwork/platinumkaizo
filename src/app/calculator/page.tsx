@@ -247,25 +247,25 @@ function TacticalDmgHud({ min, max, koDisplay }: { min: number; max: number; koD
   const ledColor = max >= 100 ? 'text-red-400' : max >= 70 ? 'text-emerald-200' : 'text-emerald-300';
 
   return (
-    <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-5 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12),0_0_30px_rgba(16,185,129,0.05)]">
-      <div className="flex items-start justify-between gap-4">
+    <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12),0_0_30px_rgba(16,185,129,0.05)]">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-slate-500">Ballistic_Output</div>
-          <div className={`mt-2 font-mono text-6xl font-black tracking-tight ${ledColor}`} style={{ textShadow: '0 0 10px rgba(16,185,129,0.5)' }}>
+          <div className={`mt-1.5 font-mono text-5xl font-black tracking-tight xl:text-[3.25rem] ${ledColor}`} style={{ textShadow: '0 0 10px rgba(16,185,129,0.5)' }}>
             {min.toFixed(1)}%
-            <span className="px-3 text-4xl font-light text-slate-700">-</span>
+            <span className="px-2 text-3xl font-light text-slate-700">-</span>
             {max.toFixed(1)}%
           </div>
         </div>
         <div className="text-right">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">Knockout_Probability</div>
-          <div className={`mt-2 font-mono text-sm font-bold uppercase tracking-[0.18em] ${koDisplay.includes('OHKO') ? 'animate-pulse text-red-400' : 'text-emerald-300'}`} style={{ textShadow: '0 0 10px rgba(16,185,129,0.35)' }}>
+          <div className={`mt-1.5 font-mono text-xs font-bold uppercase tracking-[0.16em] ${koDisplay.includes('OHKO') ? 'animate-pulse text-red-400' : 'text-emerald-300'}`} style={{ textShadow: '0 0 10px rgba(16,185,129,0.35)' }}>
             {koDisplay}
           </div>
         </div>
       </div>
 
-      <div className="mt-4 h-4 overflow-hidden rounded-full border border-emerald-500/20 bg-black/50 shadow-[inset_0_1px_3px_rgba(0,0,0,0.85)]">
+      <div className="mt-3 h-3 overflow-hidden rounded-full border border-emerald-500/20 bg-black/50 shadow-[inset_0_1px_3px_rgba(0,0,0,0.85)]">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(max, 100)}%` }}
@@ -280,16 +280,16 @@ function TacticalDmgHud({ min, max, koDisplay }: { min: number; max: number; koD
 
 function RngMatrix({ rolls }: { rolls: Array<{ factor: number; value: number }> }) {
   return (
-    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-white">16-Step RNG Damage Matrix</h3>
+    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+      <div className="mb-2.5 flex items-center justify-between">
+        <h3 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-white">16-Step RNG Damage Matrix</h3>
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Seed: 0xDEADBEEF</span>
       </div>
       <div className="grid flex-1 grid-cols-4 gap-2">
         {rolls.map((roll) => (
-          <div key={`${roll.factor}-${roll.value}`} className="rounded-lg border border-slate-800 bg-black/35 px-3 py-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.75)]">
+          <div key={`${roll.factor}-${roll.value}`} className="rounded-lg border border-slate-800 bg-black/35 px-2.5 py-1.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.75)]">
             <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600">R{roll.factor}</div>
-            <div className="mt-1 font-mono text-lg font-bold text-white">{roll.value.toFixed(1)}%</div>
+            <div className="mt-0.5 font-mono text-base font-bold text-white">{roll.value.toFixed(1)}%</div>
           </div>
         ))}
       </div>
@@ -419,7 +419,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
   }, [move, selectedAttackerPreset.moves, setMove]);
 
   return (
-    <main className="relative h-[100dvh] overflow-hidden bg-[#020617] px-4 py-4 text-slate-100 md:px-6">
+    <main className="relative h-[100dvh] overflow-hidden bg-[#020617] px-4 py-3 text-slate-100 md:px-5">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.06)_1px,transparent_1px)] bg-[size:36px_36px]" />
         <motion.div
@@ -429,22 +429,22 @@ export default function DamageCalculatorPage(): React.ReactElement {
         />
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full max-w-[1820px] flex-col gap-4">
-        <header className="shrink-0 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] px-5 py-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
-          <div className="flex items-center justify-between gap-4">
+      <div className="relative z-10 mx-auto flex h-full max-w-[1820px] flex-col gap-3">
+        <header className="shrink-0 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] px-4 py-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.34em] text-emerald-400/70">
                 Command_Center
               </div>
-              <h1 className="mt-1 font-mono text-3xl font-black uppercase tracking-tight text-white xl:text-4xl">
+              <h1 className="mt-1 font-mono text-[1.7rem] font-black uppercase tracking-tight text-white xl:text-[2.2rem]">
                 Platinum Kaizo Tactical Command Center
               </h1>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               {['DATABASE: ONLINE', 'SYNC: VERIFIED', 'SECURITY: ACTIVE'].map((item) => (
                 <div
                   key={item}
-                  className="rounded-full border border-emerald-500/15 bg-black/35 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] text-emerald-300/80"
+                  className="rounded-full border border-emerald-500/15 bg-black/35 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300/80"
                 >
                   {item}
                 </div>
@@ -453,10 +453,10 @@ export default function DamageCalculatorPage(): React.ReactElement {
           </div>
         </header>
 
-        <div className="grid min-h-0 flex-1 grid-cols-[16rem_minmax(0,1fr)_20rem] gap-4">
-          <aside className="flex min-h-0 flex-col rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
-            <div className="mb-4 rounded-2xl border border-emerald-500/15 bg-black/30 p-4">
-              <div className="relative mx-auto h-36 w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
+        <div className="grid min-h-0 flex-1 grid-cols-[15rem_minmax(0,1fr)_19rem] gap-3">
+          <aside className="flex min-h-0 flex-col rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+            <div className="mb-3 rounded-2xl border border-emerald-500/15 bg-black/30 p-3">
+              <div className="relative mx-auto h-28 w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
                 <Image
                   src={LEADER_ART_ASSETS[activeTrainer.id] || activeTrainer.silhouetteAsset}
                   alt={activeTrainer.name}
@@ -468,18 +468,18 @@ export default function DamageCalculatorPage(): React.ReactElement {
                 <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
                   Active_Dossier
                 </div>
-                <div className="mt-1 text-xl font-black text-white">{activeTrainer.name}</div>
+                <div className="mt-1 text-lg font-black text-white">{activeTrainer.name}</div>
                 <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300/70">
                   Threat Level: {activeTrainer.threatLevel}% // {getThreatTier(activeTrainer.threatLevel)}
                 </div>
-                <p className="mt-3 text-xs leading-5 text-slate-400">{activeTrainer.intel}</p>
+                <p className="mt-2 text-[11px] leading-5 text-slate-400">{activeTrainer.intel}</p>
               </div>
             </div>
 
             <LeaderList leaders={leaders} activeId={activeTrainerId} onSelect={handleTrainerSelect} />
           </aside>
 
-          <section className="flex min-h-0 flex-col gap-4 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+          <section className="flex min-h-0 flex-col gap-3 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
             <TacticalDmgHud min={minDamage} max={maxDamage} koDisplay={koDisplay} />
 
             <AnimatePresence mode="wait">
@@ -489,13 +489,13 @@ export default function DamageCalculatorPage(): React.ReactElement {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0.18, y: -10 }}
                 transition={{ duration: 0.26, ease: 'easeOut' }}
-                className="grid min-h-0 flex-1 grid-rows-[auto_auto_minmax(0,1fr)] gap-4"
+                className="grid min-h-0 flex-1 grid-rows-[auto_auto_minmax(0,1fr)] gap-3"
               >
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
-                    <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+                    <div className="mb-2.5 flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
-                        <div className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-800 bg-black/35">
+                        <div className="relative h-[4.5rem] w-[4.5rem] overflow-hidden rounded-xl border border-slate-800 bg-black/35">
                           <Image
                             src={POKEMON_ART_ASSETS[selectedAttackerPreset.enName]}
                             alt={selectedAttackerPreset.name}
@@ -507,7 +507,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                           Attacker_Vector
                         </div>
-                        <div className="mt-1 font-mono text-2xl font-black uppercase text-white">
+                        <div className="mt-1 font-mono text-xl font-black uppercase text-white">
                           {selectedAttackerPreset.name}
                         </div>
                         </div>
@@ -519,7 +519,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2.5">
                       <CompactSelect
                         label="Attack Unit"
                         value={activeAttackerId}
@@ -556,7 +556,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       />
                     </div>
 
-                    <div className="mt-4 grid grid-cols-3 gap-3">
+                    <div className="mt-3 grid grid-cols-3 gap-2.5">
                       {[
                         { label: 'POWER', value: mappedMoveIntel?.power ?? currentMove?.power ?? 0 },
                         { label: 'ATK', value: offenseStatValue },
@@ -564,12 +564,12 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       ].map((item) => (
                         <div
                           key={item.label}
-                          className="rounded-xl border border-slate-800 bg-black/35 p-3"
+                          className="rounded-xl border border-slate-800 bg-black/35 p-2.5"
                         >
                           <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                             {item.label}
                           </div>
-                          <div className="mt-2 font-mono text-xl font-black text-white">
+                          <div className="mt-1.5 font-mono text-lg font-black text-white">
                             {item.value}
                           </div>
                         </div>
@@ -577,10 +577,10 @@ export default function DamageCalculatorPage(): React.ReactElement {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
-                    <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+                    <div className="mb-2.5 flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
-                        <div className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-800 bg-black/35">
+                        <div className="relative h-[4.5rem] w-[4.5rem] overflow-hidden rounded-xl border border-slate-800 bg-black/35">
                           <Image
                             src={POKEMON_ART_ASSETS[selectedDefenderPreset.enName]}
                             alt={selectedDefenderPreset.name}
@@ -592,7 +592,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                           Defender_Dossier
                         </div>
-                        <div className="mt-1 font-mono text-2xl font-black uppercase text-white">
+                        <div className="mt-1 font-mono text-xl font-black uppercase text-white">
                           {selectedDefenderPreset.name}
                         </div>
                         </div>
@@ -604,7 +604,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2.5">
                       <CompactInput
                         label="Level"
                         type="number"
@@ -651,7 +651,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       />
                     </div>
 
-                    <div className="mt-4 grid grid-cols-3 gap-3">
+                    <div className="mt-3 grid grid-cols-3 gap-2.5">
                       {[
                         { label: 'DEF', value: defenseStatValue },
                         { label: 'MULTI', value: `${effectiveness.toFixed(2)}x` },
@@ -659,12 +659,12 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       ].map((item) => (
                         <div
                           key={item.label}
-                          className="rounded-xl border border-slate-800 bg-black/35 p-3"
+                          className="rounded-xl border border-slate-800 bg-black/35 p-2.5"
                         >
                           <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                             {item.label}
                           </div>
-                          <div className="mt-2 font-mono text-xl font-black text-white">
+                          <div className="mt-1.5 font-mono text-lg font-black text-white">
                             {item.value}
                           </div>
                         </div>
@@ -672,36 +672,36 @@ export default function DamageCalculatorPage(): React.ReactElement {
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-[minmax(0,1fr)_260px] gap-4">
-                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+                <div className="grid grid-cols-[minmax(0,1fr)_240px] gap-3">
+                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
                     <div className="flex items-start gap-3">
-                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-2 text-emerald-300">
-                        <ShieldAlert className="h-5 w-5" />
+                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-1.5 text-emerald-300">
+                        <ShieldAlert className="h-4 w-4" />
                       </div>
                       <div>
                         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                           Tactical_Readout
                         </div>
-                        <div className="mt-2 text-sm leading-6 text-slate-300">
+                        <div className="mt-1.5 text-xs leading-5 text-slate-300">
                           {result?.desc || 'Awaiting synchronized parameters. Select attack vector, move package, and target dossier.'}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
-                    <div className="mb-3 flex items-center justify-between">
+                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+                    <div className="mb-2.5 flex items-center justify-between">
                       <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                         Matchup_Status
                       </div>
                       <Crosshair className="h-4 w-4 text-emerald-300" />
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-2.5">
                       <div>
                         <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                           Type Matrix
                         </div>
-                        <div className="mt-1 font-mono text-xl font-black text-white">
+                        <div className="mt-1 font-mono text-lg font-black text-white">
                           {getEffectivenessLabel(effectiveness)}
                         </div>
                       </div>
@@ -709,7 +709,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                         <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                           Offense / Defense
                         </div>
-                        <div className="mt-1 flex items-center gap-3 font-mono text-xl font-black text-white">
+                        <div className="mt-1 flex items-center gap-2 font-mono text-lg font-black text-white">
                           <span>{offenseStatValue}</span>
                           <Swords className="h-4 w-4 text-emerald-300" />
                           <span>{defenseStatValue}</span>
@@ -721,7 +721,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                         </div>
                         <div className="mt-1 flex items-center gap-2">
                           <TypeIcon type={mappedMoveIntel?.type || currentMove?.type || 'Normal'} />
-                          <span className="font-mono text-sm uppercase tracking-[0.14em] text-slate-300">
+                          <span className="font-mono text-xs uppercase tracking-[0.14em] text-slate-300">
                             {currentMove?.category || 'physical'}
                           </span>
                         </div>
@@ -735,8 +735,8 @@ export default function DamageCalculatorPage(): React.ReactElement {
             </AnimatePresence>
           </section>
 
-          <aside className="flex min-h-0 flex-col gap-4 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
-            <div className="rounded-2xl border border-emerald-500/20 bg-black/30 p-4">
+          <aside className="flex min-h-0 flex-col gap-3 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+            <div className="rounded-2xl border border-emerald-500/20 bg-black/30 p-3">
               <div className="mb-1 flex items-center justify-between">
                 <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                   Squad_Deployment
@@ -745,14 +745,14 @@ export default function DamageCalculatorPage(): React.ReactElement {
                   {activeTrainer.name}
                 </div>
               </div>
-              <div className="text-sm leading-5 text-slate-400">
+              <div className="text-xs leading-5 text-slate-400">
                 {activeTrainer.recommendation}
               </div>
             </div>
 
-            <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-4">
+            <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-3">
               <div className="min-h-0 overflow-y-auto pr-1">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2.5">
                   {activeTrainer.pokemon.map((pokemon) => {
                     const selected = pokemon.id === activeRosterPokemon.id;
                     const types = POKEMON_TYPE_MAP[pokemon.enName] || ['Normal'];
@@ -762,13 +762,13 @@ export default function DamageCalculatorPage(): React.ReactElement {
                         key={pokemon.id}
                         type="button"
                         onClick={() => applyDefenderPreset(pokemon.id)}
-                        className={`rounded-xl border p-3 text-left transition-all ${
+                        className={`rounded-xl border p-2.5 text-left transition-all ${
                           selected
                             ? 'border-emerald-400/40 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.12)]'
                             : 'border-slate-800 bg-black/35 hover:border-emerald-500/25'
                         }`}
                       >
-                        <div className="relative mb-3 h-20 w-full overflow-hidden rounded-lg border border-slate-800 bg-slate-950/70">
+                        <div className="relative mb-2.5 h-16 w-full overflow-hidden rounded-lg border border-slate-800 bg-slate-950/70">
                           <Image
                             src={POKEMON_ART_ASSETS[pokemon.enName]}
                             alt={pokemon.name}
@@ -781,7 +781,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                             <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                               {pokemon.level}
                             </div>
-                            <div className="mt-1 text-sm font-black text-white">
+                            <div className="mt-1 text-xs font-black text-white">
                               {pokemon.name}
                             </div>
                           </div>
@@ -792,7 +792,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                             <TypeIcon key={type} type={type} />
                           ))}
                         </div>
-                        <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-300/70">
+                        <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-300/70">
                           {pokemon.note}
                         </div>
                       </button>
@@ -801,13 +801,13 @@ export default function DamageCalculatorPage(): React.ReactElement {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-emerald-500/20 bg-black/35 p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
-                <div className="mb-3 flex items-center justify-between">
+              <div className="rounded-2xl border border-emerald-500/20 bg-black/35 p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+                <div className="mb-2.5 flex items-center justify-between">
                   <div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                       Unit_Stat_Profile
                     </div>
-                    <div className="mt-1 text-lg font-black text-white">
+                    <div className="mt-1 text-base font-black text-white">
                       {activeRosterPokemon.name}
                     </div>
                   </div>
@@ -816,7 +816,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {statLabels.map((stat) => (
                     <StatBar
                       key={stat.key}
@@ -826,11 +826,11 @@ export default function DamageCalculatorPage(): React.ReactElement {
                   ))}
                 </div>
 
-                <div className="mt-4 border-t border-emerald-500/10 pt-3">
+                <div className="mt-3 border-t border-emerald-500/10 pt-2.5">
                   <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                     Tactical_Note
                   </div>
-                  <div className="mt-2 text-xs leading-5 text-slate-400">
+                  <div className="mt-1.5 text-[11px] leading-5 text-slate-400">
                     {activeRosterPokemon.tactic}
                   </div>
                 </div>
@@ -839,7 +839,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
           </aside>
         </div>
 
-        <footer className="shrink-0 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] px-5 py-3 font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+        <footer className="shrink-0 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
           <div className="flex items-center justify-between">
             <span>[SYSTEM_STATUS: NOMINAL]</span>
             <span className="text-emerald-400/80">[ENCRYPTION: ACTIVE]</span>
