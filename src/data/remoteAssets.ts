@@ -6,6 +6,12 @@ export const LEADER_ART_ASSETS: Record<string, string> = {
 };
 
 export const POKEMON_ART_ASSETS: Record<string, string> = {
+  Turtwig: '/assets/pokemon/turtwig.png',
+  Chimchar: '/assets/pokemon/chimchar.png',
+  Piplup: '/assets/pokemon/piplup.png',
+  Starly: '/assets/pokemon/starly.png',
+  Shinx: '/assets/pokemon/shinx.png',
+  Budew: '/assets/pokemon/budew.png',
   Cranidos: '/assets/pokemon/cranidos.png',
   Onix: '/assets/pokemon/onix.png',
   Geodude: '/assets/pokemon/geodude.png',

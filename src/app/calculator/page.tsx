@@ -9,6 +9,7 @@ import { TypeIcon } from '@/components/calc/TypeIcon';
 import { LeaderList } from '@/components/trainers/LeaderList';
 import { TYPE_CHART } from '@/constants/typeChart';
 import { GYM_MOVE_INTEL, getGymMoveIntelByName } from '@/data/gymMoveIntel';
+import { defaultPlayerPresetId, playerRosterData } from '@/data/playerRoster';
 import { LEADER_ART_ASSETS, POKEMON_ART_ASSETS } from '@/data/remoteAssets';
 import { defaultTrainerId, trainersData } from '@/data/trainers';
 import { usePokemonCalc } from '@/hooks/usePokemonCalc';
@@ -69,6 +70,12 @@ const GYM_KEY_MAP: Record<string, keyof typeof GYM_MOVE_INTEL.gym_leaders> = {
 };
 
 const POKEMON_TYPE_MAP: Record<string, string[]> = {
+  Turtwig: ['Grass'],
+  Chimchar: ['Fire'],
+  Piplup: ['Water'],
+  Starly: ['Normal', 'Flying'],
+  Shinx: ['Electric'],
+  Budew: ['Grass', 'Poison'],
   Cranidos: ['Rock'],
   Onix: ['Rock', 'Ground'],
   Geodude: ['Rock', 'Ground'],
@@ -140,7 +147,7 @@ function getPresetMoveOptions(trainerId: string): MoveOption[] {
   }));
 }
 
-function buildPresets(): CombatPreset[] {
+function buildTrainerPresets(): CombatPreset[] {
   return trainersData.flatMap((trainer) =>
     trainer.pokemon.map((pokemon) => ({
       id: pokemon.id,
@@ -163,10 +170,42 @@ function buildPresets(): CombatPreset[] {
   );
 }
 
-const PRESETS = buildPresets();
+function buildPlayerPresets(): CombatPreset[] {
+  return playerRosterData.map((pokemon) => ({
+    id: pokemon.id,
+    trainerId: 'player',
+    trainerCode: 'PX',
+    trainerName: 'Player',
+    name: pokemon.name,
+    enName: pokemon.enName,
+    role: pokemon.role,
+    level: pokemon.level,
+    item: pokemon.item,
+    ability: pokemon.ability,
+    nature: pokemon.nature,
+    tactic: pokemon.tactic,
+    note: pokemon.note,
+    types: pokemon.types,
+    stats: pokemon.stats,
+    moves: pokemon.moves.map((move) => ({
+      value: move.name,
+      label: move.label,
+      power: move.power,
+      type: move.type,
+      category: move.category,
+    })),
+  }));
+}
 
-function getPreset(presetId: string): CombatPreset {
-  return PRESETS.find((preset) => preset.id === presetId) ?? PRESETS[0];
+const TRAINER_PRESETS = buildTrainerPresets();
+const PLAYER_PRESETS = buildPlayerPresets();
+
+function getTrainerPreset(presetId: string): CombatPreset {
+  return TRAINER_PRESETS.find((preset) => preset.id === presetId) ?? TRAINER_PRESETS[0];
+}
+
+function getPlayerPreset(presetId: string): CombatPreset {
+  return PLAYER_PRESETS.find((preset) => preset.id === presetId) ?? PLAYER_PRESETS[0];
 }
 
 function getEffectiveness(moveType: string, defenderTypes: string[]): number {
@@ -412,13 +451,13 @@ export default function DamageCalculatorPage(): React.ReactElement {
 
   const [activeTrainerId, setActiveTrainerId] = useState(defaultTrainerId);
   const [activeRosterPokemonId, setActiveRosterPokemonId] = useState(trainersData[0].pokemon[0].id);
-  const [activeAttackerId, setActiveAttackerId] = useState('roark-cranidos');
+  const [activeAttackerId, setActiveAttackerId] = useState(defaultPlayerPresetId);
 
   const activeTrainer = useMemo(() => trainersData.find((trainer) => trainer.id === activeTrainerId) ?? trainersData[0], [activeTrainerId]);
   const activeRosterPokemon = useMemo(() => activeTrainer.pokemon.find((pokemon) => pokemon.id === activeRosterPokemonId) ?? activeTrainer.pokemon[0], [activeRosterPokemonId, activeTrainer]);
-  const selectedAttackerPreset = useMemo(() => getPreset(activeAttackerId), [activeAttackerId]);
-  const selectedDefenderPreset = useMemo(() => getPreset(activeRosterPokemonId), [activeRosterPokemonId]);
-  const attackerPresetOptions = useMemo(() => PRESETS.map((preset) => ({ value: preset.id, label: preset.name })), []);
+  const selectedAttackerPreset = useMemo(() => getPlayerPreset(activeAttackerId), [activeAttackerId]);
+  const selectedDefenderPreset = useMemo(() => getTrainerPreset(activeRosterPokemonId), [activeRosterPokemonId]);
+  const attackerPresetOptions = useMemo(() => PLAYER_PRESETS.map((preset) => ({ value: preset.id, label: preset.name })), []);
   const moveOptions = useMemo(() => {
     const baseOptions = selectedAttackerPreset.moves.map((option) => ({
       value: option.value,
@@ -472,7 +511,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
   );
 
   const applyAttackerPreset = (presetId: string) => {
-    const preset = getPreset(presetId);
+    const preset = getPlayerPreset(presetId);
     setActiveAttackerId(presetId);
     setAttacker({
       name: preset.enName,
@@ -487,7 +526,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
   };
 
   const applyDefenderPreset = (presetId: string) => {
-    const preset = getPreset(presetId);
+    const preset = getTrainerPreset(presetId);
     setActiveRosterPokemonId(presetId);
     setDefender({
       name: preset.enName,
@@ -507,8 +546,8 @@ export default function DamageCalculatorPage(): React.ReactElement {
   };
 
   useEffect(() => {
-    const initialAttacker = getPreset('roark-cranidos');
-    const initialDefender = getPreset(trainersData[0].pokemon[0].id);
+    const initialAttacker = getPlayerPreset(defaultPlayerPresetId);
+    const initialDefender = getTrainerPreset(trainersData[0].pokemon[0].id);
 
     setActiveAttackerId(initialAttacker.id);
     setAttacker({

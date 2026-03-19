@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { Search, ShieldCheck, Sparkles, Swords } from 'lucide-react';
 import { TacticalFrame } from '@/components/ui/TacticalFrame';
 import { SynergyMatrix } from '@/components/teambuilder/SynergyMatrix';
+import { playerRosterData } from '@/data/playerRoster';
 import { POKEMON_ART_ASSETS } from '@/data/remoteAssets';
 import { trainersData } from '@/data/trainers';
 
@@ -28,6 +29,12 @@ const trainerLabels: Record<string, string> = {
 };
 
 const typeMap: Record<string, string[]> = {
+  Turtwig: ['Grass'],
+  Chimchar: ['Fire'],
+  Piplup: ['Water'],
+  Starly: ['Normal', 'Flying'],
+  Shinx: ['Electric'],
+  Budew: ['Grass', 'Poison'],
   Cranidos: ['Rock'],
   Onix: ['Rock', 'Ground'],
   Geodude: ['Rock', 'Ground'],
@@ -54,19 +61,32 @@ const typeMap: Record<string, string[]> = {
   Poliwrath: ['Water', 'Fighting'],
 };
 
-const catalog: CatalogEntry[] = trainersData.flatMap((trainer) =>
-  trainer.pokemon.map((pokemon) => ({
+const catalog: CatalogEntry[] = [
+  ...playerRosterData.map((pokemon) => ({
     id: pokemon.id,
     name: pokemon.enName,
     enName: pokemon.enName,
-    trainer: trainerLabels[trainer.id] || trainer.id,
+    trainer: 'Player Dossier',
     role: pokemon.role,
     note: pokemon.note,
     tactic: pokemon.tactic,
-    types: typeMap[pokemon.enName] || ['Normal'],
+    types: pokemon.types,
     art: POKEMON_ART_ASSETS[pokemon.enName] || '',
-  }))
-);
+  })),
+  ...trainersData.flatMap((trainer) =>
+    trainer.pokemon.map((pokemon) => ({
+      id: pokemon.id,
+      name: pokemon.enName,
+      enName: pokemon.enName,
+      trainer: trainerLabels[trainer.id] || trainer.id,
+      role: pokemon.role,
+      note: pokemon.note,
+      tactic: pokemon.tactic,
+      types: typeMap[pokemon.enName] || ['Normal'],
+      art: POKEMON_ART_ASSETS[pokemon.enName] || '',
+    }))
+  ),
+];
 
 function TeamSlot({
   index,

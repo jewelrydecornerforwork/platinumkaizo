@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, ScanSearch, ShieldAlert, X } from 'lucide-react';
 import { PinyinSearchInput } from '@/components/ui/PinyinSearchInput';
+import { playerRosterData } from '@/data/playerRoster';
 import { POKEMON_ART_ASSETS } from '@/data/remoteAssets';
 import { trainersData } from '@/data/trainers';
 import { garchomp } from '@/data/sampleData';
@@ -43,6 +44,12 @@ const trainerLabels: Record<string, string> = {
 };
 
 const typeMap: Record<string, string[]> = {
+  Turtwig: ['Grass'],
+  Chimchar: ['Fire'],
+  Piplup: ['Water'],
+  Starly: ['Normal', 'Flying'],
+  Shinx: ['Electric'],
+  Budew: ['Grass', 'Poison'],
   Cranidos: ['Rock'],
   Onix: ['Rock', 'Ground'],
   Geodude: ['Rock', 'Ground'],
@@ -72,11 +79,14 @@ const typeMap: Record<string, string[]> = {
 
 const typeOptions = [
   ALL_TYPE_OPTION,
+  'Normal',
+  'Fire',
   'Rock',
   'Ground',
   'Steel',
   'Grass',
   'Poison',
+  'Electric',
   'Fighting',
   'Psychic',
   'Bug',
@@ -99,6 +109,18 @@ const typeOptionMeta: Record<
     accent: 'bg-emerald-400',
     chip: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
     hint: 'Display every indexed combat unit.',
+  },
+  Normal: {
+    label: 'NORMAL',
+    accent: 'bg-slate-300',
+    chip: 'border-slate-400/30 bg-slate-400/10 text-slate-200',
+    hint: 'Generalist utility lines and stable neutral pressure.',
+  },
+  Fire: {
+    label: 'FIRE',
+    accent: 'bg-orange-500',
+    chip: 'border-orange-500/30 bg-orange-500/10 text-orange-200',
+    hint: 'Fast breach pressure and burn-enabled tempo swings.',
   },
   Rock: {
     label: 'ROCK',
@@ -123,6 +145,12 @@ const typeOptionMeta: Record<
     accent: 'bg-lime-400',
     chip: 'border-lime-500/30 bg-lime-500/10 text-lime-200',
     hint: 'Seed attrition and recovery-based control.',
+  },
+  Electric: {
+    label: 'ELECTRIC',
+    accent: 'bg-yellow-400',
+    chip: 'border-yellow-400/30 bg-yellow-400/10 text-yellow-200',
+    hint: 'Speed control, anti-water pressure, and clean pivot checks.',
   },
   Poison: {
     label: 'POISON',
@@ -169,6 +197,12 @@ const typeOptionMeta: Record<
 };
 
 const pokemonSearchIndex: Record<string, { zh: string; initials: string }> = {
+  Turtwig: { zh: '草苗龟', initials: 'cmg' },
+  Chimchar: { zh: '小火焰猴', initials: 'xhyh' },
+  Piplup: { zh: '波加曼', initials: 'bjm' },
+  Starly: { zh: '姆克儿', initials: 'mke' },
+  Shinx: { zh: '小猫怪', initials: 'xmg' },
+  Budew: { zh: '含羞苞', initials: 'hxb' },
   Cranidos: { zh: '头盖龙', initials: 'tgl' },
   Onix: { zh: '大岩蛇', initials: 'dys' },
   Geodude: { zh: '小拳石', initials: 'xqs' },
@@ -277,6 +311,23 @@ const pokedexEntries: PokedexEntry[] = trainersData.flatMap((trainer) =>
 );
 
 const supplementalDexEntries: PokedexEntry[] = [
+  ...playerRosterData.map((pokemon) => ({
+    id: pokemon.id,
+    name: pokemon.enName,
+    enName: pokemon.enName,
+    trainer: 'Player Dossier',
+    role: pokemon.role,
+    note: pokemon.note,
+    tactic: pokemon.tactic,
+    ability: pokemon.ability,
+    item: pokemon.item,
+    nature: pokemon.nature,
+    types: pokemon.types,
+    art: POKEMON_ART_ASSETS[pokemon.enName] || '',
+    threatScore: Math.round((pokemon.stats.atk + pokemon.stats.spA + pokemon.stats.spe) / 3),
+    hasKaizoRevision: true,
+    stats: pokemon.stats,
+  })),
   {
     id: `dex-${garchomp.id}`,
     name: garchomp.enName,
