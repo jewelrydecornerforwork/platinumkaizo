@@ -190,7 +190,6 @@ function UnitCard({
   index: number;
 }): React.ReactElement {
   const showTopEdge = index < 3;
-  const showBottomEdge = index >= 3;
 
   return (
     <motion.article
@@ -216,17 +215,6 @@ function UnitCard({
       {showTopEdge ? (
         <div
           className="absolute inset-x-0 top-0 h-px"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent, var(--trainer-primary-border), var(--trainer-primary), var(--trainer-primary-border), transparent)',
-            boxShadow: '0 0 10px var(--trainer-primary-faint)',
-          }}
-        />
-      ) : null}
-
-      {showBottomEdge ? (
-        <div
-          className="absolute inset-x-0 bottom-0 h-px"
           style={{
             background:
               'linear-gradient(90deg, transparent, var(--trainer-primary-border), var(--trainer-primary), var(--trainer-primary-border), transparent)',
