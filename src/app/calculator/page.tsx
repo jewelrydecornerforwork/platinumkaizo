@@ -102,6 +102,66 @@ const MOVE_LABELS: Record<string, string> = {
   'Dragon Dance': 'Dragon Dance',
 };
 
+const LEADER_ART_ASSETS: Record<string, string> = {
+  roark: 'https://archives.bulbagarden.net/media/upload/3/36/Brilliant_Diamond_Shining_Pearl_Roark.png',
+  gardenia:
+    'https://archives.bulbagarden.net/media/upload/9/97/Brilliant_Diamond_Shining_Pearl_Gardenia.png',
+  maylene:
+    'https://archives.bulbagarden.net/media/upload/1/1a/Brilliant_Diamond_Shining_Pearl_Maylene.png',
+  wake: 'https://archives.bulbagarden.net/media/upload/4/4f/Brilliant_Diamond_Shining_Pearl_Crasher_Wake.png',
+};
+
+const POKEMON_ART_ASSETS: Record<string, string> = {
+  Cranidos:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/408.png',
+  Onix:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/95.png',
+  Geodude:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/74.png',
+  Shieldon:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/410.png',
+  Nosepass:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/299.png',
+  Aron:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/304.png',
+  Roserade:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/407.png',
+  Breloom:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/286.png',
+  Tangela:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/114.png',
+  Cherrim:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/421.png',
+  Grovyle:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/253.png',
+  Grotle:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/388.png',
+  Lucario:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png',
+  Medicham:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/308.png',
+  Machoke:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/67.png',
+  Hariyama:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/297.png',
+  Toxicroak:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/454.png',
+  Heracross:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/214.png',
+  Gyarados:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png',
+  Floatzel:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/419.png',
+  Quagsire:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/195.png',
+  Azumarill:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/184.png',
+  Pelipper:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/279.png',
+  Poliwrath:
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/62.png',
+};
+
 const statLabels = [
   { key: 'hp', short: 'H' },
   { key: 'atk', short: 'A' },
@@ -335,7 +395,17 @@ export default function DamageCalculatorPage(): React.ReactElement {
   }, [currentMove?.type, mappedMoveIntel?.type, selectedDefenderPreset.types]);
   const offenseStatValue = currentMove?.category === 'special' ? selectedAttackerPreset.stats.spA : selectedAttackerPreset.stats.atk;
   const defenseStatValue = currentMove?.category === 'special' ? selectedDefenderPreset.stats.spD : selectedDefenderPreset.stats.def;
-  const leaders = useMemo<TrainerListEntry[]>(() => trainersData.map((trainer) => ({ id: trainer.id, name: trainer.name, specialty: trainer.specialty, avatar: trainer.silhouetteAsset, threatLevel: `${trainer.threatLevel}%` })), []);
+  const leaders = useMemo<TrainerListEntry[]>(
+    () =>
+      trainersData.map((trainer) => ({
+        id: trainer.id,
+        name: trainer.name,
+        specialty: trainer.specialty,
+        avatar: LEADER_ART_ASSETS[trainer.id] || trainer.silhouetteAsset,
+        threatLevel: `${trainer.threatLevel}%`,
+      })),
+    []
+  );
 
   const applyAttackerPreset = (presetId: string) => {
     const preset = getPreset(presetId);
@@ -446,10 +516,10 @@ export default function DamageCalculatorPage(): React.ReactElement {
             <div className="mb-4 rounded-2xl border border-emerald-500/15 bg-black/30 p-4">
               <div className="relative mx-auto h-36 w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
                 <Image
-                  src={activeTrainer.silhouetteAsset}
+                  src={LEADER_ART_ASSETS[activeTrainer.id] || activeTrainer.silhouetteAsset}
                   alt={activeTrainer.name}
                   fill
-                  className="object-contain p-4"
+                  className="object-contain object-bottom p-2"
                 />
               </div>
               <div className="mt-4">
@@ -482,12 +552,22 @@ export default function DamageCalculatorPage(): React.ReactElement {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
                     <div className="mb-3 flex items-start justify-between gap-3">
-                      <div>
+                      <div className="flex items-start gap-3">
+                        <div className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-800 bg-black/35">
+                          <Image
+                            src={POKEMON_ART_ASSETS[selectedAttackerPreset.enName]}
+                            alt={selectedAttackerPreset.name}
+                            fill
+                            className="object-contain p-2"
+                          />
+                        </div>
+                        <div>
                         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                           Attacker_Vector
                         </div>
                         <div className="mt-1 font-mono text-2xl font-black uppercase text-white">
                           {selectedAttackerPreset.name}
+                        </div>
                         </div>
                       </div>
                       <div className="flex flex-wrap justify-end gap-2">
@@ -557,12 +637,22 @@ export default function DamageCalculatorPage(): React.ReactElement {
 
                   <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
                     <div className="mb-3 flex items-start justify-between gap-3">
-                      <div>
+                      <div className="flex items-start gap-3">
+                        <div className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-800 bg-black/35">
+                          <Image
+                            src={POKEMON_ART_ASSETS[selectedDefenderPreset.enName]}
+                            alt={selectedDefenderPreset.name}
+                            fill
+                            className="object-contain p-2"
+                          />
+                        </div>
+                        <div>
                         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                           Defender_Dossier
                         </div>
                         <div className="mt-1 font-mono text-2xl font-black uppercase text-white">
                           {selectedDefenderPreset.name}
+                        </div>
                         </div>
                       </div>
                       <div className="flex flex-wrap justify-end gap-2">
@@ -736,6 +826,14 @@ export default function DamageCalculatorPage(): React.ReactElement {
                             : 'border-slate-800 bg-black/35 hover:border-emerald-500/25'
                         }`}
                       >
+                        <div className="relative mb-3 h-20 w-full overflow-hidden rounded-lg border border-slate-800 bg-slate-950/70">
+                          <Image
+                            src={POKEMON_ART_ASSETS[pokemon.enName]}
+                            alt={pokemon.name}
+                            fill
+                            className="object-contain p-2"
+                          />
+                        </div>
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
