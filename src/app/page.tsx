@@ -72,24 +72,7 @@ const NavCard = ({
 
 export default function Home(): React.ReactElement {
   return (
-    <>
-      <style jsx>{`
-        @keyframes radarPulse {
-          0% {
-            transform: translate(-50%, -50%) scale(0.72);
-            opacity: 0;
-          }
-          20% {
-            opacity: 0.22;
-          }
-          100% {
-            transform: translate(-50%, -50%) scale(1.85);
-            opacity: 0;
-          }
-        }
-      `}</style>
-
-      <div className="relative min-h-screen overflow-hidden px-6 pb-8 pt-12 md:px-12 md:pt-14">
+    <div className="relative min-h-screen overflow-hidden px-6 pb-8 pt-12 md:px-12 md:pt-14">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12),transparent_24%),radial-gradient(circle_at_center,rgba(14,165,233,0.08),transparent_48%)]"
@@ -115,9 +98,18 @@ export default function Home(): React.ReactElement {
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 top-[28%] z-0 h-[540px] w-[540px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-500/10"
         >
-          <div className="absolute left-1/2 top-1/2 h-full w-full rounded-full border border-emerald-500/10" style={{ animation: 'radarPulse 6s linear infinite' }} />
-          <div className="absolute left-1/2 top-1/2 h-full w-full rounded-full border border-cyan-400/10" style={{ animation: 'radarPulse 6s linear infinite 2s' }} />
-          <div className="absolute left-1/2 top-1/2 h-full w-full rounded-full border border-emerald-500/10" style={{ animation: 'radarPulse 6s linear infinite 4s' }} />
+          <div
+            className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-500/10 animate-ping"
+            style={{ animationDuration: '6s' }}
+          />
+          <div
+            className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-400/10 animate-ping"
+            style={{ animationDuration: '6s', animationDelay: '2s' }}
+          />
+          <div
+            className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-500/10 animate-ping"
+            style={{ animationDuration: '6s', animationDelay: '4s' }}
+          />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl">
@@ -375,7 +367,6 @@ export default function Home(): React.ReactElement {
             </TacticalFrame>
           </section>
         </div>
-      </div>
-    </>
+    </div>
   );
 }
