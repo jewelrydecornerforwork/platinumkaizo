@@ -1,14 +1,14 @@
 ﻿'use client';
 
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Crosshair, Radar, ShieldAlert, Swords, Target } from 'lucide-react';
+import { Crosshair, Radar, ShieldAlert, Swords } from 'lucide-react';
 import { TypeIcon } from '@/components/calc/TypeIcon';
-import IntelSelector from '@/components/calculator/IntelSelector';
-import { StatAdjuster } from '@/components/StatAdjuster';
+import { LeaderList } from '@/components/trainers/LeaderList';
 import { TYPE_CHART } from '@/constants/typeChart';
 import { GYM_MOVE_INTEL, getGymMoveIntelByName } from '@/data/gymMoveIntel';
-import { trainersData } from '@/data/trainers';
+import { defaultTrainerId, trainersData } from '@/data/trainers';
 import { usePokemonCalc } from '@/hooks/usePokemonCalc';
 
 type MoveOption = {
@@ -32,16 +32,18 @@ type CombatPreset = {
   ability: string;
   nature: string;
   types: string[];
-  stats: {
-    hp: number;
-    atk: number;
-    def: number;
-    spA: number;
-    spD: number;
-    spe: number;
-  };
+  stats: { hp: number; atk: number; def: number; spA: number; spD: number; spe: number };
+  tactic: string;
+  note: string;
   moves: MoveOption[];
-  searchKey: string;
+};
+
+type TrainerListEntry = {
+  id: string;
+  name: string;
+  specialty: string;
+  avatar: string;
+  threatLevel: string;
 };
 
 const TRAINER_LABELS: Record<string, string> = {
@@ -56,33 +58,6 @@ const GYM_KEY_MAP: Record<string, keyof typeof GYM_MOVE_INTEL.gym_leaders> = {
   gardenia: 'Gardenia',
   maylene: 'Maylene',
   wake: 'Wake',
-};
-
-const POKEMON_LABELS: Record<string, string> = {
-  Cranidos: 'Cranidos',
-  Onix: 'Onix',
-  Geodude: 'Geodude',
-  Shieldon: 'Shieldon',
-  Nosepass: 'Nosepass',
-  Aron: 'Aron',
-  Roserade: 'Roserade',
-  Breloom: 'Breloom',
-  Tangela: 'Tangela',
-  Cherrim: 'Cherrim',
-  Grovyle: 'Grovyle',
-  Grotle: 'Grotle',
-  Lucario: 'Lucario',
-  Medicham: 'Medicham',
-  Machoke: 'Machoke',
-  Hariyama: 'Hariyama',
-  Toxicroak: 'Toxicroak',
-  Heracross: 'Heracross',
-  Gyarados: 'Gyarados',
-  Floatzel: 'Floatzel',
-  Quagsire: 'Quagsire',
-  Azumarill: 'Azumarill',
-  Pelipper: 'Pelipper',
-  Poliwrath: 'Poliwrath',
 };
 
 const POKEMON_TYPE_MAP: Record<string, string[]> = {
@@ -127,23 +102,16 @@ const MOVE_LABELS: Record<string, string> = {
   'Dragon Dance': 'Dragon Dance',
 };
 
-const DEFAULT_PROFILE: Record<
-  string,
-  {
-    ability: string;
-    item: string;
-    nature: string;
-  }
-> = {
-  roark: { ability: 'Mold Breaker', item: 'Life Orb', nature: 'Adamant' },
-  gardenia: { ability: 'Technician', item: 'Black Sludge', nature: 'Modest' },
-  maylene: { ability: 'Adaptability', item: 'Life Orb', nature: 'Adamant' },
-  wake: { ability: 'Intimidate', item: 'Leftovers', nature: 'Jolly' },
-};
+const statLabels = [
+  { key: 'hp', short: 'H' },
+  { key: 'atk', short: 'A' },
+  { key: 'def', short: 'B' },
+  { key: 'spA', short: 'C' },
+  { key: 'spD', short: 'D' },
+  { key: 'spe', short: 'S' },
+] as const;
 
-function getMoveCategory(
-  category?: string
-): 'physical' | 'special' | 'status' {
+function getMoveCategory(category?: string): 'physical' | 'special' | 'status' {
   if (category === 'Special') return 'special';
   if (category === 'Status') return 'status';
   return 'physical';
@@ -163,29 +131,24 @@ function getPresetMoveOptions(trainerId: string): MoveOption[] {
 
 function buildPresets(): CombatPreset[] {
   return trainersData.flatMap((trainer) =>
-    trainer.pokemon.map((pokemon) => {
-      const profile = DEFAULT_PROFILE[trainer.id];
-      const displayName = POKEMON_LABELS[pokemon.enName] || pokemon.enName;
-      const trainerName = TRAINER_LABELS[trainer.id] || trainer.id;
-
-      return {
-        id: pokemon.id,
-        trainerId: trainer.id,
-        trainerCode: trainer.code,
-        trainerName,
-        name: displayName,
-        enName: pokemon.enName,
-        role: pokemon.role || 'Tactical Slot',
-        level: Number(pokemon.level.replace(/[^\d]/g, '')) || 100,
-        item: profile.item,
-        ability: profile.ability,
-        nature: profile.nature,
-        types: POKEMON_TYPE_MAP[pokemon.enName] || ['Normal'],
-        stats: pokemon.stats,
-        moves: getPresetMoveOptions(trainer.id),
-        searchKey: `${displayName} ${pokemon.enName} ${trainerName} ${trainer.code}`.toLowerCase(),
-      };
-    })
+    trainer.pokemon.map((pokemon) => ({
+      id: pokemon.id,
+      trainerId: trainer.id,
+      trainerCode: trainer.code,
+      trainerName: TRAINER_LABELS[trainer.id] || trainer.name,
+      name: pokemon.name,
+      enName: pokemon.enName,
+      role: pokemon.role || 'TACTICAL SLOT',
+      level: Number(pokemon.level.replace(/[^\d]/g, '')) || 100,
+      item: pokemon.item,
+      ability: pokemon.ability,
+      nature: pokemon.nature,
+      tactic: pokemon.tactic,
+      note: pokemon.note,
+      types: POKEMON_TYPE_MAP[pokemon.enName] || ['Normal'],
+      stats: pokemon.stats,
+      moves: getPresetMoveOptions(trainer.id),
+    }))
   );
 }
 
@@ -212,17 +175,13 @@ function getEffectivenessLabel(multiplier: number): string {
 }
 
 function getDamageGradient(min: number, max: number): string {
-  if (max >= 100) {
-    return 'linear-gradient(90deg, #22c55e 0%, #f59e0b 42%, #ef4444 100%)';
-  }
-  if (max >= 70) {
-    return 'linear-gradient(90deg, #10b981 0%, #eab308 68%, #f97316 100%)';
-  }
+  if (max >= 100) return 'linear-gradient(90deg, #22c55e 0%, #facc15 52%, #ef4444 100%)';
+  if (max >= 70) return 'linear-gradient(90deg, #10b981 0%, #84cc16 28%, #facc15 70%, #f97316 100%)';
   return 'linear-gradient(90deg, #10b981 0%, #84cc16 58%, #eab308 100%)';
 }
 
 function getKoDisplay(koText: string | undefined): string {
-  if (!koText) return 'Awaiting calculation feed';
+  if (!koText) return 'AWAITING CALCULATION FEED';
   if (koText.includes('OHKO')) return 'CERTAIN OHKO';
   if (koText.includes('2HKO')) return koText.includes('Stealth Rock') ? 'CERTAIN 2HKO // STEALTH ROCK REQUIRED' : 'CERTAIN 2HKO';
   if (koText.includes('3HKO')) return 'CERTAIN 3HKO';
@@ -231,66 +190,46 @@ function getKoDisplay(koText: string | undefined): string {
   return 'NO RELIABLE LETHAL CONFIRMED';
 }
 
-function PanelInput({
-  label,
-  value,
-  onChange,
-  accent,
-  type = 'text',
-}: {
-  label: string;
-  value: string | number;
-  onChange: (value: string) => void;
-  accent: 'cyan' | 'red';
-  type?: 'text' | 'number';
-}) {
-  const border =
-    accent === 'cyan'
-      ? 'border-cyan-500/20 focus:border-cyan-300'
-      : 'border-red-500/20 focus:border-red-300';
+function getThreatTier(value: number): string {
+  if (value >= 75) return 'OMEGA';
+  if (value >= 60) return 'HIGH';
+  if (value >= 45) return 'ELEVATED';
+  return 'STABLE';
+}
 
+function buildDamageRolls(min: number, max: number) {
+  const start = Number(min.toFixed(1));
+  const end = Number(max.toFixed(1));
+  const step = end > start ? (end - start) / 15 : 0;
+
+  return Array.from({ length: 16 }, (_, index) => ({
+    factor: 85 + index,
+    value: Number((start + step * index).toFixed(1)),
+  }));
+}
+
+function CompactInput({ label, value, onChange, type = 'text' }: { label: string; value: string | number; onChange: (value: string) => void; type?: 'text' | 'number' }) {
   return (
-    <label className="space-y-2">
-      <span className="block text-[10px] uppercase tracking-[0.24em] text-slate-500">
-        {label}
-      </span>
+    <label className="space-y-1.5">
+      <span className="block font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className={`w-full rounded-xl border bg-black/40 px-3 py-2.5 font-mono text-sm text-slate-100 outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)] ${border}`}
+        className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all focus:border-emerald-400/40"
       />
     </label>
   );
 }
 
-function PanelSelect({
-  label,
-  value,
-  onChange,
-  options,
-  accent,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
-  accent: 'cyan' | 'red';
-}) {
-  const border =
-    accent === 'cyan'
-      ? 'border-cyan-500/20 focus:border-cyan-300'
-      : 'border-red-500/20 focus:border-red-300';
-
+function CompactSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Array<{ value: string; label: string }> }) {
   return (
-    <label className="space-y-2">
-      <span className="block text-[10px] uppercase tracking-[0.24em] text-slate-500">
-        {label}
-      </span>
+    <label className="space-y-1.5">
+      <span className="block font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">{label}</span>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className={`w-full rounded-xl border bg-black/40 px-3 py-2.5 font-mono text-sm text-slate-100 outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)] ${border}`}
+        className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all focus:border-emerald-400/40"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -302,142 +241,101 @@ function PanelSelect({
   );
 }
 
-function TacticalDmgHud({
-  min,
-  max,
-  koDisplay,
-}: {
-  min: number;
-  max: number;
-  koDisplay: string;
-}) {
-  const getDmgColor = (val: number): string => {
-    if (val < 50) return 'text-emerald-500 [text-shadow:0_0_10px_#10b981]';
-    if (val < 100) return 'text-orange-500 [text-shadow:0_0_10px_#f97316]';
-    return 'animate-pulse text-red-600 [text-shadow:0_0_10px_red]';
-  };
+function TacticalDmgHud({ min, max, koDisplay }: { min: number; max: number; koDisplay: string }) {
+  const ledColor = max >= 100 ? 'text-red-400' : max >= 70 ? 'text-emerald-200' : 'text-emerald-300';
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)]">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-5 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12),0_0_30px_rgba(16,185,129,0.05)]">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-slate-500">
-            Tactical_Damage_Hud
-          </p>
-          <div
-            className={`mt-2 font-mono text-5xl font-black italic tracking-tighter md:text-[3.6rem] ${getDmgColor(
-              max
-            )}`}
-          >
+          <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-slate-500">Ballistic_Output</div>
+          <div className={`mt-2 font-mono text-6xl font-black tracking-tight ${ledColor}`} style={{ textShadow: '0 0 10px rgba(16,185,129,0.5)' }}>
             {min.toFixed(1)}%
-            <span className="px-2 text-3xl font-light text-slate-700">-</span>
+            <span className="px-3 text-4xl font-light text-slate-700">-</span>
             {max.toFixed(1)}%
           </div>
         </div>
-
-        <div className="flex w-full flex-col gap-2 md:w-auto md:min-w-[220px] md:items-end">
-          <div className="relative h-2 w-full overflow-hidden rounded-full border border-slate-700 bg-slate-900">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.min(min, 100)}%` }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="absolute left-0 top-0 h-full bg-orange-500/50"
-            />
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.min(max, 100)}%` }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
-              className="absolute left-0 top-0 h-full"
-              style={{ background: getDamageGradient(min, max) }}
-            />
-          </div>
-          <span
-            className={`font-mono text-[10px] uppercase tracking-[0.28em] ${
-              koDisplay.includes('OHKO')
-                ? 'animate-pulse text-red-400 [text-shadow:0_0_10px_rgba(248,113,113,0.7)]'
-                : 'text-red-500/80 [text-shadow:0_0_8px_rgba(248,113,113,0.25)]'
-            }`}
-          >
+        <div className="text-right">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">Knockout_Probability</div>
+          <div className={`mt-2 font-mono text-sm font-bold uppercase tracking-[0.18em] ${koDisplay.includes('OHKO') ? 'animate-pulse text-red-400' : 'text-emerald-300'}`} style={{ textShadow: '0 0 10px rgba(16,185,129,0.35)' }}>
             {koDisplay}
-          </span>
+          </div>
         </div>
+      </div>
+
+      <div className="mt-4 h-4 overflow-hidden rounded-full border border-emerald-500/20 bg-black/50 shadow-[inset_0_1px_3px_rgba(0,0,0,0.85)]">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min(max, 100)}%` }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+          className="h-full"
+          style={{ background: getDamageGradient(min, max) }}
+        />
       </div>
     </div>
   );
 }
 
-export default function DamageCalculatorPage() {
-  const { attacker, setAttacker, defender, setDefender, move, setMove, result } =
-    usePokemonCalc();
+function RngMatrix({ rolls }: { rolls: Array<{ factor: number; value: number }> }) {
+  return (
+    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-white">16-Step RNG Damage Matrix</h3>
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Seed: 0xDEADBEEF</span>
+      </div>
+      <div className="grid flex-1 grid-cols-4 gap-2">
+        {rolls.map((roll) => (
+          <div key={`${roll.factor}-${roll.value}`} className="rounded-lg border border-slate-800 bg-black/35 px-3 py-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.75)]">
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600">R{roll.factor}</div>
+            <div className="mt-1 font-mono text-lg font-bold text-white">{roll.value.toFixed(1)}%</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-  const [attackerSearch, setAttackerSearch] = useState('');
-  const [defenderSearch, setDefenderSearch] = useState('');
+function StatBar({ label, value }: { label: string; value: number }) {
+  const width = Math.min((value / 160) * 100, 100);
+
+  return (
+    <div className="grid grid-cols-[20px_58px_minmax(0,1fr)_42px] items-center gap-2">
+      <span className="font-mono text-sm font-black text-emerald-400">{label}</span>
+      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">Stat</span>
+      <div className="h-2.5 overflow-hidden rounded-full border border-emerald-500/10 bg-black/45 shadow-[inset_0_1px_2px_rgba(0,0,0,0.85)]">
+        <div className="h-full rounded-full bg-[linear-gradient(90deg,#14532d_0%,#10b981_35%,#34d399_100%)] shadow-[0_0_10px_rgba(16,185,129,0.25)]" style={{ width: `${width}%` }} />
+      </div>
+      <span className="text-right font-mono text-sm font-bold text-white">{value}</span>
+    </div>
+  );
+}
+
+export default function DamageCalculatorPage(): React.ReactElement {
+  const { attacker, setAttacker, defender, setDefender, move, setMove, result } = usePokemonCalc();
+
+  const [activeTrainerId, setActiveTrainerId] = useState(defaultTrainerId);
+  const [activeRosterPokemonId, setActiveRosterPokemonId] = useState(trainersData[0].pokemon[0].id);
   const [activeAttackerId, setActiveAttackerId] = useState('roark-cranidos');
-  const [activeDefenderId, setActiveDefenderId] = useState('wake-gyarados');
 
-  const deferredAttackerSearch = useDeferredValue(attackerSearch);
-  const deferredDefenderSearch = useDeferredValue(defenderSearch);
-
-  const selectedAttackerPreset = useMemo(
-    () => getPreset(activeAttackerId),
-    [activeAttackerId]
-  );
-  const selectedDefenderPreset = useMemo(
-    () => getPreset(activeDefenderId),
-    [activeDefenderId]
-  );
-
-  const attackerOptions = useMemo(() => {
-    const query = deferredAttackerSearch.trim().toLowerCase();
-    return PRESETS.filter(
-      (preset) => !query || preset.searchKey.includes(query)
-    ).map((preset) => ({
-      id: preset.id,
-      name: preset.name,
-      subtitle: `${preset.trainerName} / ${preset.enName}`,
-      meta: `LV.${preset.level}`,
-    }));
-  }, [deferredAttackerSearch]);
-
-  const defenderOptions = useMemo(() => {
-    const query = deferredDefenderSearch.trim().toLowerCase();
-    return PRESETS.filter(
-      (preset) => !query || preset.searchKey.includes(query)
-    ).map((preset) => ({
-      id: preset.id,
-      name: preset.name,
-      subtitle: `${preset.trainerName} / ${preset.enName}`,
-      meta: `LV.${preset.level}`,
-    }));
-  }, [deferredDefenderSearch]);
-
-  const currentMoveOptions = selectedAttackerPreset.moves;
-  const currentMove = useMemo(
-    () =>
-      currentMoveOptions.find((option) => option.value === move) ||
-      currentMoveOptions[0],
-    [currentMoveOptions, move]
-  );
+  const activeTrainer = useMemo(() => trainersData.find((trainer) => trainer.id === activeTrainerId) ?? trainersData[0], [activeTrainerId]);
+  const activeRosterPokemon = useMemo(() => activeTrainer.pokemon.find((pokemon) => pokemon.id === activeRosterPokemonId) ?? activeTrainer.pokemon[0], [activeRosterPokemonId, activeTrainer]);
+  const selectedAttackerPreset = useMemo(() => getPreset(activeAttackerId), [activeAttackerId]);
+  const selectedDefenderPreset = useMemo(() => getPreset(activeRosterPokemonId), [activeRosterPokemonId]);
+  const attackerPresetOptions = useMemo(() => PRESETS.map((preset) => ({ value: preset.id, label: `${preset.name} // ${preset.trainerName}` })), []);
+  const moveOptions = useMemo(() => selectedAttackerPreset.moves.map((option) => ({ value: option.value, label: `${option.label} // ${option.power} BP` })), [selectedAttackerPreset.moves]);
   const mappedMoveIntel = useMemo(() => getGymMoveIntelByName(move), [move]);
-
+  const currentMove = useMemo(() => selectedAttackerPreset.moves.find((option) => option.value === move) ?? selectedAttackerPreset.moves[0], [selectedAttackerPreset.moves, move]);
   const minDamage = result?.range[0] ?? 0;
   const maxDamage = result?.range[1] ?? 0;
   const koDisplay = useMemo(() => getKoDisplay(result?.ko), [result?.ko]);
-  const offenseStatLabel = currentMove?.category === 'special' ? 'SPECIAL VECTOR' : 'ATTACK VECTOR';
-  const offenseStatValue =
-    currentMove?.category === 'special'
-      ? selectedAttackerPreset.stats.spA
-      : selectedAttackerPreset.stats.atk;
-  const defenseStatLabel = currentMove?.category === 'special' ? 'SPECIAL ARMOR' : 'PHYSICAL ARMOR';
-  const defenseStatValue =
-    currentMove?.category === 'special'
-      ? selectedDefenderPreset.stats.spD
-      : selectedDefenderPreset.stats.def;
-
+  const damageRolls = useMemo(() => buildDamageRolls(minDamage, maxDamage), [minDamage, maxDamage]);
   const effectiveness = useMemo(() => {
     const moveType = mappedMoveIntel?.type || currentMove?.type || 'Normal';
     return getEffectiveness(moveType, selectedDefenderPreset.types);
   }, [currentMove?.type, mappedMoveIntel?.type, selectedDefenderPreset.types]);
+  const offenseStatValue = currentMove?.category === 'special' ? selectedAttackerPreset.stats.spA : selectedAttackerPreset.stats.atk;
+  const defenseStatValue = currentMove?.category === 'special' ? selectedDefenderPreset.stats.spD : selectedDefenderPreset.stats.def;
+  const leaders = useMemo<TrainerListEntry[]>(() => trainersData.map((trainer) => ({ id: trainer.id, name: trainer.name, specialty: trainer.specialty, avatar: trainer.silhouetteAsset, threatLevel: `${trainer.threatLevel}%` })), []);
 
   const applyAttackerPreset = (presetId: string) => {
     const preset = getPreset(presetId);
@@ -456,21 +354,27 @@ export default function DamageCalculatorPage() {
 
   const applyDefenderPreset = (presetId: string) => {
     const preset = getPreset(presetId);
-    setActiveDefenderId(presetId);
+    setActiveRosterPokemonId(presetId);
     setDefender({
       name: preset.enName,
       level: preset.level,
       evs: { hp: 252, def: 252, spD: 252 },
       ivs: { hp: 31, def: 31, spD: 31 },
       item: preset.item,
-      nature: 'Bold',
+      nature: preset.nature,
       ability: preset.ability,
     });
   };
 
+  const handleTrainerSelect = (trainerId: string) => {
+    const trainer = trainersData.find((entry) => entry.id === trainerId) ?? trainersData[0];
+    setActiveTrainerId(trainer.id);
+    applyDefenderPreset(trainer.pokemon[0].id);
+  };
+
   useEffect(() => {
     const initialAttacker = getPreset('roark-cranidos');
-    const initialDefender = getPreset('wake-gyarados');
+    const initialDefender = getPreset(trainersData[0].pokemon[0].id);
 
     setActiveAttackerId(initialAttacker.id);
     setAttacker({
@@ -484,274 +388,182 @@ export default function DamageCalculatorPage() {
     });
     setMove(initialAttacker.moves[0]?.value || 'Earthquake');
 
-    setActiveDefenderId(initialDefender.id);
+    setActiveRosterPokemonId(initialDefender.id);
     setDefender({
       name: initialDefender.enName,
       level: initialDefender.level,
       evs: { hp: 252, def: 252, spD: 252 },
       ivs: { hp: 31, def: 31, spD: 31 },
       item: initialDefender.item,
-      nature: 'Bold',
+      nature: initialDefender.nature,
       ability: initialDefender.ability,
     });
   }, [setAttacker, setDefender, setMove]);
 
-  const scrollToResult = () => {
-    document.getElementById('damage-result-panel')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  };
+  useEffect(() => {
+    if (!selectedAttackerPreset.moves.some((option) => option.value === move)) {
+      setMove(selectedAttackerPreset.moves[0]?.value || 'Earthquake');
+    }
+  }, [move, selectedAttackerPreset.moves, setMove]);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.14),transparent_26%),radial-gradient(circle_at_bottom,rgba(239,68,68,0.1),transparent_22%),linear-gradient(180deg,#020617_0%,#04111d_40%,#020617_100%)] px-4 py-6 pb-24 text-slate-100 md:px-8 lg:px-10 lg:pb-10">
+    <main className="relative h-[100dvh] overflow-hidden bg-[#020617] px-4 py-4 text-slate-100 md:px-6">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(51,65,85,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(51,65,85,0.14)_1px,transparent_1px)] bg-[size:40px_40px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.06)_1px,transparent_1px)] bg-[size:36px_36px]" />
         <motion.div
-          className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
+          className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"
           animate={{ y: ['0%', '100vh'] }}
-          transition={{ duration: 5.2, repeat: Infinity, ease: 'linear' }}
+          transition={{ duration: 5.5, repeat: Infinity, ease: 'linear' }}
         />
       </div>
 
-      <div className="relative mx-auto max-w-7xl">
-        <header className="mb-8 flex flex-col gap-4 border-b border-cyan-500/20 pb-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="mb-2 font-mono text-xs uppercase tracking-[0.32em] text-cyan-400/80">
-              Precision Damage Console
-            </p>
-            <h1 className="text-4xl font-black tracking-tight text-white md:text-5xl">
-              PRECISION BALLISTIC CONSOLE
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-              A live ballistic interface built on Platinum Kaizo combat intelligence. Any change to level, EV load, or move package updates the result core in real time.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 backdrop-blur-md">
-            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-              Console_Status
-            </p>
-            <p className="mt-1 font-mono text-sm text-cyan-300">
-              {result ? 'LIVE_FEED_ACTIVE' : 'SYNCING_PARAMETERS'}
-            </p>
-          </div>
-        </header>
-
-        <div className="grid gap-6 lg:grid-cols-[1.05fr_1.15fr_1.05fr]">
-          <IntelSelector
-            side="attacker"
-            title="Attacker Intel Panel"
-            searchValue={attackerSearch}
-            onSearchChange={setAttackerSearch}
-            options={attackerOptions}
-            selectedId={activeAttackerId}
-            onSelect={applyAttackerPreset}
-            levelValue={attacker.level}
-            effortValue={attacker.evs.atk ?? 0}
-          >
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: 'ATTACK', value: selectedAttackerPreset.stats.atk },
-                { label: 'SP. ATK', value: selectedAttackerPreset.stats.spA },
-                { label: 'SPEED', value: selectedAttackerPreset.stats.spe },
-              ].map((item) => (
+      <div className="relative z-10 mx-auto flex h-full max-w-[1820px] flex-col gap-4">
+        <header className="shrink-0 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] px-5 py-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.34em] text-emerald-400/70">
+                Command_Center
+              </div>
+              <h1 className="mt-1 font-mono text-3xl font-black uppercase tracking-tight text-white xl:text-4xl">
+                Platinum Kaizo Tactical Command Center
+              </h1>
+            </div>
+            <div className="flex gap-3">
+              {['DATABASE: ONLINE', 'SYNC: VERIFIED', 'SECURITY: ACTIVE'].map((item) => (
                 <div
-                  key={item.label}
-                  className="rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2"
+                  key={item}
+                  className="rounded-full border border-emerald-500/15 bg-black/35 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] text-emerald-300/80"
                 >
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 font-mono text-lg font-bold text-white">
-                    {item.value}
-                  </p>
+                  {item}
                 </div>
               ))}
             </div>
+          </div>
+        </header>
 
-            <div className="space-y-2 md:hidden">
-              <StatAdjuster
-                label="LEVEL"
-                value={attacker.level}
-                step={1}
-                max={100}
-                onChange={(value) =>
-                  setAttacker((prev) => ({ ...prev, level: value }))
-                }
-              />
-              <StatAdjuster
-                label="ATK EV"
-                value={attacker.evs.atk ?? 0}
-                onChange={(value) =>
-                  setAttacker((prev) => ({
-                    ...prev,
-                    evs: { ...prev.evs, atk: value },
-                  }))
-                }
-              />
-              <StatAdjuster
-                label="SPA EV"
-                value={attacker.evs.spA ?? 0}
-                onChange={(value) =>
-                  setAttacker((prev) => ({
-                    ...prev,
-                    evs: { ...prev.evs, spA: value },
-                  }))
-                }
-              />
-            </div>
-
-            <div className="hidden grid-cols-2 gap-3 md:grid">
-              <PanelInput
-                label="LEVEL"
-                type="number"
-                value={attacker.level}
-                onChange={(value) =>
-                  setAttacker((prev) => ({
-                    ...prev,
-                    level: Math.max(1, Number(value) || 1),
-                  }))
-                }
-                accent="cyan"
-              />
-              <PanelSelect
-                label="MOVE PACKAGE"
-                value={move}
-                onChange={setMove}
-                accent="cyan"
-                options={currentMoveOptions.map((option) => ({
-                  value: option.value,
-                  label: `${option.label} / ${option.power} BP`,
-                }))}
-              />
-              <PanelInput
-                label="ATK EV"
-                type="number"
-                value={attacker.evs.atk ?? 0}
-                onChange={(value) =>
-                  setAttacker((prev) => ({
-                    ...prev,
-                    evs: { ...prev.evs, atk: Math.max(0, Number(value) || 0) },
-                  }))
-                }
-                accent="cyan"
-              />
-              <PanelInput
-                label="SPA EV"
-                type="number"
-                value={attacker.evs.spA ?? 0}
-                onChange={(value) =>
-                  setAttacker((prev) => ({
-                    ...prev,
-                    evs: { ...prev.evs, spA: Math.max(0, Number(value) || 0) },
-                  }))
-                }
-                accent="cyan"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-3">
-              <PanelInput
-                label="ABILITY"
-                value={attacker.ability || ''}
-                onChange={(value) =>
-                  setAttacker((prev) => ({ ...prev, ability: value }))
-                }
-                accent="cyan"
-              />
-              <PanelInput
-                label="HELD ITEM"
-                value={attacker.item}
-                onChange={(value) =>
-                  setAttacker((prev) => ({ ...prev, item: value }))
-                }
-                accent="cyan"
-              />
-              <PanelInput
-                label="NATURE"
-                value={attacker.nature}
-                onChange={(value) =>
-                  setAttacker((prev) => ({ ...prev, nature: value }))
-                }
-                accent="cyan"
-              />
-            </div>
-          </IntelSelector>
-
-          <section
-            id="damage-result-panel"
-            className="rounded-[2rem] border border-slate-800/80 bg-slate-900/45 p-5 backdrop-blur-xl shadow-[0_30px_80px_rgba(2,6,23,0.55)]"
-          >
-            <div className="mb-5 flex items-center gap-3">
-              <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/10 p-2 text-cyan-300">
-                <Target className="h-5 w-5" />
+        <div className="grid min-h-0 flex-1 grid-cols-[16rem_minmax(0,1fr)_20rem] gap-4">
+          <aside className="flex min-h-0 flex-col rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+            <div className="mb-4 rounded-2xl border border-emerald-500/15 bg-black/30 p-4">
+              <div className="relative mx-auto h-36 w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
+                <Image
+                  src={activeTrainer.silhouetteAsset}
+                  alt={activeTrainer.name}
+                  fill
+                  className="object-contain p-4"
+                />
               </div>
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                  Real_Time_Result
-                </p>
-                <h2 className="text-xl font-bold text-white">CENTRAL CALCULATION CORE</h2>
+              <div className="mt-4">
+                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  Active_Dossier
+                </div>
+                <div className="mt-1 text-xl font-black text-white">{activeTrainer.name}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300/70">
+                  Threat Level: {activeTrainer.threatLevel}% // {getThreatTier(activeTrainer.threatLevel)}
+                </div>
+                <p className="mt-3 text-xs leading-5 text-slate-400">{activeTrainer.intel}</p>
               </div>
             </div>
+
+            <LeaderList leaders={leaders} activeId={activeTrainerId} onSelect={handleTrainerSelect} />
+          </aside>
+
+          <section className="flex min-h-0 flex-col gap-4 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+            <TacticalDmgHud min={minDamage} max={maxDamage} koDisplay={koDisplay} />
 
             <AnimatePresence mode="wait">
               <motion.div
-                key={`${activeAttackerId}-${activeDefenderId}-${move}-${attacker.level}-${defender.level}-${attacker.evs.atk}-${attacker.evs.spA}-${defender.evs.hp}-${defender.evs.def}-${defender.evs.spD}`}
-                initial={{ opacity: 0.35, y: 14 }}
+                key={`${activeAttackerId}-${activeRosterPokemonId}-${move}-${attacker.level}-${defender.level}-${attacker.evs.atk}-${attacker.evs.spA}-${defender.evs.hp}-${defender.evs.def}-${defender.evs.spD}`}
+                initial={{ opacity: 0.3, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0.22, y: -10 }}
-                transition={{ duration: 0.28, ease: 'easeOut' }}
-                className="space-y-5"
+                exit={{ opacity: 0.18, y: -10 }}
+                transition={{ duration: 0.26, ease: 'easeOut' }}
+                className="grid min-h-0 flex-1 grid-rows-[auto_auto_minmax(0,1fr)] gap-4"
               >
-                <TacticalDmgHud
-                  min={minDamage}
-                  max={maxDamage}
-                  koDisplay={koDisplay}
-                />
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.05] p-4 backdrop-blur-md shadow-[inset_0_0_0_1px_rgba(34,211,238,0.06)]">
-                    <div className="flex items-start justify-between gap-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+                    <div className="mb-3 flex items-start justify-between gap-3">
                       <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cyan-300/70">
-                          Attack_Vector
-                        </p>
-                        <h3 className="mt-2 font-mono text-lg font-black uppercase text-white">
-                          {currentMove?.label || move}
-                        </h3>
+                        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                          Attacker_Vector
+                        </div>
+                        <div className="mt-1 font-mono text-2xl font-black uppercase text-white">
+                          {selectedAttackerPreset.name}
+                        </div>
                       </div>
-                      <TypeIcon type={mappedMoveIntel?.type || currentMove?.type || 'Normal'} />
+                      <div className="flex flex-wrap justify-end gap-2">
+                        {selectedAttackerPreset.types.map((type) => (
+                          <TypeIcon key={type} type={type} />
+                        ))}
+                      </div>
                     </div>
-                    <div className="mt-4 flex items-end justify-between">
-                      <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
-                          {offenseStatLabel}
-                        </p>
-                        <p className="mt-1 font-mono text-2xl font-black text-cyan-100">
-                          {offenseStatValue}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
-                          Base_Power
-                        </p>
-                        <p className="mt-1 font-mono text-2xl font-black text-white">
-                          {mappedMoveIntel?.power ?? currentMove?.power ?? 0}
-                        </p>
-                      </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <CompactSelect
+                        label="Attack Unit"
+                        value={activeAttackerId}
+                        onChange={applyAttackerPreset}
+                        options={attackerPresetOptions}
+                      />
+                      <CompactSelect
+                        label="Move Package"
+                        value={move}
+                        onChange={setMove}
+                        options={moveOptions}
+                      />
+                      <CompactInput
+                        label="Level"
+                        type="number"
+                        value={attacker.level}
+                        onChange={(value) =>
+                          setAttacker((prev) => ({
+                            ...prev,
+                            level: Math.max(1, Number(value) || 1),
+                          }))
+                        }
+                      />
+                      <CompactInput
+                        label="ATK EV"
+                        type="number"
+                        value={attacker.evs.atk ?? 0}
+                        onChange={(value) =>
+                          setAttacker((prev) => ({
+                            ...prev,
+                            evs: { ...prev.evs, atk: Math.max(0, Number(value) || 0) },
+                          }))
+                        }
+                      />
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-3 gap-3">
+                      {[
+                        { label: 'POWER', value: mappedMoveIntel?.power ?? currentMove?.power ?? 0 },
+                        { label: 'ATK', value: offenseStatValue },
+                        { label: 'SPEED', value: selectedAttackerPreset.stats.spe },
+                      ].map((item) => (
+                        <div
+                          key={item.label}
+                          className="rounded-xl border border-slate-800 bg-black/35 p-3"
+                        >
+                          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                            {item.label}
+                          </div>
+                          <div className="mt-2 font-mono text-xl font-black text-white">
+                            {item.value}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-red-500/15 bg-red-500/[0.05] p-4 backdrop-blur-md shadow-[inset_0_0_0_1px_rgba(239,68,68,0.06)]">
-                    <div className="flex items-start justify-between gap-3">
+                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+                    <div className="mb-3 flex items-start justify-between gap-3">
                       <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-red-300/70">
-                          Defense_Armor
-                        </p>
-                        <h3 className="mt-2 font-mono text-lg font-black uppercase text-white">
+                        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                          Defender_Dossier
+                        </div>
+                        <div className="mt-1 font-mono text-2xl font-black uppercase text-white">
                           {selectedDefenderPreset.name}
-                        </h3>
+                        </div>
                       </div>
                       <div className="flex flex-wrap justify-end gap-2">
                         {selectedDefenderPreset.types.map((type) => (
@@ -759,304 +571,242 @@ export default function DamageCalculatorPage() {
                         ))}
                       </div>
                     </div>
-                    <div className="mt-4 flex items-end justify-between">
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <CompactInput
+                        label="Level"
+                        type="number"
+                        value={defender.level}
+                        onChange={(value) =>
+                          setDefender((prev) => ({
+                            ...prev,
+                            level: Math.max(1, Number(value) || 1),
+                          }))
+                        }
+                      />
+                      <CompactInput
+                        label="HP EV"
+                        type="number"
+                        value={defender.evs.hp ?? 0}
+                        onChange={(value) =>
+                          setDefender((prev) => ({
+                            ...prev,
+                            evs: { ...prev.evs, hp: Math.max(0, Number(value) || 0) },
+                          }))
+                        }
+                      />
+                      <CompactInput
+                        label="DEF EV"
+                        type="number"
+                        value={defender.evs.def ?? 0}
+                        onChange={(value) =>
+                          setDefender((prev) => ({
+                            ...prev,
+                            evs: { ...prev.evs, def: Math.max(0, Number(value) || 0) },
+                          }))
+                        }
+                      />
+                      <CompactInput
+                        label="SPD EV"
+                        type="number"
+                        value={defender.evs.spD ?? 0}
+                        onChange={(value) =>
+                          setDefender((prev) => ({
+                            ...prev,
+                            evs: { ...prev.evs, spD: Math.max(0, Number(value) || 0) },
+                          }))
+                        }
+                      />
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-3 gap-3">
+                      {[
+                        { label: 'DEF', value: defenseStatValue },
+                        { label: 'MULTI', value: `${effectiveness.toFixed(2)}x` },
+                        { label: 'KO', value: koDisplay.includes('OHKO') ? 'OHKO' : 'CHECK' },
+                      ].map((item) => (
+                        <div
+                          key={item.label}
+                          className="rounded-xl border border-slate-800 bg-black/35 p-3"
+                        >
+                          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                            {item.label}
+                          </div>
+                          <div className="mt-2 font-mono text-xl font-black text-white">
+                            {item.value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-[minmax(0,1fr)_260px] gap-4">
+                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-2 text-emerald-300">
+                        <ShieldAlert className="h-5 w-5" />
+                      </div>
                       <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
-                          {defenseStatLabel}
-                        </p>
-                        <p className="mt-1 font-mono text-2xl font-black text-red-100">
-                          {defenseStatValue}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
-                          Effectiveness
-                        </p>
-                        <p className="mt-1 font-mono text-2xl font-black text-white">
-                          {effectiveness.toFixed(2)}x
-                        </p>
+                        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                          Tactical_Readout
+                        </div>
+                        <div className="mt-2 text-sm leading-6 text-slate-300">
+                          {result?.desc || 'Awaiting synchronized parameters. Select attack vector, move package, and target dossier.'}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-cyan-500/15 bg-slate-950/70 p-5 backdrop-blur-md">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                      LETHAL PROBABILITY
-                    </p>
-                    <p
-                      className={`mt-3 font-mono text-2xl font-black uppercase tracking-[0.08em] ${
-                        koDisplay.includes('OHKO')
-                          ? 'animate-pulse text-red-300 [text-shadow:0_0_12px_rgba(248,113,113,0.7),0_0_28px_rgba(239,68,68,0.45)]'
-                          : 'text-white'
-                      }`}
-                    >
-                      {koDisplay}
-                    </p>
-                    <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
-                      {result?.ko === 'STATUS_MOVE'
-                        ? 'Current move is status-class and provides tempo control only.'
-                        : 'Adjust any parameter to refresh the lethal window automatically.'}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-red-500/15 bg-slate-950/70 p-5 backdrop-blur-md">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                      POWER MAPPING
-                    </p>
-                    <p className="mt-3 font-mono text-2xl font-black text-white">
-                      {mappedMoveIntel?.power ?? currentMove?.power ?? 0} BP
-                    </p>
-                    <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
-                      {currentMove?.label || move}
-                      <span className="font-mono text-red-300">
-                        {' '}
-                        / {(mappedMoveIntel?.type || currentMove?.type || 'Normal').toUpperCase()}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-slate-800 bg-slate-950/75 p-5">
-                    <div className="flex items-center justify-between">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                        TYPE EFFECT MATRIX
-                      </p>
-                      <Radar className="h-4 w-4 text-emerald-400" />
+                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+                    <div className="mb-3 flex items-center justify-between">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                        Matchup_Status
+                      </div>
+                      <Crosshair className="h-4 w-4 text-emerald-300" />
                     </div>
-                    <p className="mt-3 font-mono text-2xl font-black text-white">
-                      {effectiveness.toFixed(2)}x
-                    </p>
-                    <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
-                      {getEffectivenessLabel(effectiveness)} / TARGET TYPE:
-                      <span className="font-mono text-emerald-300">
-                        {' '}
-                        {selectedDefenderPreset.types.join(' / ')}
-                      </span>
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-800 bg-slate-950/75 p-5">
-                    <div className="flex items-center justify-between">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                        OFFENSE / DEFENSE BASELINE
-                      </p>
-                      <Swords className="h-4 w-4 text-cyan-300" />
-                    </div>
-                    <p className="mt-3 font-mono text-2xl font-black text-white">
-                      {selectedAttackerPreset.stats.atk} / {selectedDefenderPreset.stats.def}
-                    </p>
-                    <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
-                      Compares the attacker&apos;s offensive baseline against the defender&apos;s physical wall value for quick setup checks.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="relative overflow-hidden rounded-[1.5rem] border border-cyan-500/15 bg-cyan-500/5 p-5 backdrop-blur-md">
-                  <div className="absolute right-0 top-0 p-4 opacity-10">
-                    <Crosshair className="h-20 w-20 text-cyan-300" />
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-2 text-red-300">
-                      <ShieldAlert className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                        Tactical_Readout
-                      </p>
-                      <p className="mt-2 font-mono text-sm leading-6 text-slate-300">
-                        {result?.desc ||
-                          'Parameters are synchronizing. Select both units and refine level, EV load, or move package.'}
-                      </p>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                          Type Matrix
+                        </div>
+                        <div className="mt-1 font-mono text-xl font-black text-white">
+                          {getEffectivenessLabel(effectiveness)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                          Offense / Defense
+                        </div>
+                        <div className="mt-1 flex items-center gap-3 font-mono text-xl font-black text-white">
+                          <span>{offenseStatValue}</span>
+                          <Swords className="h-4 w-4 text-emerald-300" />
+                          <span>{defenseStatValue}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                          Move Type
+                        </div>
+                        <div className="mt-1 flex items-center gap-2">
+                          <TypeIcon type={mappedMoveIntel?.type || currentMove?.type || 'Normal'} />
+                          <span className="font-mono text-sm uppercase tracking-[0.14em] text-slate-300">
+                            {currentMove?.category || 'physical'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                <RngMatrix rolls={damageRolls} />
               </motion.div>
             </AnimatePresence>
           </section>
 
-          <IntelSelector
-            side="defender"
-            title="Defender Intel Panel"
-            searchValue={defenderSearch}
-            onSearchChange={setDefenderSearch}
-            options={defenderOptions}
-            selectedId={activeDefenderId}
-            onSelect={applyDefenderPreset}
-            levelValue={defender.level}
-            effortValue={defender.evs.hp ?? 0}
-          >
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: 'HP', value: selectedDefenderPreset.stats.hp },
-                { label: 'DEFENSE', value: selectedDefenderPreset.stats.def },
-                { label: 'SP. DEF', value: selectedDefenderPreset.stats.spD },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2"
-                >
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 font-mono text-lg font-bold text-white">
-                    {item.value}
-                  </p>
+          <aside className="flex min-h-0 flex-col gap-4 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+            <div className="rounded-2xl border border-emerald-500/20 bg-black/30 p-4">
+              <div className="mb-1 flex items-center justify-between">
+                <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                  Squad_Deployment
                 </div>
-              ))}
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-300/70">
+                  {activeTrainer.name}
+                </div>
+              </div>
+              <div className="text-sm leading-5 text-slate-400">
+                {activeTrainer.recommendation}
+              </div>
             </div>
 
-            <div className="space-y-2 md:hidden">
-              <StatAdjuster
-                label="LEVEL"
-                value={defender.level}
-                step={1}
-                max={100}
-                onChange={(value) =>
-                  setDefender((prev) => ({ ...prev, level: value }))
-                }
-              />
-              <StatAdjuster
-                label="HP EV"
-                value={defender.evs.hp ?? 0}
-                onChange={(value) =>
-                  setDefender((prev) => ({
-                    ...prev,
-                    evs: { ...prev.evs, hp: value },
-                  }))
-                }
-              />
-              <StatAdjuster
-                label="DEF EV"
-                value={defender.evs.def ?? 0}
-                onChange={(value) =>
-                  setDefender((prev) => ({
-                    ...prev,
-                    evs: { ...prev.evs, def: value },
-                  }))
-                }
-              />
-              <StatAdjuster
-                label="SPD EV"
-                value={defender.evs.spD ?? 0}
-                onChange={(value) =>
-                  setDefender((prev) => ({
-                    ...prev,
-                    evs: { ...prev.evs, spD: value },
-                  }))
-                }
-              />
-            </div>
+            <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-4">
+              <div className="min-h-0 overflow-y-auto pr-1">
+                <div className="grid grid-cols-2 gap-3">
+                  {activeTrainer.pokemon.map((pokemon) => {
+                    const selected = pokemon.id === activeRosterPokemon.id;
+                    const types = POKEMON_TYPE_MAP[pokemon.enName] || ['Normal'];
 
-            <div className="hidden grid-cols-2 gap-3 md:grid">
-              <PanelInput
-                label="LEVEL"
-                type="number"
-                value={defender.level}
-                onChange={(value) =>
-                  setDefender((prev) => ({
-                    ...prev,
-                    level: Math.max(1, Number(value) || 1),
-                  }))
-                }
-                accent="red"
-              />
-              <PanelInput
-                label="HP EV"
-                type="number"
-                value={defender.evs.hp ?? 0}
-                onChange={(value) =>
-                  setDefender((prev) => ({
-                    ...prev,
-                    evs: { ...prev.evs, hp: Math.max(0, Number(value) || 0) },
-                  }))
-                }
-                accent="red"
-              />
-              <PanelInput
-                label="DEF EV"
-                type="number"
-                value={defender.evs.def ?? 0}
-                onChange={(value) =>
-                  setDefender((prev) => ({
-                    ...prev,
-                    evs: { ...prev.evs, def: Math.max(0, Number(value) || 0) },
-                  }))
-                }
-                accent="red"
-              />
-              <PanelInput
-                label="SPD EV"
-                type="number"
-                value={defender.evs.spD ?? 0}
-                onChange={(value) =>
-                  setDefender((prev) => ({
-                    ...prev,
-                    evs: { ...prev.evs, spD: Math.max(0, Number(value) || 0) },
-                  }))
-                }
-                accent="red"
-              />
-            </div>
+                    return (
+                      <button
+                        key={pokemon.id}
+                        type="button"
+                        onClick={() => applyDefenderPreset(pokemon.id)}
+                        className={`rounded-xl border p-3 text-left transition-all ${
+                          selected
+                            ? 'border-emerald-400/40 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.12)]'
+                            : 'border-slate-800 bg-black/35 hover:border-emerald-500/25'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                              {pokemon.level}
+                            </div>
+                            <div className="mt-1 text-sm font-black text-white">
+                              {pokemon.name}
+                            </div>
+                          </div>
+                          <Radar className="h-4 w-4 text-emerald-300/70" />
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {types.map((type) => (
+                            <TypeIcon key={type} type={type} />
+                          ))}
+                        </div>
+                        <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-300/70">
+                          {pokemon.note}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-            <div className="grid grid-cols-1 gap-3">
-              <PanelInput
-                label="ABILITY"
-                value={defender.ability || ''}
-                onChange={(value) =>
-                  setDefender((prev) => ({ ...prev, ability: value }))
-                }
-                accent="red"
-              />
-              <PanelInput
-                label="HELD ITEM"
-                value={defender.item}
-                onChange={(value) =>
-                  setDefender((prev) => ({ ...prev, item: value }))
-                }
-                accent="red"
-              />
-              <PanelInput
-                label="NATURE"
-                value={defender.nature}
-                onChange={(value) =>
-                  setDefender((prev) => ({ ...prev, nature: value }))
-                }
-                accent="red"
-              />
+              <div className="rounded-2xl border border-emerald-500/20 bg-black/35 p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                      Unit_Stat_Profile
+                    </div>
+                    <div className="mt-1 text-lg font-black text-white">
+                      {activeRosterPokemon.name}
+                    </div>
+                  </div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-300/70">
+                    {activeRosterPokemon.item}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {statLabels.map((stat) => (
+                    <StatBar
+                      key={stat.key}
+                      label={stat.short}
+                      value={activeRosterPokemon.stats[stat.key]}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-4 border-t border-emerald-500/10 pt-3">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    Tactical_Note
+                  </div>
+                  <div className="mt-2 text-xs leading-5 text-slate-400">
+                    {activeRosterPokemon.tactic}
+                  </div>
+                </div>
+              </div>
             </div>
-          </IntelSelector>
+          </aside>
         </div>
-      </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 h-[60px] border-t border-cyan-500/20 bg-slate-950/85 backdrop-blur-xl lg:hidden">
-        <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-3 px-4">
-          <div className="min-w-0">
-            <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-slate-500">
-              Live_Damage_Bar
-            </p>
-            <p className="truncate font-mono text-sm font-bold text-white">
-              {minDamage.toFixed(1)}% - {maxDamage.toFixed(1)}%
-              <span className="ml-2 text-xs text-cyan-300">
-                {getKoDisplay(result?.ko)}
-              </span>
-            </p>
+        <footer className="shrink-0 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] px-5 py-3 font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
+          <div className="flex items-center justify-between">
+            <span>[SYSTEM_STATUS: NOMINAL]</span>
+            <span className="text-emerald-400/80">[ENCRYPTION: ACTIVE]</span>
+            <span>[NODE: COMMAND_GRID_04]</span>
           </div>
-
-          <button
-            type="button"
-            onClick={scrollToResult}
-            className="rounded-xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-2 font-mono text-xs font-bold tracking-[0.24em] text-cyan-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_20px_rgba(34,211,238,0.12)] transition-all active:scale-95"
-          >
-            RUN HUD
-          </button>
-        </div>
+        </footer>
       </div>
     </main>
   );
 }
-
-
