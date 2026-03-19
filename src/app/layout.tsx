@@ -35,7 +35,7 @@ export default function RootLayout({ children }: RootLayoutProps): React.ReactEl
           <div className="flex h-screen">
             <Sidebar />
 
-            <main className="ml-0 flex-1 overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 md:ml-sidebar">
+            <main className="ml-0 flex-1 overflow-y-auto bg-[#020617] md:ml-sidebar">
               <div className="flex min-h-full flex-col">
                 <div className="flex-1">{children}</div>
                 <TacticalFooter />
