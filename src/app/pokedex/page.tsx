@@ -348,7 +348,7 @@ function FilterBar({
   }, []);
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/40 p-4 backdrop-blur-md md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/40 p-4 backdrop-blur-md md:flex-row md:items-start md:justify-between">
       <div ref={filterRef} className="relative flex-1">
         <button
           type="button"
@@ -390,10 +390,10 @@ function FilterBar({
         </button>
 
         <div
-          className={`absolute left-0 right-0 top-[calc(100%+12px)] z-20 overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 ${
+          className={`mt-3 overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 ${
             isTypeDrawerOpen
-              ? 'pointer-events-auto translate-y-0 border-emerald-500/20 bg-slate-950/95 opacity-100 shadow-[0_24px_60px_rgba(2,6,23,0.72)]'
-              : 'pointer-events-none -translate-y-2 border-slate-800/60 bg-slate-950/70 opacity-0'
+              ? 'max-h-[520px] border-emerald-500/20 bg-slate-950/95 opacity-100 shadow-[0_24px_60px_rgba(2,6,23,0.72)]'
+              : 'max-h-0 border-transparent bg-slate-950/70 opacity-0'
           }`}
         >
           <div className="border-b border-emerald-500/10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_60%)] px-4 py-3">
