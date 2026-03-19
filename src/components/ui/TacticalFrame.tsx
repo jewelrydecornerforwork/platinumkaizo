@@ -6,10 +6,12 @@ import { CornerBracket } from '@/components/ui/CornerBracket';
 export const TacticalFrame = ({
   children,
   title,
+  subtitle,
   className = '',
 }: {
   children: React.ReactNode;
   title?: string;
+  subtitle?: string;
   className?: string;
 }) => {
   return (
@@ -29,8 +31,11 @@ export const TacticalFrame = ({
       <CornerBracket position="br" />
 
       {title && (
-        <div className="mb-4 border-b border-emerald-500/10 pb-2 font-mono text-[10px] uppercase tracking-widest text-emerald-500/40">
-          {`${title} // SECURE_ACCESS`}
+        <div className="mb-6 flex items-center justify-between border-b border-emerald-500/10 pb-2 font-mono text-[11px] uppercase tracking-[0.3em] text-emerald-500/60">
+          <span>{`${title} // SECURE_ACCESS`}</span>
+          {subtitle ? (
+            <span className="text-[9px] tracking-[0.2em] text-slate-700">{subtitle}</span>
+          ) : null}
         </div>
       )}
 
