@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, ScanSearch, ShieldAlert, X } from 'lucide-react';
 import { PinyinSearchInput } from '@/components/ui/PinyinSearchInput';
 import { trainersData } from '@/data/trainers';
@@ -107,6 +107,83 @@ const typeOptions = [
   'Water',
   'Flying',
 ] as const;
+
+const typeOptionMeta: Record<
+  (typeof typeOptions)[number],
+  {
+    label: string;
+    accent: string;
+    chip: string;
+    hint: string;
+  }
+> = {
+  全部属性: {
+    label: '全部属性',
+    accent: 'bg-emerald-400',
+    chip: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+    hint: '显示全部作战单位',
+  },
+  Rock: {
+    label: '岩石',
+    accent: 'bg-amber-400',
+    chip: 'border-amber-500/30 bg-amber-500/10 text-amber-200',
+    hint: '高物防与压场单位',
+  },
+  Ground: {
+    label: '地面',
+    accent: 'bg-yellow-500',
+    chip: 'border-yellow-500/30 bg-yellow-500/10 text-yellow-200',
+    hint: '电系封锁与震荡压制',
+  },
+  Steel: {
+    label: '钢',
+    accent: 'bg-slate-300',
+    chip: 'border-slate-400/30 bg-slate-400/10 text-slate-200',
+    hint: '高抗性与联防核心',
+  },
+  Grass: {
+    label: '草',
+    accent: 'bg-lime-400',
+    chip: 'border-lime-500/30 bg-lime-500/10 text-lime-200',
+    hint: '寄生消耗与回复控制',
+  },
+  Poison: {
+    label: '毒',
+    accent: 'bg-fuchsia-500',
+    chip: 'border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-200',
+    hint: '状态压制与中速破口',
+  },
+  Fighting: {
+    label: '格斗',
+    accent: 'bg-orange-500',
+    chip: 'border-orange-500/30 bg-orange-500/10 text-orange-200',
+    hint: '高压近战与破盾终端',
+  },
+  Psychic: {
+    label: '超能',
+    accent: 'bg-pink-500',
+    chip: 'border-pink-500/30 bg-pink-500/10 text-pink-200',
+    hint: '先读打击与特攻压制',
+  },
+  Bug: {
+    label: '虫',
+    accent: 'bg-lime-500',
+    chip: 'border-lime-600/30 bg-lime-600/10 text-lime-200',
+    hint: '干扰联动与奇袭收割',
+  },
+  Water: {
+    label: '水',
+    accent: 'bg-sky-400',
+    chip: 'border-sky-500/30 bg-sky-500/10 text-sky-200',
+    hint: '雨天推进与高频压血',
+  },
+  Flying: {
+    label: '飞行',
+    accent: 'bg-cyan-300',
+    chip: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200',
+    hint: '高速切入与对地压制',
+  },
+};
 
 const pokemonSearchIndex: Record<string, { zh: string; initials: string }> = {
   Cranidos: { zh: '头盖龙', initials: 'tgl' },
@@ -255,23 +332,118 @@ function FilterBar({
   kaizoOnly: boolean;
   onKaizoToggle: (value: boolean) => void;
 }) {
+  const [isTypeDrawerOpen, setIsTypeDrawerOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement | null>(null);
+  const selectedTypeMeta = typeOptionMeta[selectedType as keyof typeof typeOptionMeta];
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setIsTypeDrawerOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, []);
+
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/40 p-4 backdrop-blur-md md:flex-row md:items-center md:justify-between">
-      <div className="flex flex-1 items-center gap-3 rounded-xl border border-slate-800 bg-black/20 px-4 py-3">
-        <ScanSearch className="h-4 w-4 text-emerald-300" />
-        <div className="relative w-full">
-          <select
-            value={selectedType}
-            onChange={(event) => onTypeChange(event.target.value)}
-            className="w-full appearance-none bg-transparent pr-8 font-mono text-sm text-slate-100 outline-none"
-          >
-            {typeOptions.map((type) => (
-              <option key={type} value={type} className="bg-slate-950">
-                {type}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+      <div ref={filterRef} className="relative flex-1">
+        <button
+          type="button"
+          onClick={() => setIsTypeDrawerOpen((prev) => !prev)}
+          className={`group flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
+            isTypeDrawerOpen
+              ? 'border-emerald-500/35 bg-black/40 shadow-[0_0_25px_rgba(16,185,129,0.08)]'
+              : 'border-slate-800 bg-black/20 hover:border-emerald-500/20'
+          }`}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/15 bg-emerald-500/10">
+            <ScanSearch className="h-4 w-4 text-emerald-300" />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
+              Type_Filter_Drawer
+            </div>
+            <div className="mt-1 flex items-center gap-3">
+              <span
+                className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] ${selectedTypeMeta.chip}`}
+              >
+                {selectedTypeMeta.label}
+              </span>
+              <span className="truncate text-xs text-slate-400">{selectedTypeMeta.hint}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600 md:block">
+              {typeOptions.length}_CHANNELS
+            </span>
+            <ChevronDown
+              className={`h-4 w-4 text-slate-500 transition-transform duration-300 ${
+                isTypeDrawerOpen ? 'rotate-180 text-emerald-300' : ''
+              }`}
+            />
+          </div>
+        </button>
+
+        <div
+          className={`absolute left-0 right-0 top-[calc(100%+12px)] z-20 overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 ${
+            isTypeDrawerOpen
+              ? 'pointer-events-auto translate-y-0 border-emerald-500/20 bg-slate-950/95 opacity-100 shadow-[0_24px_60px_rgba(2,6,23,0.72)]'
+              : 'pointer-events-none -translate-y-2 border-slate-800/60 bg-slate-950/70 opacity-0'
+          }`}
+        >
+          <div className="border-b border-emerald-500/10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_60%)] px-4 py-3">
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/70">
+              Select_Target_Type
+            </div>
+            <div className="mt-1 text-xs text-slate-400">按属性快速收束战术样本，减少无效检索噪音。</div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-2 xl:grid-cols-3">
+            {typeOptions.map((type) => {
+              const meta = typeOptionMeta[type];
+              const isActive = selectedType === type;
+
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => {
+                    onTypeChange(type);
+                    setIsTypeDrawerOpen(false);
+                  }}
+                  className={`rounded-xl border p-3 text-left transition-all ${
+                    isActive
+                      ? 'border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.08)]'
+                      : 'border-slate-800 bg-black/25 hover:border-emerald-500/20 hover:bg-slate-900/70'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className={`h-2.5 w-2.5 rounded-full ${meta.accent}`} />
+                        <span className="text-sm font-bold text-white">{meta.label}</span>
+                      </div>
+                      <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                        {type}
+                      </div>
+                    </div>
+                    {isActive ? (
+                      <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-emerald-300">
+                        Active
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-3 text-xs leading-5 text-slate-400">{meta.hint}</div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
