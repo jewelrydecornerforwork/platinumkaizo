@@ -341,41 +341,12 @@ export default function BossIntelPage(): React.ReactElement {
         }
 
         .trainer-feed-scroll {
-          scrollbar-width: thin;
-          scrollbar-color: var(--trainer-primary-border) rgba(15, 23, 42, 0.78);
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
 
         .trainer-feed-scroll::-webkit-scrollbar {
-          width: 10px;
-        }
-
-        .trainer-feed-scroll::-webkit-scrollbar-track {
-          border-radius: 9999px;
-          background: rgba(15, 23, 42, 0.78);
-          box-shadow: inset 0 0 0 1px rgba(51, 65, 85, 0.65);
-        }
-
-        .trainer-feed-scroll::-webkit-scrollbar-thumb {
-          border: 1px solid var(--trainer-primary-border);
-          border-radius: 9999px;
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255, 255, 255, 0.1),
-              var(--trainer-primary)
-            );
-          box-shadow:
-            0 0 16px var(--trainer-primary-glow),
-            inset 0 0 10px rgba(255, 255, 255, 0.06);
-        }
-
-        .trainer-feed-scroll::-webkit-scrollbar-thumb:hover {
-          background:
-            linear-gradient(
-              180deg,
-              var(--trainer-primary),
-              rgba(255, 255, 255, 0.18)
-            );
+          display: none;
         }
       `}</style>
 
