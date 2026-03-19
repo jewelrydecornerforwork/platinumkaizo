@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -103,7 +103,7 @@ function TargetButton({
       <div className="relative flex items-center justify-between gap-3 pl-5">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-slate-500">
-            Target {trainer.code}
+            TARGET {trainer.code}
           </p>
           <p className={`mt-1 text-sm font-semibold ${isActive ? 'text-white' : 'text-slate-300'}`}>
             {trainer.name}
@@ -253,25 +253,25 @@ function UnitCard({
 
         <div className="space-y-2 text-xs">
           <div className="flex items-center justify-between rounded-lg bg-slate-950/70 px-3 py-2">
-            <span className="text-slate-500">核心威胁</span>
+            <span className="text-slate-500">THREAT FLAG</span>
             <span style={{ color: 'var(--trainer-primary)' }}>{unit.note}</span>
           </div>
           <div className="flex items-center justify-between rounded-lg bg-slate-950/70 px-3 py-2">
-            <span className="text-slate-500">特性</span>
+            <span className="text-slate-500">ABILITY</span>
             <span style={{ color: 'var(--trainer-primary)' }}>{unit.ability}</span>
           </div>
           <div className="flex items-center justify-between rounded-lg bg-slate-950/70 px-3 py-2">
-            <span className="text-slate-500">性格</span>
+            <span className="text-slate-500">NATURE</span>
             <span style={{ color: 'var(--trainer-primary)' }}>{unit.nature}</span>
           </div>
           <div className="flex items-center justify-between rounded-lg bg-slate-950/70 px-3 py-2">
-            <span className="text-slate-500">携带道具</span>
+            <span className="text-slate-500">HELD ITEM</span>
             <span style={{ color: 'var(--trainer-primary)' }}>{unit.item}</span>
           </div>
         </div>
 
         <div className="mt-4">
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">关键战术招式</p>
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">KEY MOVE PACKAGE</p>
           <div className="flex flex-wrap gap-2">
             {unit.moves.map((move) => (
               <span
@@ -359,7 +359,7 @@ export default function BossIntelPage(): React.ReactElement {
           style={{ borderColor: 'var(--trainer-primary-border)' }}
         >
           <div>
-            <h1 className="text-4xl font-black tracking-tighter text-white">馆主战术情报中心</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-white">GYM LEADER TACTICAL DOSSIER</h1>
             <p className="mt-2 font-mono text-sm" style={{ color: 'var(--trainer-primary)' }}>
               CLASSIFIED // PLATINUM KAIZO TACTICAL DATA
             </p>
@@ -375,7 +375,7 @@ export default function BossIntelPage(): React.ReactElement {
             <div className="rounded-2xl border border-slate-800 bg-slate-900/55 p-4 shadow-[0_0_22px_rgba(15,23,42,0.7)]">
               <div className="mb-4 flex items-center justify-between">
                 <p className="font-mono text-[11px] uppercase tracking-[0.32em]" style={{ color: 'var(--trainer-primary)' }}>
-                  Target Selection
+                  TARGET SELECTION
                 </p>
                 <div
                   className="h-2 w-10 rounded-full"
@@ -423,7 +423,7 @@ export default function BossIntelPage(): React.ReactElement {
                   </p>
                   <div className="mt-6 space-y-2">
                     <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                      核心威胁度
+                      THREAT INDEX
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-slate-800">
                       <motion.div
@@ -458,7 +458,7 @@ export default function BossIntelPage(): React.ReactElement {
                 <div className="flex items-end justify-between gap-4">
                   <div>
                     <p className="font-mono text-[11px] uppercase tracking-[0.32em]" style={{ color: 'var(--trainer-primary)' }}>
-                      Live Target Feed
+                      LIVE TARGET FEED
                     </p>
                     <h2 className="mt-2 text-3xl font-black tracking-tight text-white">
                       {currentTrainer.name}
@@ -466,10 +466,10 @@ export default function BossIntelPage(): React.ReactElement {
                   </div>
                   <div className="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-2 text-right">
                     <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
-                      Specialty
+                      SPECIALTY
                     </p>
                     <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--trainer-primary)' }}>
-                      {currentTrainer.specialty}系战区
+                      {currentTrainer.specialty} SECTOR
                     </p>
                   </div>
                 </div>
@@ -520,7 +520,7 @@ export default function BossIntelPage(): React.ReactElement {
 
                   <div className="relative z-10">
                     <h3 className="mb-4 flex items-center gap-2 text-xl font-bold" style={{ color: 'var(--trainer-primary)' }}>
-                      <Zap className="h-5 w-5" /> 战场决策建议
+                      <Zap className="h-5 w-5" /> BATTLEFIELD DECISION BRIEF
                     </h3>
                     <p className="text-sm leading-7 text-slate-300">
                       {currentTrainer.recommendation}

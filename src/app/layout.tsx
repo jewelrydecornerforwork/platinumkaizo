@@ -6,10 +6,10 @@ import { TacticalFooter } from '@/components/layout/TacticalFooter';
 import '@/globals.css';
 
 export const metadata: Metadata = {
-  title: 'Platinum Kaizo 数字化作战指挥系统',
-  description: '为顶尖训练家定制的硬核数据支持',
-  keywords: ['宝可梦', '白金改版', '战术', '图鉴', '伤害计算'],
-  authors: [{ name: '白金改版社区' }],
+  title: 'Platinum Kaizo Tactical Command Grid',
+  description: 'Hardcore tactical intelligence support for elite trainers.',
+  keywords: ['Pokemon', 'Platinum Kaizo', 'tactical intel', 'pokedex', 'damage calc'],
+  authors: [{ name: 'Platinum Kaizo Intelligence Network' }],
 };
 
 export const viewport: Viewport = {
@@ -23,7 +23,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps): React.ReactElement {
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="theme-color" content="#020617" />

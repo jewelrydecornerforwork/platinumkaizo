@@ -27,7 +27,7 @@ export function Sidebar(): React.ReactElement {
           isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100'
         }`}
         role="navigation"
-        aria-label="主导航"
+        aria-label="Primary Navigation"
       >
         <div className="border-b border-emerald-500/25 p-6">
           <div className="flex items-start justify-between gap-4">
@@ -47,7 +47,7 @@ export function Sidebar(): React.ReactElement {
             <button
               onClick={closeSidebar}
               className="tech-button h-10 w-10 px-0 py-0 md:hidden"
-              aria-label="关闭侧边栏"
+              aria-label="Close Sidebar"
             >
               <X size={18} />
             </button>
@@ -82,7 +82,9 @@ export function Sidebar(): React.ReactElement {
         </nav>
 
         <div className="border-t border-emerald-500/25 p-4">
-          <p className="text-center text-xs text-slate-400">白金改版百科 1.0 版</p>
+          <p className="text-center font-mono text-[10px] uppercase tracking-[0.22em] text-slate-400">
+            PLATINUM KAIZO INTEL SUITE // V1.0
+          </p>
         </div>
       </aside>
     </>

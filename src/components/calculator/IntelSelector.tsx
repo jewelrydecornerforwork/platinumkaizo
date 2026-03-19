@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 
@@ -49,7 +49,7 @@ export default function IntelSelector({
   title,
   searchValue,
   onSearchChange,
-  placeholder = '搜索战术单位 / 拼音缩写...',
+  placeholder = 'SMART UNIT SEARCH // NAME, ENGLISH, INITIALS...',
   options,
   selectedId,
   onSelect,
@@ -112,8 +112,8 @@ export default function IntelSelector({
 
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: '等级', value: levelValue },
-            { label: '努力值', value: effortValue },
+            { label: 'LEVEL', value: levelValue },
+            { label: 'EFFORT LOAD', value: effortValue },
           ].map((item) => (
             <div
               key={item.label}

@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import Link from 'next/link';
 import { BookOpenText, Calculator, Github, Shield, Users } from 'lucide-react';
 import { TacticalFrame } from '@/components/ui/TacticalFrame';
@@ -10,17 +10,17 @@ const statusBadges = [
 ] as const;
 
 const gymQuickAccess = [
-  { id: '01', name: '瓢太', href: '/trainers', asset: '/silhouettes/roark.svg' },
-  { id: '02', name: '菜种', href: '/trainers', asset: '/silhouettes/gardenia.svg' },
-  { id: '03', name: '阿李', href: '/trainers', asset: '/silhouettes/maylene.svg' },
-  { id: '04', name: '吉宪', href: '/trainers', asset: '/silhouettes/wake.svg' },
+  { id: '01', name: 'Roark', href: '/trainers', asset: '/silhouettes/roark.svg' },
+  { id: '02', name: 'Gardenia', href: '/trainers', asset: '/silhouettes/gardenia.svg' },
+  { id: '03', name: 'Maylene', href: '/trainers', asset: '/silhouettes/maylene.svg' },
+  { id: '04', name: 'Wake', href: '/trainers', asset: '/silhouettes/wake.svg' },
 ] as const;
 
 const newsFeed = [
-  { time: '07:14', text: '伤害演算中枢完成同步，核心击杀阈值表已刷新。' },
-  { time: '08:32', text: '馆主战术库新增 AI 换人链路注释与高危首发标记。' },
-  { time: '09:05', text: '图鉴数据库完成招式映射校验，字段一致性通过。' },
-  { time: '10:21', text: '队伍构建矩阵已接入最新 Kaizo 环境威胁优先级。' },
+  { time: '07:14', text: 'BALLISTIC CALCULATION STACK SYNCHRONIZED. PRIMARY KO THRESHOLD TABLE REFRESHED.' },
+  { time: '08:32', text: 'GYM LEADER DOSSIER APPENDED WITH AI SWITCH CHAIN NOTES AND HIGH-RISK LEAD TAGS.' },
+  { time: '09:05', text: 'DEX INTEL DATABASE COMPLETED MOVE MAPPING VALIDATION. FIELD CONSISTENCY PASSED.' },
+  { time: '10:21', text: 'STRIKE TEAM MATRIX NOW REFERENCES THE LATEST KAIZO THREAT PRIORITY MODEL.' },
 ] as const;
 
 const commandLinks = [
@@ -56,10 +56,10 @@ export default function Home(): React.ReactElement {
       <div className="relative z-10 mx-auto max-w-7xl">
         <section className="mb-10 text-center">
           <h1 className="title-strong mb-3 text-5xl text-white md:text-7xl">
-            白金改版战术情报中心
+            PLATINUM KAIZO TACTICAL COMMAND GRID
           </h1>
           <p className="mx-auto max-w-3xl text-sm text-emerald-300 md:text-base">
-            多源战斗数据融合、实时态势分析与策略级推演平台
+            MULTI-SOURCE COMBAT INTELLIGENCE FUSION, LIVE THREAT MAPPING, AND HARDCORE STRATEGIC EXECUTION.
           </p>
 
           <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -89,10 +89,10 @@ export default function Home(): React.ReactElement {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-6 xl:grid-cols-4 xl:auto-rows-[minmax(160px,1fr)]">
+        <section className="grid grid-cols-1 gap-6 xl:auto-rows-[minmax(160px,1fr)] xl:grid-cols-4">
           <NavCard href="/calculator" className="xl:col-span-2 xl:row-span-2">
             <TacticalFrame
-              title="Core Module"
+              title="Primary Strike Module"
               className="h-full transition-all duration-300 group-hover:border-emerald-500/50"
             >
               <div className="flex h-full flex-col justify-between gap-8">
@@ -101,24 +101,23 @@ export default function Home(): React.ReactElement {
                     <Calculator size={30} strokeWidth={2.2} />
                   </div>
                   <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-emerald-400/50">
-                    Live Calculation Engine
+                    LIVE CALCULATION ENGINE
                   </div>
                 </div>
 
                 <div>
                   <h2 className="mb-3 text-3xl font-black text-white md:text-4xl">
-                    伤害计算
+                    PRECISION BALLISTIC CONSOLE
                   </h2>
                   <p className="max-w-xl text-sm leading-7 text-slate-300 md:text-base">
-                    执行核心对战演算，评估击杀阈值、回合交换效率与风险窗口。用于快速确认
-                    Kaizo 环境下的先手线、斩杀线与换人代价。
+                    Execute primary combat simulation, confirm lethal ranges, review exchange efficiency, and verify tactical punishment windows inside the Kaizo ruleset.
                   </p>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-xl border border-slate-800 bg-black/20 p-4">
                     <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-slate-500">
-                      Damage Window
+                      DAMAGE WINDOW
                     </div>
                     <div className="mt-2 font-mono text-3xl font-black text-white">
                       84.3% - 99.1%
@@ -126,9 +125,11 @@ export default function Home(): React.ReactElement {
                   </div>
                   <div className="rounded-xl border border-slate-800 bg-black/20 p-4">
                     <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-slate-500">
-                      Tactical Status
+                      TACTICAL STATUS
                     </div>
-                    <div className="mt-2 text-sm text-emerald-300">演算引擎持续运行</div>
+                    <div className="mt-2 font-mono text-sm uppercase tracking-[0.18em] text-emerald-300">
+                      CALCULATION ENGINE ONLINE
+                    </div>
                   </div>
                 </div>
               </div>
@@ -137,7 +138,7 @@ export default function Home(): React.ReactElement {
 
           <NavCard href="/pokedex" className="xl:col-span-2">
             <TacticalFrame
-              title="Dex Module"
+              title="Dex Intelligence Module"
               className="h-full transition-all duration-300 group-hover:border-emerald-500/50"
             >
               <div className="flex h-full items-start justify-between gap-4">
@@ -145,13 +146,13 @@ export default function Home(): React.ReactElement {
                   <div className="mb-4 inline-flex rounded-2xl border border-cyan-500/20 bg-cyan-500/10 p-3 text-cyan-300">
                     <BookOpenText size={24} strokeWidth={2.2} />
                   </div>
-                  <h2 className="mb-2 text-2xl font-black text-white">全图鉴</h2>
+                  <h2 className="mb-2 text-2xl font-black text-white">FULL DEX INDEX</h2>
                   <p className="max-w-xl text-sm leading-6 text-slate-300">
-                    检索属性、种族值、特性、招式与稀有度信息，快速建立战术认知。
+                    Search typing, base stats, abilities, move coverage, and revision flags to build faster tactical recognition.
                   </p>
                 </div>
                 <div className="hidden font-mono text-[10px] uppercase tracking-[0.28em] text-cyan-400/45 md:block">
-                  Dex Database Ready
+                  DEX DATABASE READY
                 </div>
               </div>
             </TacticalFrame>
@@ -159,7 +160,7 @@ export default function Home(): React.ReactElement {
 
           <NavCard href="/trainers" className="xl:col-span-2">
             <TacticalFrame
-              title="Boss Intel"
+              title="Leader Dossier Module"
               className="h-full transition-all duration-300 group-hover:border-emerald-500/50"
             >
               <div className="flex h-full items-start justify-between gap-4">
@@ -167,13 +168,13 @@ export default function Home(): React.ReactElement {
                   <div className="mb-4 inline-flex rounded-2xl border border-orange-500/20 bg-orange-500/10 p-3 text-orange-300">
                     <Shield size={24} strokeWidth={2.2} />
                   </div>
-                  <h2 className="mb-2 text-2xl font-black text-white">馆主对战</h2>
+                  <h2 className="mb-2 text-2xl font-black text-white">GYM LEADER TACTICAL DOSSIER</h2>
                   <p className="max-w-xl text-sm leading-6 text-slate-300">
-                    汇总关键馆主阵容、技能覆盖与压制节奏，制定针对 Platinum Kaizo 的突破方案。
+                    Review hostile lineups, move coverage, and pressure sequencing to plan clean breakthroughs against Platinum Kaizo bosses.
                   </p>
                 </div>
                 <div className="hidden font-mono text-[10px] uppercase tracking-[0.28em] text-orange-400/45 md:block">
-                  Enemy Intel Updated
+                  ENEMY INTEL UPDATED
                 </div>
               </div>
             </TacticalFrame>
@@ -185,7 +186,7 @@ export default function Home(): React.ReactElement {
                 <Link
                   key={leader.id}
                   href={leader.href}
-                  aria-label={`进入${leader.name}情报`}
+                  aria-label={`Open ${leader.name} dossier`}
                   className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center backdrop-blur-md transition-all hover:border-emerald-500/35 hover:shadow-[0_0_18px_rgba(16,185,129,0.12)]"
                 >
                   <div className="relative mx-auto mb-3 h-12 w-12 overflow-hidden rounded-lg border border-slate-800 bg-black/25">
@@ -224,7 +225,7 @@ export default function Home(): React.ReactElement {
 
           <NavCard href="/teambuilder">
             <TacticalFrame
-              title="Build Matrix"
+              title="Formation Matrix"
               className="h-full transition-all duration-300 group-hover:border-emerald-500/50"
             >
               <div className="flex h-full flex-col justify-between gap-4">
@@ -232,13 +233,13 @@ export default function Home(): React.ReactElement {
                   <Users size={22} strokeWidth={2.2} />
                 </div>
                 <div>
-                  <h2 className="mb-2 text-xl font-black text-white">队伍构建</h2>
+                  <h2 className="mb-2 text-xl font-black text-white">STRIKE TEAM ARCHITECT</h2>
                   <p className="text-sm leading-6 text-slate-300">
-                    统筹输出曲线、抗性链路与作战稳定性。
+                    Audit offensive curves, resistance chains, and structural battlefield stability.
                   </p>
                 </div>
                 <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-violet-300/55">
-                  Team Matrix Synced
+                  TEAM MATRIX SYNCED
                 </div>
               </div>
             </TacticalFrame>
@@ -249,13 +250,13 @@ export default function Home(): React.ReactElement {
               <div className="flex items-center gap-2">
                 <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
                 <span className="font-mono text-xs uppercase tracking-[0.22em] text-emerald-300">
-                  系统在线
+                  SYSTEM ONLINE
                 </span>
               </div>
 
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
-                  Database Version
+                  DATABASE VERSION
                 </div>
                 <div className="mt-2 font-mono text-2xl font-black text-white">
                   PKZ v4.2
@@ -263,7 +264,7 @@ export default function Home(): React.ReactElement {
               </div>
 
               <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
-                Uptime // 247h 18m
+                UPTIME // 247H 18M
               </div>
             </div>
           </TacticalFrame>

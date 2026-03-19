@@ -30,41 +30,13 @@ type PokedexEntry = {
   };
 };
 
-const ALL_TYPE_OPTION = '全部属性';
-
-const pokemonLabels: Record<string, string> = {
-  Cranidos: '头盖龙',
-  Onix: '大岩蛇',
-  Geodude: '小拳石',
-  Shieldon: '盾甲龙',
-  Nosepass: '朝北鼻',
-  Aron: '可可多拉',
-  Roserade: '罗丝雷朵',
-  Breloom: '斗笠菇',
-  Tangela: '蔓藤怪',
-  Cherrim: '樱花儿',
-  Grovyle: '森林蜥蜴',
-  Grotle: '树林龟',
-  Lucario: '路卡利欧',
-  Medicham: '恰雷姆',
-  Machoke: '豪力',
-  Hariyama: '幕下力士',
-  Toxicroak: '毒骷蛙',
-  Heracross: '赫拉克罗斯',
-  Gyarados: '暴鲤龙',
-  Floatzel: '浮潜鼬',
-  Quagsire: '沼王',
-  Azumarill: '玛力露丽',
-  Pelipper: '大嘴鸥',
-  Poliwrath: '蚊香泳士',
-  Garchomp: '烈咬陆鲨',
-};
+const ALL_TYPE_OPTION = 'ALL TYPES';
 
 const trainerLabels: Record<string, string> = {
-  roark: '瓢太',
-  gardenia: '菜种',
-  maylene: '阿李',
-  wake: '吉宪',
+  roark: 'Roark',
+  gardenia: 'Gardenia',
+  maylene: 'Maylene',
+  wake: 'Wake',
 };
 
 const typeMap: Record<string, string[]> = {
@@ -92,6 +64,7 @@ const typeMap: Record<string, string[]> = {
   Azumarill: ['Water'],
   Pelipper: ['Water', 'Flying'],
   Poliwrath: ['Water', 'Fighting'],
+  Garchomp: ['Dragon', 'Ground'],
 };
 
 const typeOptions = [
@@ -106,6 +79,7 @@ const typeOptions = [
   'Bug',
   'Water',
   'Flying',
+  'Dragon',
 ] as const;
 
 const typeOptionMeta: Record<
@@ -117,71 +91,77 @@ const typeOptionMeta: Record<
     hint: string;
   }
 > = {
-  全部属性: {
-    label: '全部属性',
+  'ALL TYPES': {
+    label: 'ALL TYPES',
     accent: 'bg-emerald-400',
     chip: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
-    hint: '显示全部作战单位',
+    hint: 'Display every indexed combat unit.',
   },
   Rock: {
-    label: '岩石',
+    label: 'ROCK',
     accent: 'bg-amber-400',
     chip: 'border-amber-500/30 bg-amber-500/10 text-amber-200',
-    hint: '高物防与压场单位',
+    hint: 'Heavy physical bulk and pressure anchors.',
   },
   Ground: {
-    label: '地面',
+    label: 'GROUND',
     accent: 'bg-yellow-500',
     chip: 'border-yellow-500/30 bg-yellow-500/10 text-yellow-200',
-    hint: '电系封锁与震荡压制',
+    hint: 'Electric denial and quake pressure lanes.',
   },
   Steel: {
-    label: '钢',
+    label: 'STEEL',
     accent: 'bg-slate-300',
     chip: 'border-slate-400/30 bg-slate-400/10 text-slate-200',
-    hint: '高抗性与联防核心',
+    hint: 'High-resistance relay and defensive compression.',
   },
   Grass: {
-    label: '草',
+    label: 'GRASS',
     accent: 'bg-lime-400',
     chip: 'border-lime-500/30 bg-lime-500/10 text-lime-200',
-    hint: '寄生消耗与回复控制',
+    hint: 'Seed attrition and recovery-based control.',
   },
   Poison: {
-    label: '毒',
+    label: 'POISON',
     accent: 'bg-fuchsia-500',
     chip: 'border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-200',
-    hint: '状态压制与中速破口',
+    hint: 'Status warfare and toxic choke points.',
   },
   Fighting: {
-    label: '格斗',
+    label: 'FIGHTING',
     accent: 'bg-orange-500',
     chip: 'border-orange-500/30 bg-orange-500/10 text-orange-200',
-    hint: '高压近战与破盾终端',
+    hint: 'Close-range breach and shield-breaking force.',
   },
   Psychic: {
-    label: '超能',
+    label: 'PSYCHIC',
     accent: 'bg-pink-500',
     chip: 'border-pink-500/30 bg-pink-500/10 text-pink-200',
-    hint: '先读打击与特攻压制',
+    hint: 'Precision reads and special pressure vectors.',
   },
   Bug: {
-    label: '虫',
+    label: 'BUG',
     accent: 'bg-lime-500',
     chip: 'border-lime-600/30 bg-lime-600/10 text-lime-200',
-    hint: '干扰联动与奇袭收割',
+    hint: 'Interference loops and opportunistic cleanup.',
   },
   Water: {
-    label: '水',
+    label: 'WATER',
     accent: 'bg-sky-400',
     chip: 'border-sky-500/30 bg-sky-500/10 text-sky-200',
-    hint: '雨天推进与高频压血',
+    hint: 'Rain tempo and sustained offensive flow.',
   },
   Flying: {
-    label: '飞行',
+    label: 'FLYING',
     accent: 'bg-cyan-300',
     chip: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200',
-    hint: '高速切入与对地压制',
+    hint: 'Fast insertion and ground suppression.',
+  },
+  Dragon: {
+    label: 'DRAGON',
+    accent: 'bg-violet-400',
+    chip: 'border-violet-500/30 bg-violet-500/10 text-violet-200',
+    hint: 'Elite offensive ceiling and sweep threat.',
   },
 };
 
@@ -275,7 +255,7 @@ const pokedexEntries: PokedexEntry[] = trainersData.flatMap((trainer) =>
 
     return {
       id: pokemon.id,
-      name: pokemonLabels[pokemon.enName] || pokemon.enName,
+      name: pokemon.enName,
       enName: pokemon.enName,
       trainer: trainerLabels[trainer.id] || trainer.id,
       role: pokemon.role,
@@ -295,15 +275,15 @@ const pokedexEntries: PokedexEntry[] = trainersData.flatMap((trainer) =>
 const supplementalDexEntries: PokedexEntry[] = [
   {
     id: `dex-${garchomp.id}`,
-    name: pokemonLabels[garchomp.enName] || garchomp.name,
+    name: garchomp.enName,
     enName: garchomp.enName,
-    trainer: '基础数据库',
-    role: '标准图鉴样本',
-    note: '已并入基础图鉴索引，可作为馆主数据之外的检索样本与演算目标。',
-    tactic: '适合用于验证中文名、英文名与拼音首字母的混合搜索链路。',
-    ability: garchomp.abilities.ability1.name,
-    item: '未配置',
-    nature: '标准模板',
+    trainer: 'Core Database',
+    role: 'Reference Combat Sample',
+    note: 'Integrated into the base dex index as a non-gym tactical benchmark unit.',
+    tactic: 'Useful for validating multilingual search, acronym matching, and cross-page ballistic test flow.',
+    ability: 'Sand Stream',
+    item: 'Unassigned',
+    nature: 'Reference Template',
     types: garchomp.types.flatMap((type) => {
       if (!type) {
         return [];
@@ -359,7 +339,7 @@ function FilterBar({
               : 'border-slate-800 bg-black/20 hover:border-emerald-500/20'
           }`}
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/15 bg-emerald-500/10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/15 bg-emerald-500/10 md:h-10 md:w-10 xl:h-11 xl:w-11">
             <ScanSearch className="h-4 w-4 text-emerald-300" />
           </div>
 
@@ -378,7 +358,7 @@ function FilterBar({
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600 md:block">
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600 xl:block">
               {typeOptions.length}_CHANNELS
             </span>
             <ChevronDown
@@ -400,7 +380,9 @@ function FilterBar({
             <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/70">
               Select_Target_Type
             </div>
-            <div className="mt-1 text-xs text-slate-400">按属性快速收束战术样本，减少无效检索噪音。</div>
+            <div className="mt-1 text-xs text-slate-400">
+              Narrow the indexed battlespace by typing and remove low-value search noise.
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-2 xl:grid-cols-3">
@@ -434,7 +416,7 @@ function FilterBar({
                     </div>
                     {isActive ? (
                       <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-emerald-300">
-                        Active
+                        ACTIVE
                       </span>
                     ) : null}
                   </div>
@@ -450,13 +432,13 @@ function FilterBar({
       <button
         type="button"
         onClick={() => onKaizoToggle(!kaizoOnly)}
-        className={`flex items-center justify-between gap-4 rounded-xl border px-4 py-3 font-mono text-xs uppercase tracking-[0.18em] transition-all ${
+        className={`flex min-w-[240px] items-center justify-between gap-4 rounded-xl border px-4 py-3 font-mono text-xs uppercase tracking-[0.18em] transition-all ${
           kaizoOnly
             ? 'border-emerald-500/35 bg-emerald-500/10 text-emerald-300'
             : 'border-slate-800 bg-black/20 text-slate-400'
         }`}
       >
-        Kaizo 改动优先
+        KAIZO REVISION PRIORITY
         <div
           className={`h-5 w-10 rounded-full border transition-all ${
             kaizoOnly ? 'border-emerald-500/40 bg-emerald-500/15' : 'border-slate-700 bg-slate-900'
@@ -490,7 +472,7 @@ function DetailDrawer({
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/60">
-              Dex_Unit_Record
+              DEX_UNIT_RECORD
             </p>
             <h2 className="mt-2 text-3xl font-black text-white">{entry.name}</h2>
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
@@ -520,17 +502,17 @@ function DetailDrawer({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">战术定位</div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">TACTICAL ROLE</div>
             <div className="mt-2 text-sm text-white">{entry.role}</div>
           </div>
           <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">威胁等级</div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">THREAT GRADE</div>
             <div className="mt-2 font-mono text-2xl font-black text-emerald-300">T-{entry.threatScore}</div>
           </div>
         </div>
 
         <div className="mt-5 rounded-2xl border border-slate-800 bg-black/20 p-4">
-          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">种族值截面</div>
+          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">BASE STAT PANEL</div>
           <div className="grid grid-cols-3 gap-3 font-mono text-xs text-slate-300">
             <div>HP {entry.stats.hp}</div>
             <div>ATK {entry.stats.atk}</div>
@@ -543,26 +525,26 @@ function DetailDrawer({
 
         <div className="mt-5 space-y-4">
           <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Kaizo 修订</div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">KAIZO REVISION</div>
             <p className="mt-2 text-sm leading-6 text-slate-300">{entry.note}</p>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">战术建议</div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">TACTICAL ADVISORY</div>
             <p className="mt-2 text-sm leading-6 text-slate-300">{entry.tactic}</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">特性</div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">ABILITY</div>
               <div className="mt-2 text-sm text-white">{entry.ability}</div>
             </div>
             <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">道具</div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">HELD ITEM</div>
               <div className="mt-2 text-sm text-white">{entry.item}</div>
             </div>
             <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">性格</div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">NATURE</div>
               <div className="mt-2 text-sm text-white">{entry.nature}</div>
             </div>
           </div>
@@ -589,9 +571,9 @@ export default function PokedexPage(): React.ReactElement {
     <div className="px-6 py-12 md:px-12">
       <div className="mx-auto max-w-7xl space-y-6">
         <section>
-          <h1 className="title-strong text-4xl text-emerald-300 md:text-5xl">全图鉴战术索引</h1>
+          <h1 className="title-strong text-4xl text-emerald-300 md:text-5xl">FULL DEX TACTICAL INDEX</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-            以 Kaizo 环境威胁评估为核心的战术图鉴面板。支持中文、英文与拼音首字母实时检索，帮助您快速锁定高优先级作战单位。
+            A Kaizo-first intelligence board for high-risk unit review. Search by localized name, English name, or acronym while filtering by type and revision priority.
           </p>
         </section>
 
@@ -621,7 +603,7 @@ export default function PokedexPage(): React.ReactElement {
                 <div className="rounded-xl border border-emerald-500/20 bg-black/40 p-3">
                   <div className="mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-400/70">
                     <ShieldAlert className="h-3.5 w-3.5" />
-                    战术威胁等级
+                    THREAT GRADE
                   </div>
                   <div className="font-mono text-2xl font-black text-white">T-{entry.threatScore}</div>
                 </div>

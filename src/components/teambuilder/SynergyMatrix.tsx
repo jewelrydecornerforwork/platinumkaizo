@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { TYPE_CHART } from '@/constants/typeChart';
 
@@ -73,7 +73,7 @@ export const SynergyMatrix = ({ team }: { team: TeamMember[] }) => {
   return (
     <div className="rounded-2xl border border-slate-800 border-t-emerald-500/20 bg-slate-950/80 p-6">
       <h3 className="mb-6 text-xs font-mono uppercase tracking-[0.2em] text-emerald-500">
-        Team_Synergy_Analysis // 联防演算
+        TEAM_SYNERGY_ANALYSIS // DEFENSIVE MATRIX
       </h3>
       <div className="grid grid-cols-6 gap-2 md:grid-cols-9">
         {analysis.map((entry) => (
@@ -109,4 +109,3 @@ export const SynergyMatrix = ({ team }: { team: TeamMember[] }) => {
     </div>
   );
 };
-

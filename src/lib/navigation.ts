@@ -3,31 +3,31 @@
 export const navItems: NavItem[] = [
   {
     id: 'home',
-    label: '首页',
+    label: 'Command Hub',
     href: '/',
     icon: null,
   },
   {
     id: 'pokedex',
-    label: '全图鉴',
+    label: 'Full Dex Index',
     href: '/pokedex',
     icon: null,
   },
   {
     id: 'trainers',
-    label: '馆主对战',
+    label: 'Gym Leader Tactical Dossier',
     href: '/trainers',
     icon: null,
   },
   {
     id: 'calculator',
-    label: '伤害计算',
+    label: 'Precision Ballistic Console',
     href: '/calculator',
     icon: null,
   },
   {
     id: 'teambuilder',
-    label: '队伍构建',
+    label: 'Strike Team Architect',
     href: '/teambuilder',
     icon: null,
   },

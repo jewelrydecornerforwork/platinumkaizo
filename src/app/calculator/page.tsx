@@ -45,10 +45,10 @@ type CombatPreset = {
 };
 
 const TRAINER_LABELS: Record<string, string> = {
-  roark: '瓢太',
-  gardenia: '菜种',
-  maylene: '阿李',
-  wake: '吉宪',
+  roark: 'Roark',
+  gardenia: 'Gardenia',
+  maylene: 'Maylene',
+  wake: 'Wake',
 };
 
 const GYM_KEY_MAP: Record<string, keyof typeof GYM_MOVE_INTEL.gym_leaders> = {
@@ -59,30 +59,30 @@ const GYM_KEY_MAP: Record<string, keyof typeof GYM_MOVE_INTEL.gym_leaders> = {
 };
 
 const POKEMON_LABELS: Record<string, string> = {
-  Cranidos: '头盖龙',
-  Onix: '大岩蛇',
-  Geodude: '小拳石',
-  Shieldon: '盾甲龙',
-  Nosepass: '朝北鼻',
-  Aron: '可可多拉',
-  Roserade: '罗丝雷朵',
-  Breloom: '斗笠菇',
-  Tangela: '蔓藤怪',
-  Cherrim: '樱花儿',
-  Grovyle: '森林蜥蜴',
-  Grotle: '树林龟',
-  Lucario: '路卡利欧',
-  Medicham: '恰雷姆',
-  Machoke: '豪力',
-  Hariyama: '幕下力士',
-  Toxicroak: '毒骷蛙',
-  Heracross: '赫拉克罗斯',
-  Gyarados: '暴鲤龙',
-  Floatzel: '浮潜鼬',
-  Quagsire: '沼王',
-  Azumarill: '玛力露丽',
-  Pelipper: '大嘴鸥',
-  Poliwrath: '蚊香泳士',
+  Cranidos: 'Cranidos',
+  Onix: 'Onix',
+  Geodude: 'Geodude',
+  Shieldon: 'Shieldon',
+  Nosepass: 'Nosepass',
+  Aron: 'Aron',
+  Roserade: 'Roserade',
+  Breloom: 'Breloom',
+  Tangela: 'Tangela',
+  Cherrim: 'Cherrim',
+  Grovyle: 'Grovyle',
+  Grotle: 'Grotle',
+  Lucario: 'Lucario',
+  Medicham: 'Medicham',
+  Machoke: 'Machoke',
+  Hariyama: 'Hariyama',
+  Toxicroak: 'Toxicroak',
+  Heracross: 'Heracross',
+  Gyarados: 'Gyarados',
+  Floatzel: 'Floatzel',
+  Quagsire: 'Quagsire',
+  Azumarill: 'Azumarill',
+  Pelipper: 'Pelipper',
+  Poliwrath: 'Poliwrath',
 };
 
 const POKEMON_TYPE_MAP: Record<string, string[]> = {
@@ -113,18 +113,18 @@ const POKEMON_TYPE_MAP: Record<string, string[]> = {
 };
 
 const MOVE_LABELS: Record<string, string> = {
-  'Head Smash': '双刃头槌',
-  'Rock Slide': '岩崩',
-  'Stealth Rock': '隐形岩',
-  'Leaf Storm': '飞叶风暴',
-  'Sludge Bomb': '污泥炸弹',
-  'Giga Drain': '亿万吸取',
-  'Close Combat': '近身战',
-  'Aura Sphere': '波导弹',
-  'Drain Punch': '吸取拳',
-  Waterfall: '攀瀑',
-  'Ice Fang': '冰冻牙',
-  'Dragon Dance': '龙之舞',
+  'Head Smash': 'Head Smash',
+  'Rock Slide': 'Rock Slide',
+  'Stealth Rock': 'Stealth Rock',
+  'Leaf Storm': 'Leaf Storm',
+  'Sludge Bomb': 'Sludge Bomb',
+  'Giga Drain': 'Giga Drain',
+  'Close Combat': 'Close Combat',
+  'Aura Sphere': 'Aura Sphere',
+  'Drain Punch': 'Drain Punch',
+  Waterfall: 'Waterfall',
+  'Ice Fang': 'Ice Fang',
+  'Dragon Dance': 'Dragon Dance',
 };
 
 const DEFAULT_PROFILE: Record<
@@ -175,7 +175,7 @@ function buildPresets(): CombatPreset[] {
         trainerName,
         name: displayName,
         enName: pokemon.enName,
-        role: pokemon.role || '战术位',
+        role: pokemon.role || 'Tactical Slot',
         level: Number(pokemon.level.replace(/[^\d]/g, '')) || 100,
         item: profile.item,
         ability: profile.ability,
@@ -203,12 +203,12 @@ function getEffectiveness(moveType: string, defenderTypes: string[]): number {
 }
 
 function getEffectivenessLabel(multiplier: number): string {
-  if (multiplier === 0) return '无效';
-  if (multiplier >= 4) return '四倍克制';
-  if (multiplier >= 2) return '效果拔群';
-  if (multiplier <= 0.25) return '极度受阻';
-  if (multiplier < 1) return '效果不佳';
-  return '标准命中';
+  if (multiplier === 0) return 'NO EFFECT';
+  if (multiplier >= 4) return '4X EFFECTIVE';
+  if (multiplier >= 2) return 'SUPER EFFECTIVE';
+  if (multiplier <= 0.25) return 'SEVERELY RESISTED';
+  if (multiplier < 1) return 'RESISTED';
+  return 'STANDARD HIT';
 }
 
 function getDamageGradient(min: number, max: number): string {
@@ -222,13 +222,13 @@ function getDamageGradient(min: number, max: number): string {
 }
 
 function getKoDisplay(koText: string | undefined): string {
-  if (!koText) return '等待演算数据';
-  if (koText.includes('OHKO')) return '确一 (OHKO)';
-  if (koText.includes('2HKO')) return koText.includes('Stealth Rock') ? '确二 (2HKO) 且需隐形岩辅助' : '确二 (2HKO)';
-  if (koText.includes('3HKO')) return '确三 (3HKO)';
-  if (koText.includes('4HKO')) return '确四 (4HKO)';
-  if (koText.includes('变化招式')) return '变化招式，不直接造成伤害';
-  return '暂不构成稳定击杀';
+  if (!koText) return 'Awaiting calculation feed';
+  if (koText.includes('OHKO')) return 'CERTAIN OHKO';
+  if (koText.includes('2HKO')) return koText.includes('Stealth Rock') ? 'CERTAIN 2HKO // STEALTH ROCK REQUIRED' : 'CERTAIN 2HKO';
+  if (koText.includes('3HKO')) return 'CERTAIN 3HKO';
+  if (koText.includes('4HKO')) return 'CERTAIN 4HKO';
+  if (koText.includes('STATUS_MOVE')) return 'STATUS MOVE // NO DIRECT DAMAGE';
+  return 'NO RELIABLE LETHAL CONFIRMED';
 }
 
 function PanelInput({
@@ -353,7 +353,7 @@ function TacticalDmgHud({
           </div>
           <span
             className={`font-mono text-[10px] uppercase tracking-[0.28em] ${
-              koDisplay.includes('确一')
+              koDisplay.includes('OHKO')
                 ? 'animate-pulse text-red-400 [text-shadow:0_0_10px_rgba(248,113,113,0.7)]'
                 : 'text-red-500/80 [text-shadow:0_0_8px_rgba(248,113,113,0.25)]'
             }`}
@@ -423,12 +423,12 @@ export default function DamageCalculatorPage() {
   const minDamage = result?.range[0] ?? 0;
   const maxDamage = result?.range[1] ?? 0;
   const koDisplay = useMemo(() => getKoDisplay(result?.ko), [result?.ko]);
-  const offenseStatLabel = currentMove?.category === 'special' ? '特攻轴' : '攻击轴';
+  const offenseStatLabel = currentMove?.category === 'special' ? 'SPECIAL VECTOR' : 'ATTACK VECTOR';
   const offenseStatValue =
     currentMove?.category === 'special'
       ? selectedAttackerPreset.stats.spA
       : selectedAttackerPreset.stats.atk;
-  const defenseStatLabel = currentMove?.category === 'special' ? '特防甲' : '物防甲';
+  const defenseStatLabel = currentMove?.category === 'special' ? 'SPECIAL ARMOR' : 'PHYSICAL ARMOR';
   const defenseStatValue =
     currentMove?.category === 'special'
       ? selectedDefenderPreset.stats.spD
@@ -521,10 +521,10 @@ export default function DamageCalculatorPage() {
               Precision Damage Console
             </p>
             <h1 className="text-4xl font-black tracking-tight text-white md:text-5xl">
-              精密伤害演算中枢
+              PRECISION BALLISTIC CONSOLE
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-              基于 Platinum Kaizo 战术情报构建的实时演算界面。修改等级、努力值、招式后，中央结果面板会自动刷新。
+              A live ballistic interface built on Platinum Kaizo combat intelligence. Any change to level, EV load, or move package updates the result core in real time.
             </p>
           </div>
 
@@ -541,7 +541,7 @@ export default function DamageCalculatorPage() {
         <div className="grid gap-6 lg:grid-cols-[1.05fr_1.15fr_1.05fr]">
           <IntelSelector
             side="attacker"
-            title="进攻单位情报"
+            title="Attacker Intel Panel"
             searchValue={attackerSearch}
             onSearchChange={setAttackerSearch}
             options={attackerOptions}
@@ -552,9 +552,9 @@ export default function DamageCalculatorPage() {
           >
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: '攻击', value: selectedAttackerPreset.stats.atk },
-                { label: '特攻', value: selectedAttackerPreset.stats.spA },
-                { label: '速度', value: selectedAttackerPreset.stats.spe },
+                { label: 'ATTACK', value: selectedAttackerPreset.stats.atk },
+                { label: 'SP. ATK', value: selectedAttackerPreset.stats.spA },
+                { label: 'SPEED', value: selectedAttackerPreset.stats.spe },
               ].map((item) => (
                 <div
                   key={item.label}
@@ -572,7 +572,7 @@ export default function DamageCalculatorPage() {
 
             <div className="space-y-2 md:hidden">
               <StatAdjuster
-                label="等级"
+                label="LEVEL"
                 value={attacker.level}
                 step={1}
                 max={100}
@@ -581,7 +581,7 @@ export default function DamageCalculatorPage() {
                 }
               />
               <StatAdjuster
-                label="攻击 EV"
+                label="ATK EV"
                 value={attacker.evs.atk ?? 0}
                 onChange={(value) =>
                   setAttacker((prev) => ({
@@ -591,7 +591,7 @@ export default function DamageCalculatorPage() {
                 }
               />
               <StatAdjuster
-                label="特攻 EV"
+                label="SPA EV"
                 value={attacker.evs.spA ?? 0}
                 onChange={(value) =>
                   setAttacker((prev) => ({
@@ -604,7 +604,7 @@ export default function DamageCalculatorPage() {
 
             <div className="hidden grid-cols-2 gap-3 md:grid">
               <PanelInput
-                label="等级"
+                label="LEVEL"
                 type="number"
                 value={attacker.level}
                 onChange={(value) =>
@@ -616,7 +616,7 @@ export default function DamageCalculatorPage() {
                 accent="cyan"
               />
               <PanelSelect
-                label="招式"
+                label="MOVE PACKAGE"
                 value={move}
                 onChange={setMove}
                 accent="cyan"
@@ -626,7 +626,7 @@ export default function DamageCalculatorPage() {
                 }))}
               />
               <PanelInput
-                label="攻击 EV"
+                label="ATK EV"
                 type="number"
                 value={attacker.evs.atk ?? 0}
                 onChange={(value) =>
@@ -638,7 +638,7 @@ export default function DamageCalculatorPage() {
                 accent="cyan"
               />
               <PanelInput
-                label="特攻 EV"
+                label="SPA EV"
                 type="number"
                 value={attacker.evs.spA ?? 0}
                 onChange={(value) =>
@@ -653,7 +653,7 @@ export default function DamageCalculatorPage() {
 
             <div className="grid grid-cols-1 gap-3">
               <PanelInput
-                label="特性"
+                label="ABILITY"
                 value={attacker.ability || ''}
                 onChange={(value) =>
                   setAttacker((prev) => ({ ...prev, ability: value }))
@@ -661,7 +661,7 @@ export default function DamageCalculatorPage() {
                 accent="cyan"
               />
               <PanelInput
-                label="道具"
+                label="HELD ITEM"
                 value={attacker.item}
                 onChange={(value) =>
                   setAttacker((prev) => ({ ...prev, item: value }))
@@ -669,7 +669,7 @@ export default function DamageCalculatorPage() {
                 accent="cyan"
               />
               <PanelInput
-                label="性格"
+                label="NATURE"
                 value={attacker.nature}
                 onChange={(value) =>
                   setAttacker((prev) => ({ ...prev, nature: value }))
@@ -691,7 +691,7 @@ export default function DamageCalculatorPage() {
                 <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
                   Real_Time_Result
                 </p>
-                <h2 className="text-xl font-bold text-white">中央伤害演算区</h2>
+                <h2 className="text-xl font-bold text-white">CENTRAL CALCULATION CORE</h2>
               </div>
             </div>
 
@@ -783,11 +783,11 @@ export default function DamageCalculatorPage() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-2xl border border-cyan-500/15 bg-slate-950/70 p-5 backdrop-blur-md">
                     <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                      击杀概率
+                      LETHAL PROBABILITY
                     </p>
                     <p
                       className={`mt-3 font-mono text-2xl font-black uppercase tracking-[0.08em] ${
-                        koDisplay.includes('确一')
+                        koDisplay.includes('OHKO')
                           ? 'animate-pulse text-red-300 [text-shadow:0_0_12px_rgba(248,113,113,0.7),0_0_28px_rgba(239,68,68,0.45)]'
                           : 'text-white'
                       }`}
@@ -795,15 +795,15 @@ export default function DamageCalculatorPage() {
                       {koDisplay}
                     </p>
                     <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
-                      {result?.ko === '变化招式'
-                        ? '当前招式为变化系，仅提供节奏控制。'
-                        : '移动参数后将自动重新判定斩杀窗口。'}
+                      {result?.ko === 'STATUS_MOVE'
+                        ? 'Current move is status-class and provides tempo control only.'
+                        : 'Adjust any parameter to refresh the lethal window automatically.'}
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-red-500/15 bg-slate-950/70 p-5 backdrop-blur-md">
                     <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                      威力映射
+                      POWER MAPPING
                     </p>
                     <p className="mt-3 font-mono text-2xl font-black text-white">
                       {mappedMoveIntel?.power ?? currentMove?.power ?? 0} BP
@@ -822,7 +822,7 @@ export default function DamageCalculatorPage() {
                   <div className="rounded-2xl border border-slate-800 bg-slate-950/75 p-5">
                     <div className="flex items-center justify-between">
                       <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                        属性相性矩阵
+                        TYPE EFFECT MATRIX
                       </p>
                       <Radar className="h-4 w-4 text-emerald-400" />
                     </div>
@@ -830,7 +830,7 @@ export default function DamageCalculatorPage() {
                       {effectiveness.toFixed(2)}x
                     </p>
                     <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
-                      {getEffectivenessLabel(effectiveness)} / 目标属性:
+                      {getEffectivenessLabel(effectiveness)} / TARGET TYPE:
                       <span className="font-mono text-emerald-300">
                         {' '}
                         {selectedDefenderPreset.types.join(' / ')}
@@ -841,7 +841,7 @@ export default function DamageCalculatorPage() {
                   <div className="rounded-2xl border border-slate-800 bg-slate-950/75 p-5">
                     <div className="flex items-center justify-between">
                       <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                        攻防基准
+                        OFFENSE / DEFENSE BASELINE
                       </p>
                       <Swords className="h-4 w-4 text-cyan-300" />
                     </div>
@@ -849,7 +849,7 @@ export default function DamageCalculatorPage() {
                       {selectedAttackerPreset.stats.atk} / {selectedDefenderPreset.stats.def}
                     </p>
                     <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
-                      进攻方攻击基值对位守方物防基值，适合快速判断是否需要强化。
+                      Compares the attacker's offensive baseline against the defender's physical wall value for quick setup checks.
                     </p>
                   </div>
                 </div>
@@ -869,7 +869,7 @@ export default function DamageCalculatorPage() {
                       </p>
                       <p className="mt-2 font-mono text-sm leading-6 text-slate-300">
                         {result?.desc ||
-                          '参数正在同步中。请选择双方单位并微调等级、努力值或招式。'}
+                          'Parameters are synchronizing. Select both units and refine level, EV load, or move package.'}
                       </p>
                     </div>
                   </div>
@@ -880,7 +880,7 @@ export default function DamageCalculatorPage() {
 
           <IntelSelector
             side="defender"
-            title="防守单位情报"
+            title="Defender Intel Panel"
             searchValue={defenderSearch}
             onSearchChange={setDefenderSearch}
             options={defenderOptions}
@@ -891,9 +891,9 @@ export default function DamageCalculatorPage() {
           >
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: '体力', value: selectedDefenderPreset.stats.hp },
-                { label: '防御', value: selectedDefenderPreset.stats.def },
-                { label: '特防', value: selectedDefenderPreset.stats.spD },
+                { label: 'HP', value: selectedDefenderPreset.stats.hp },
+                { label: 'DEFENSE', value: selectedDefenderPreset.stats.def },
+                { label: 'SP. DEF', value: selectedDefenderPreset.stats.spD },
               ].map((item) => (
                 <div
                   key={item.label}
@@ -911,7 +911,7 @@ export default function DamageCalculatorPage() {
 
             <div className="space-y-2 md:hidden">
               <StatAdjuster
-                label="等级"
+                label="LEVEL"
                 value={defender.level}
                 step={1}
                 max={100}
@@ -920,7 +920,7 @@ export default function DamageCalculatorPage() {
                 }
               />
               <StatAdjuster
-                label="体力 EV"
+                label="HP EV"
                 value={defender.evs.hp ?? 0}
                 onChange={(value) =>
                   setDefender((prev) => ({
@@ -930,7 +930,7 @@ export default function DamageCalculatorPage() {
                 }
               />
               <StatAdjuster
-                label="防御 EV"
+                label="DEF EV"
                 value={defender.evs.def ?? 0}
                 onChange={(value) =>
                   setDefender((prev) => ({
@@ -940,7 +940,7 @@ export default function DamageCalculatorPage() {
                 }
               />
               <StatAdjuster
-                label="特防 EV"
+                label="SPD EV"
                 value={defender.evs.spD ?? 0}
                 onChange={(value) =>
                   setDefender((prev) => ({
@@ -953,7 +953,7 @@ export default function DamageCalculatorPage() {
 
             <div className="hidden grid-cols-2 gap-3 md:grid">
               <PanelInput
-                label="等级"
+                label="LEVEL"
                 type="number"
                 value={defender.level}
                 onChange={(value) =>
@@ -965,7 +965,7 @@ export default function DamageCalculatorPage() {
                 accent="red"
               />
               <PanelInput
-                label="体力 EV"
+                label="HP EV"
                 type="number"
                 value={defender.evs.hp ?? 0}
                 onChange={(value) =>
@@ -977,7 +977,7 @@ export default function DamageCalculatorPage() {
                 accent="red"
               />
               <PanelInput
-                label="防御 EV"
+                label="DEF EV"
                 type="number"
                 value={defender.evs.def ?? 0}
                 onChange={(value) =>
@@ -989,7 +989,7 @@ export default function DamageCalculatorPage() {
                 accent="red"
               />
               <PanelInput
-                label="特防 EV"
+                label="SPD EV"
                 type="number"
                 value={defender.evs.spD ?? 0}
                 onChange={(value) =>
@@ -1004,7 +1004,7 @@ export default function DamageCalculatorPage() {
 
             <div className="grid grid-cols-1 gap-3">
               <PanelInput
-                label="特性"
+                label="ABILITY"
                 value={defender.ability || ''}
                 onChange={(value) =>
                   setDefender((prev) => ({ ...prev, ability: value }))
@@ -1012,7 +1012,7 @@ export default function DamageCalculatorPage() {
                 accent="red"
               />
               <PanelInput
-                label="道具"
+                label="HELD ITEM"
                 value={defender.item}
                 onChange={(value) =>
                   setDefender((prev) => ({ ...prev, item: value }))
@@ -1020,7 +1020,7 @@ export default function DamageCalculatorPage() {
                 accent="red"
               />
               <PanelInput
-                label="性格"
+                label="NATURE"
                 value={defender.nature}
                 onChange={(value) =>
                   setDefender((prev) => ({ ...prev, nature: value }))
@@ -1051,10 +1051,12 @@ export default function DamageCalculatorPage() {
             onClick={scrollToResult}
             className="rounded-xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-2 font-mono text-xs font-bold tracking-[0.24em] text-cyan-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_20px_rgba(34,211,238,0.12)] transition-all active:scale-95"
           >
-            一键演算
+            RUN HUD
           </button>
         </div>
       </div>
     </main>
   );
 }
+
+

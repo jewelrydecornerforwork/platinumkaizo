@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState } from 'react';
 import { calculate, Move, Pokemon } from '@smogon/calc';
@@ -60,8 +60,8 @@ export const usePokemonCalc = () => {
       if (mappedMove?.power === 0) {
         return {
           range: [0, 0],
-          desc: `${mappedMove.name} 为变化招式，不直接造成伤害。`,
-          ko: '变化招式',
+          desc: `${mappedMove.name} is a status-class move and does not deal direct damage.`,
+          ko: 'STATUS_MOVE',
         };
       }
 
@@ -79,7 +79,7 @@ export const usePokemonCalc = () => {
       return {
         range,
         desc: res.fullDesc(),
-        ko: koChance.text || '暂无击杀判定',
+        ko: koChance.text || 'NO RELIABLE KO FLAG',
       };
     } catch {
       return null;

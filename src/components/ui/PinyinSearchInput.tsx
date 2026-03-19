@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from 'react';
 import { Terminal } from 'lucide-react';
@@ -11,7 +11,7 @@ export const PinyinSearchInput = ({ onSearch }: SearchProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
   return (
-    <div className="group relative mx-auto mb-8 w-full max-w-2xl">
+    <div className="group relative mx-auto mb-8 w-full max-w-3xl">
       <div
         className={`absolute -inset-0.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-blue-500/20 blur opacity-30 transition duration-1000 group-hover:opacity-100 ${isFocused ? 'opacity-100' : ''}`}
       />
@@ -20,7 +20,7 @@ export const PinyinSearchInput = ({ onSearch }: SearchProps) => {
         <div className="flex items-center gap-2 border-r border-slate-800 bg-slate-900/30 px-4 py-3">
           <Terminal size={14} className={isFocused ? 'text-emerald-500' : 'text-slate-600'} />
           <span className="hidden font-mono text-[10px] uppercase tracking-widest text-slate-500 md:block">
-            {isFocused ? 'Scanning...' : 'Input_Ready'}
+            {isFocused ? 'SEARCHING...' : 'INPUT_READY'}
           </span>
         </div>
 
@@ -29,7 +29,7 @@ export const PinyinSearchInput = ({ onSearch }: SearchProps) => {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onChange={(event) => onSearch(event.target.value)}
-          placeholder="输入宝可梦名称、英文名或拼音首字母 (如: LLLS)..."
+          placeholder="SMART UNIT SEARCH (ACRONYM SUPPORTED) // NAME, ENGLISH, INITIALS..."
           className="w-full bg-transparent px-4 py-3 text-sm font-mono text-white placeholder:text-slate-700 focus:outline-none"
         />
 
