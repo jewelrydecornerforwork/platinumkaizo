@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
+import { Pokemon } from '@smogon/calc';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Crosshair, Radar, ShieldAlert, Swords } from 'lucide-react';
 import { TypeIcon } from '@/components/calc/TypeIcon';
@@ -45,6 +46,12 @@ type TrainerListEntry = {
   specialty: string;
   avatar: string;
   threatLevel: string;
+};
+
+type LiveCombatantIntel = {
+  stats: { hp: number; atk: number; def: number; spA: number; spD: number; spe: number };
+  types: string[];
+  valid: boolean;
 };
 
 const TRAINER_LABELS: Record<string, string> = {
@@ -102,6 +109,8 @@ const MOVE_LABELS: Record<string, string> = {
   'Ice Fang': 'Ice Fang',
   'Dragon Dance': 'Dragon Dance',
 };
+
+const ZERO_STATS = { hp: 0, atk: 0, def: 0, spA: 0, spD: 0, spe: 0 };
 
 
 const statLabels = [
@@ -210,6 +219,53 @@ function buildDamageRolls(min: number, max: number) {
   }));
 }
 
+function buildLiveCombatantIntel(
+  combatant: {
+    name: string;
+    level: number;
+    evs: { hp?: number; atk?: number; def?: number; spA?: number; spD?: number; spe?: number };
+    ivs: { hp?: number; atk?: number; def?: number; spA?: number; spD?: number; spe?: number };
+    item: string;
+    nature: string;
+    ability?: string;
+  },
+  fallbackPreset: CombatPreset
+): LiveCombatantIntel {
+  try {
+    const livePokemon = new Pokemon(4, combatant.name as never, {
+      level: combatant.level,
+      evs: combatant.evs,
+      ivs: combatant.ivs,
+      item: combatant.item,
+      nature: combatant.nature,
+      ability: combatant.ability,
+    } as never);
+
+    return {
+      stats: {
+        hp: livePokemon.rawStats.hp,
+        atk: livePokemon.rawStats.atk,
+        def: livePokemon.rawStats.def,
+        spA: livePokemon.rawStats.spa,
+        spD: livePokemon.rawStats.spd,
+        spe: livePokemon.rawStats.spe,
+      },
+      types: livePokemon.types.length ? livePokemon.types : ['Unknown'],
+      valid: true,
+    };
+  } catch {
+    return {
+      stats: combatant.name === fallbackPreset.enName ? fallbackPreset.stats : ZERO_STATS,
+      types: combatant.name === fallbackPreset.enName ? fallbackPreset.types : ['Unknown'],
+      valid: false,
+    };
+  }
+}
+
+function getCombatantArt(name: string): string | null {
+  return POKEMON_ART_ASSETS[name] || null;
+}
+
 function CompactInput({ label, value, onChange, type = 'text' }: { label: string; value: string | number; onChange: (value: string) => void; type?: 'text' | 'number' }) {
   return (
     <label className="space-y-1.5">
@@ -221,6 +277,52 @@ function CompactInput({ label, value, onChange, type = 'text' }: { label: string
         className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all focus:border-emerald-400/40"
       />
     </label>
+  );
+}
+
+function ProfileToggleButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] transition-all ${
+        active
+          ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200 shadow-[0_0_18px_rgba(16,185,129,0.12)]'
+          : 'border-slate-700 bg-black/35 text-slate-400 hover:border-emerald-500/25 hover:text-emerald-200'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function PortraitFrame({
+  name,
+  fallbackLabel,
+}: {
+  name: string;
+  fallbackLabel: string;
+}) {
+  const art = getCombatantArt(name);
+
+  return (
+    <div className="relative h-[4.5rem] w-[4.5rem] overflow-hidden rounded-xl border border-slate-800 bg-black/35">
+      {art ? (
+        <Image src={art} alt={name} fill className="object-contain p-2" />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center px-2 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+          {fallbackLabel}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -318,25 +420,54 @@ export default function DamageCalculatorPage(): React.ReactElement {
   const [activeTrainerId, setActiveTrainerId] = useState(defaultTrainerId);
   const [activeRosterPokemonId, setActiveRosterPokemonId] = useState(trainersData[0].pokemon[0].id);
   const [activeAttackerId, setActiveAttackerId] = useState('roark-cranidos');
+  const [attackerCustomOpen, setAttackerCustomOpen] = useState(false);
+  const [defenderCustomOpen, setDefenderCustomOpen] = useState(false);
 
   const activeTrainer = useMemo(() => trainersData.find((trainer) => trainer.id === activeTrainerId) ?? trainersData[0], [activeTrainerId]);
   const activeRosterPokemon = useMemo(() => activeTrainer.pokemon.find((pokemon) => pokemon.id === activeRosterPokemonId) ?? activeTrainer.pokemon[0], [activeRosterPokemonId, activeTrainer]);
   const selectedAttackerPreset = useMemo(() => getPreset(activeAttackerId), [activeAttackerId]);
   const selectedDefenderPreset = useMemo(() => getPreset(activeRosterPokemonId), [activeRosterPokemonId]);
   const attackerPresetOptions = useMemo(() => PRESETS.map((preset) => ({ value: preset.id, label: `${preset.name} // ${preset.trainerName}` })), []);
-  const moveOptions = useMemo(() => selectedAttackerPreset.moves.map((option) => ({ value: option.value, label: `${option.label} // ${option.power} BP` })), [selectedAttackerPreset.moves]);
+  const moveOptions = useMemo(() => {
+    const baseOptions = selectedAttackerPreset.moves.map((option) => ({
+      value: option.value,
+      label: `${option.label} // ${option.power} BP`,
+    }));
+
+    if (!move || baseOptions.some((option) => option.value === move)) {
+      return baseOptions;
+    }
+
+    return [{ value: move, label: `${move} // MANUAL` }, ...baseOptions];
+  }, [move, selectedAttackerPreset.moves]);
   const mappedMoveIntel = useMemo(() => getGymMoveIntelByName(move), [move]);
-  const currentMove = useMemo(() => selectedAttackerPreset.moves.find((option) => option.value === move) ?? selectedAttackerPreset.moves[0], [selectedAttackerPreset.moves, move]);
+  const currentMove = useMemo(
+    () =>
+      selectedAttackerPreset.moves.find((option) => option.value === move) ?? {
+        value: move,
+        label: move,
+        power: 0,
+        type: 'Normal',
+        category: 'physical' as const,
+      },
+    [selectedAttackerPreset.moves, move]
+  );
+  const attackerIntel = useMemo(() => buildLiveCombatantIntel(attacker, selectedAttackerPreset), [attacker, selectedAttackerPreset]);
+  const defenderIntel = useMemo(() => buildLiveCombatantIntel(defender, selectedDefenderPreset), [defender, selectedDefenderPreset]);
+  const attackerTypes = attackerIntel.types;
+  const defenderTypes = defenderIntel.types;
+  const attackerDisplayName = attacker.name || selectedAttackerPreset.name;
+  const defenderDisplayName = defender.name || selectedDefenderPreset.name;
   const minDamage = result?.range[0] ?? 0;
   const maxDamage = result?.range[1] ?? 0;
   const koDisplay = useMemo(() => getKoDisplay(result?.ko), [result?.ko]);
   const damageRolls = useMemo(() => buildDamageRolls(minDamage, maxDamage), [minDamage, maxDamage]);
   const effectiveness = useMemo(() => {
     const moveType = mappedMoveIntel?.type || currentMove?.type || 'Normal';
-    return getEffectiveness(moveType, selectedDefenderPreset.types);
-  }, [currentMove?.type, mappedMoveIntel?.type, selectedDefenderPreset.types]);
-  const offenseStatValue = currentMove?.category === 'special' ? selectedAttackerPreset.stats.spA : selectedAttackerPreset.stats.atk;
-  const defenseStatValue = currentMove?.category === 'special' ? selectedDefenderPreset.stats.spD : selectedDefenderPreset.stats.def;
+    return getEffectiveness(moveType, defenderTypes);
+  }, [currentMove?.type, defenderTypes, mappedMoveIntel?.type]);
+  const offenseStatValue = currentMove?.category === 'special' ? attackerIntel.stats.spA : attackerIntel.stats.atk;
+  const defenseStatValue = currentMove?.category === 'special' ? defenderIntel.stats.spD : defenderIntel.stats.def;
   const leaders = useMemo<TrainerListEntry[]>(
     () =>
       trainersData.map((trainer) => ({
@@ -413,7 +544,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
   }, [setAttacker, setDefender, setMove]);
 
   useEffect(() => {
-    if (!selectedAttackerPreset.moves.some((option) => option.value === move)) {
+    if (!move) {
       setMove(selectedAttackerPreset.moves[0]?.value || 'Earthquake');
     }
   }, [move, selectedAttackerPreset.moves, setMove]);
@@ -484,7 +615,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
 
             <AnimatePresence mode="wait">
               <motion.div
-                key={`${activeAttackerId}-${activeRosterPokemonId}-${move}-${attacker.level}-${defender.level}-${attacker.evs.atk}-${attacker.evs.spA}-${defender.evs.hp}-${defender.evs.def}-${defender.evs.spD}`}
+                key={`${activeAttackerId}-${activeRosterPokemonId}-${move}-${attacker.name}-${attacker.item}-${attacker.ability}-${attacker.nature}-${defender.name}-${defender.item}-${defender.ability}-${defender.nature}-${attacker.level}-${defender.level}-${attacker.evs.atk}-${attacker.evs.spA}-${attacker.evs.spe}-${defender.evs.hp}-${defender.evs.def}-${defender.evs.spD}`}
                 initial={{ opacity: 0.3, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0.18, y: -10 }}
@@ -495,27 +626,32 @@ export default function DamageCalculatorPage(): React.ReactElement {
                   <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
                     <div className="mb-2.5 flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
-                        <div className="relative h-[4.5rem] w-[4.5rem] overflow-hidden rounded-xl border border-slate-800 bg-black/35">
-                          <Image
-                            src={POKEMON_ART_ASSETS[selectedAttackerPreset.enName]}
-                            alt={selectedAttackerPreset.name}
-                            fill
-                            className="object-contain p-2"
-                          />
-                        </div>
+                        <PortraitFrame name={attackerDisplayName} fallbackLabel="CUSTOM UNIT" />
                         <div>
                         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                           Attacker_Vector
                         </div>
                         <div className="mt-1 font-mono text-xl font-black uppercase text-white">
-                          {selectedAttackerPreset.name}
+                          {attackerDisplayName}
                         </div>
+                        {!attackerIntel.valid && attacker.name !== selectedAttackerPreset.enName ? (
+                          <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-amber-300/80">
+                            Manual species name required
+                          </div>
+                        ) : null}
                         </div>
                       </div>
-                      <div className="flex flex-wrap justify-end gap-2">
-                        {selectedAttackerPreset.types.map((type) => (
-                          <TypeIcon key={type} type={type} />
-                        ))}
+                      <div className="flex max-w-[15rem] flex-col items-end gap-2">
+                        <div className="flex flex-wrap justify-end gap-2">
+                          {attackerTypes.map((type) => (
+                            <TypeIcon key={type} type={type} />
+                          ))}
+                        </div>
+                        <ProfileToggleButton
+                          active={attackerCustomOpen}
+                          label={attackerCustomOpen ? 'Close Custom Profile' : 'Custom Profile'}
+                          onClick={() => setAttackerCustomOpen((prev) => !prev)}
+                        />
                       </div>
                     </div>
 
@@ -556,11 +692,78 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       />
                     </div>
 
+                    <AnimatePresence initial={false}>
+                      {attackerCustomOpen ? (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.22, ease: 'easeOut' }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-2.5 rounded-xl border border-emerald-500/10 bg-black/25 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)]">
+                            <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300/70">
+                              Manual Override // use official species and move names
+                            </div>
+                            <div className="grid grid-cols-2 gap-2.5">
+                              <CompactInput
+                                label="Species"
+                                value={attacker.name}
+                                onChange={(value) => setAttacker((prev) => ({ ...prev, name: value }))}
+                              />
+                              <CompactInput
+                                label="Move Name"
+                                value={move}
+                                onChange={setMove}
+                              />
+                              <CompactInput
+                                label="Ability"
+                                value={attacker.ability ?? ''}
+                                onChange={(value) => setAttacker((prev) => ({ ...prev, ability: value }))}
+                              />
+                              <CompactInput
+                                label="Item"
+                                value={attacker.item}
+                                onChange={(value) => setAttacker((prev) => ({ ...prev, item: value }))}
+                              />
+                              <CompactInput
+                                label="Nature"
+                                value={attacker.nature}
+                                onChange={(value) => setAttacker((prev) => ({ ...prev, nature: value }))}
+                              />
+                              <CompactInput
+                                label="SPE EV"
+                                type="number"
+                                value={attacker.evs.spe ?? 0}
+                                onChange={(value) =>
+                                  setAttacker((prev) => ({
+                                    ...prev,
+                                    evs: { ...prev.evs, spe: Math.max(0, Number(value) || 0) },
+                                  }))
+                                }
+                              />
+                              <CompactInput
+                                label="SPA EV"
+                                type="number"
+                                value={attacker.evs.spA ?? 0}
+                                onChange={(value) =>
+                                  setAttacker((prev) => ({
+                                    ...prev,
+                                    evs: { ...prev.evs, spA: Math.max(0, Number(value) || 0) },
+                                  }))
+                                }
+                              />
+                            </div>
+                          </div>
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
+
                     <div className="mt-3 grid grid-cols-3 gap-2.5">
                       {[
                         { label: 'POWER', value: mappedMoveIntel?.power ?? currentMove?.power ?? 0 },
                         { label: 'ATK', value: offenseStatValue },
-                        { label: 'SPEED', value: selectedAttackerPreset.stats.spe },
+                        { label: 'SPEED', value: attackerIntel.stats.spe },
                       ].map((item) => (
                         <div
                           key={item.label}
@@ -580,27 +783,32 @@ export default function DamageCalculatorPage(): React.ReactElement {
                   <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
                     <div className="mb-2.5 flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
-                        <div className="relative h-[4.5rem] w-[4.5rem] overflow-hidden rounded-xl border border-slate-800 bg-black/35">
-                          <Image
-                            src={POKEMON_ART_ASSETS[selectedDefenderPreset.enName]}
-                            alt={selectedDefenderPreset.name}
-                            fill
-                            className="object-contain p-2"
-                          />
-                        </div>
+                        <PortraitFrame name={defenderDisplayName} fallbackLabel="CUSTOM UNIT" />
                         <div>
                         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                           Defender_Dossier
                         </div>
                         <div className="mt-1 font-mono text-xl font-black uppercase text-white">
-                          {selectedDefenderPreset.name}
+                          {defenderDisplayName}
                         </div>
+                        {!defenderIntel.valid && defender.name !== selectedDefenderPreset.enName ? (
+                          <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-amber-300/80">
+                            Manual species name required
+                          </div>
+                        ) : null}
                         </div>
                       </div>
-                      <div className="flex flex-wrap justify-end gap-2">
-                        {selectedDefenderPreset.types.map((type) => (
-                          <TypeIcon key={type} type={type} />
-                        ))}
+                      <div className="flex max-w-[15rem] flex-col items-end gap-2">
+                        <div className="flex flex-wrap justify-end gap-2">
+                          {defenderTypes.map((type) => (
+                            <TypeIcon key={type} type={type} />
+                          ))}
+                        </div>
+                        <ProfileToggleButton
+                          active={defenderCustomOpen}
+                          label={defenderCustomOpen ? 'Close Custom Profile' : 'Custom Profile'}
+                          onClick={() => setDefenderCustomOpen((prev) => !prev)}
+                        />
                       </div>
                     </div>
 
@@ -651,6 +859,46 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       />
                     </div>
 
+                    <AnimatePresence initial={false}>
+                      {defenderCustomOpen ? (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.22, ease: 'easeOut' }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-2.5 rounded-xl border border-emerald-500/10 bg-black/25 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)]">
+                            <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300/70">
+                              Manual Override // refine target dossier
+                            </div>
+                            <div className="grid grid-cols-2 gap-2.5">
+                              <CompactInput
+                                label="Species"
+                                value={defender.name}
+                                onChange={(value) => setDefender((prev) => ({ ...prev, name: value }))}
+                              />
+                              <CompactInput
+                                label="Ability"
+                                value={defender.ability ?? ''}
+                                onChange={(value) => setDefender((prev) => ({ ...prev, ability: value }))}
+                              />
+                              <CompactInput
+                                label="Item"
+                                value={defender.item}
+                                onChange={(value) => setDefender((prev) => ({ ...prev, item: value }))}
+                              />
+                              <CompactInput
+                                label="Nature"
+                                value={defender.nature}
+                                onChange={(value) => setDefender((prev) => ({ ...prev, nature: value }))}
+                              />
+                            </div>
+                          </div>
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
+
                     <div className="mt-3 grid grid-cols-3 gap-2.5">
                       {[
                         { label: 'DEF', value: defenseStatValue },
@@ -683,7 +931,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                           Tactical_Readout
                         </div>
                         <div className="mt-1.5 text-xs leading-5 text-slate-300">
-                          {result?.desc || 'Awaiting synchronized parameters. Select attack vector, move package, and target dossier.'}
+                          {result?.desc || 'Awaiting synchronized parameters. Select attack vector or deploy a manual custom profile, then refine move package and target dossier.'}
                         </div>
                       </div>
                     </div>
