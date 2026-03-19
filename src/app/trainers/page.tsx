@@ -129,7 +129,7 @@ function TrainerPortrait({
 }): React.ReactElement {
   return (
     <div
-      className="relative aspect-[4/5] overflow-hidden rounded-2xl border bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.98))]"
+      className="relative aspect-[4/4.55] overflow-hidden rounded-2xl border bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.98))]"
       style={{
         borderColor: 'var(--trainer-primary-border)',
         boxShadow: '0 0 32px var(--trainer-primary-faint)',
@@ -144,7 +144,7 @@ function TrainerPortrait({
         }}
       />
       <div
-        className="absolute inset-x-0 top-0 h-24"
+        className="absolute inset-x-0 top-0 h-20"
         style={{ background: 'linear-gradient(180deg, var(--trainer-primary-faint), transparent)' }}
       />
       <div
@@ -157,23 +157,23 @@ function TrainerPortrait({
         {trainer.specialty}
       </div>
       <motion.div
-        className="absolute bottom-8 left-1/2 h-24 w-24 -translate-x-1/2 rounded-full blur-3xl"
+        className="absolute bottom-6 left-1/2 h-20 w-20 -translate-x-1/2 rounded-full blur-3xl"
         animate={{ scale: [1, 1.08, 1] }}
         transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
         style={{ backgroundColor: 'var(--trainer-primary-glow)' }}
       />
-      <div className="absolute inset-0 flex items-center justify-center px-8 pb-8 pt-16">
-        <div className="relative h-[86%] w-[86%] overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-950/45">
+      <div className="absolute inset-0 flex items-center justify-center px-6 pb-6 pt-14">
+        <div className="relative h-[84%] w-[84%] overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-950/45">
           <Image
             src={LEADER_ART_ASSETS[trainer.id] || trainer.silhouetteAsset}
             alt={trainer.name}
             fill
-            className="object-contain object-bottom p-5"
+            className="object-contain object-bottom p-4"
           />
         </div>
       </div>
       <div
-        className="absolute bottom-4 left-4 font-mono text-[10px] uppercase tracking-[0.32em]"
+        className="absolute bottom-3 left-4 font-mono text-[10px] uppercase tracking-[0.32em]"
         style={{ color: 'var(--trainer-primary)' }}
       >
         {trainer.portraitLabel}
@@ -462,19 +462,19 @@ export default function BossIntelPage(): React.ReactElement {
                 <TrainerPortrait trainer={currentTrainer} />
 
                 <div
-                  className="rounded-2xl border bg-slate-900/50 p-5"
+                  className="rounded-2xl border bg-slate-900/50 p-4"
                   style={{
                     borderColor: 'var(--trainer-primary-border)',
                     boxShadow: '0 0 18px rgba(15, 23, 42, 0.52)',
                   }}
                 >
-                  <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-white">
+                  <h2 className="mb-2.5 flex items-center gap-2 text-base font-bold text-white">
                     <ShieldAlert className="h-4 w-4 text-red-500" /> {currentTrainer.name}
                   </h2>
-                  <p className="text-sm leading-8 text-slate-400">
+                  <p className="text-[13px] leading-7 text-slate-400">
                     {currentTrainer.intel}
                   </p>
-                  <div className="mt-4 space-y-2">
+                  <div className="mt-3 space-y-1.5">
                     <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
                       THREAT INDEX
                     </div>
@@ -556,9 +556,9 @@ export default function BossIntelPage(): React.ReactElement {
                   <div
                     className="trainer-feed-scroll max-h-[calc(100vh-22rem)] overflow-y-auto pr-5 pt-1"
                     style={{
-                      maskImage: 'linear-gradient(180deg, transparent 0, black 1rem, black calc(100% - 2rem), transparent 100%)',
+                      maskImage: 'linear-gradient(180deg, transparent 0, black 0.9rem, black 100%)',
                       WebkitMaskImage:
-                        'linear-gradient(180deg, transparent 0, black 1rem, black calc(100% - 2rem), transparent 100%)',
+                        'linear-gradient(180deg, transparent 0, black 0.9rem, black 100%)',
                     }}
                   >
                     <motion.div
