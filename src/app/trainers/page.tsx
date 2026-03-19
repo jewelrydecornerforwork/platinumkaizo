@@ -1,8 +1,10 @@
 ﻿"use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Crosshair, ShieldAlert, Zap } from 'lucide-react';
+import { LEADER_ART_ASSETS, POKEMON_ART_ASSETS } from '@/data/remoteAssets';
 import { defaultTrainerId, trainersData } from '@/data/trainers';
 import type { TrainerIntelProfile, TrainerPokemonIntel } from '@/types';
 
@@ -160,22 +162,15 @@ function TrainerPortrait({
         transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
         style={{ backgroundColor: 'var(--trainer-primary-glow)' }}
       />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          className="h-56 w-44"
-          style={{
-            backgroundColor: 'var(--trainer-primary)',
-            WebkitMaskImage: `url(${trainer.silhouetteAsset})`,
-            maskImage: `url(${trainer.silhouetteAsset})`,
-            WebkitMaskRepeat: 'no-repeat',
-            maskRepeat: 'no-repeat',
-            WebkitMaskPosition: 'center',
-            maskPosition: 'center',
-            WebkitMaskSize: 'contain',
-            maskSize: 'contain',
-            filter: 'drop-shadow(0 0 18px var(--trainer-primary-glow))',
-          }}
-        />
+      <div className="absolute inset-0 flex items-center justify-center px-5 pb-6 pt-16">
+        <div className="relative h-full w-full overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-950/45">
+          <Image
+            src={LEADER_ART_ASSETS[trainer.id] || trainer.silhouetteAsset}
+            alt={trainer.name}
+            fill
+            className="object-contain object-bottom p-3"
+          />
+        </div>
       </div>
       <div
         className="absolute bottom-4 left-4 font-mono text-[10px] uppercase tracking-[0.32em]"
@@ -220,12 +215,22 @@ function UnitCard({
 
       <div className="relative z-10">
         <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.28em]" style={{ color: 'var(--trainer-primary)' }}>
-              {unit.level}
-            </p>
-            <h3 className="mt-2 text-lg font-black tracking-tight text-white">{unit.name}</h3>
-            <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-slate-500">{unit.enName}</p>
+          <div className="flex items-start gap-3">
+            <div className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
+              <Image
+                src={POKEMON_ART_ASSETS[unit.enName]}
+                alt={unit.name}
+                fill
+                className="object-contain p-2"
+              />
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em]" style={{ color: 'var(--trainer-primary)' }}>
+                {unit.level}
+              </p>
+              <h3 className="mt-2 text-lg font-black tracking-tight text-white">{unit.name}</h3>
+              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-slate-500">{unit.enName}</p>
+            </div>
           </div>
           <div
             className="rounded-lg border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em]"
@@ -535,3 +540,4 @@ export default function BossIntelPage(): React.ReactElement {
     </>
   );
 }
+

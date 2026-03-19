@@ -13,6 +13,7 @@ import { CommunityLinks } from '@/components/home/CommunityLinks';
 import { ExternalIntel } from '@/components/home/ExternalIntel';
 import { StatusMedals } from '@/components/home/StatusMedals';
 import { TacticalFrame } from '@/components/ui/TacticalFrame';
+import { LEADER_ART_ASSETS } from '@/data/remoteAssets';
 
 const statusBadges = [
   'DATABASE: ONLINE',
@@ -21,10 +22,10 @@ const statusBadges = [
 ] as const;
 
 const gymQuickAccess = [
-  { id: '01', name: 'Roark', href: '/trainers', asset: '/silhouettes/roark.svg' },
-  { id: '02', name: 'Gardenia', href: '/trainers', asset: '/silhouettes/gardenia.svg' },
-  { id: '03', name: 'Maylene', href: '/trainers', asset: '/silhouettes/maylene.svg' },
-  { id: '04', name: 'Wake', href: '/trainers', asset: '/silhouettes/wake.svg' },
+  { id: '01', name: 'Roark', href: '/trainers', asset: LEADER_ART_ASSETS.roark },
+  { id: '02', name: 'Gardenia', href: '/trainers', asset: LEADER_ART_ASSETS.gardenia },
+  { id: '03', name: 'Maylene', href: '/trainers', asset: LEADER_ART_ASSETS.maylene },
+  { id: '04', name: 'Wake', href: '/trainers', asset: LEADER_ART_ASSETS.wake },
 ] as const;
 
 const nodeEnvelope = [
