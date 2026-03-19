@@ -242,16 +242,6 @@ function UnitCard({
               <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-slate-500">{unit.enName}</p>
             </div>
           </div>
-          <div
-            className="rounded-lg border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em]"
-            style={{
-              borderColor: 'var(--trainer-primary-border)',
-              backgroundColor: 'var(--trainer-primary-faint)',
-              color: 'var(--trainer-primary)',
-            }}
-          >
-            {unit.role}
-          </div>
         </div>
 
         <p className="mb-4 text-[13px] leading-6 text-slate-400">{unit.tactic}</p>
@@ -267,6 +257,18 @@ function UnitCard({
         </div>
 
         <div className="space-y-2 text-xs">
+          <div className="flex justify-end">
+            <div
+              className="rounded-lg border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em]"
+              style={{
+                borderColor: 'var(--trainer-primary-border)',
+                backgroundColor: 'var(--trainer-primary-faint)',
+                color: 'var(--trainer-primary)',
+              }}
+            >
+              {unit.role}
+            </div>
+          </div>
           <div className="flex items-center justify-between rounded-lg bg-slate-950/70 px-3 py-2">
             <span className="text-slate-500">THREAT FLAG</span>
             <span style={{ color: 'var(--trainer-primary)' }}>{unit.note}</span>
@@ -528,31 +530,6 @@ export default function BossIntelPage(): React.ReactElement {
                 </div>
 
                 <div className="relative">
-                  <div className="pointer-events-none absolute right-0 top-0 z-10 flex h-full w-10 flex-col items-center justify-between py-3">
-                    <div
-                      className="rounded-full border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em]"
-                      style={{
-                        borderColor: 'var(--trainer-primary-border)',
-                        color: 'var(--trainer-primary)',
-                        backgroundColor: 'rgba(2, 6, 23, 0.82)',
-                        boxShadow: '0 0 14px var(--trainer-primary-faint)',
-                      }}
-                    >
-                      Up
-                    </div>
-                    <div
-                      className="rounded-full border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em]"
-                      style={{
-                        borderColor: 'var(--trainer-primary-border)',
-                        color: 'var(--trainer-primary)',
-                        backgroundColor: 'rgba(2, 6, 23, 0.82)',
-                        boxShadow: '0 0 14px var(--trainer-primary-faint)',
-                      }}
-                    >
-                      Down
-                    </div>
-                  </div>
-
                   <div
                     className="trainer-feed-scroll max-h-[calc(100vh-22rem)] overflow-y-auto pr-5 pt-1"
                     style={{
