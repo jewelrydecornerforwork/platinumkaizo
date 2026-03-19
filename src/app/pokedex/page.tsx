@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { ChevronDown, ScanSearch, ShieldAlert, X } from 'lucide-react';
-import { TacticalFrame } from '@/components/ui/TacticalFrame';
+import { PinyinSearchInput } from '@/components/ui/PinyinSearchInput';
 import { trainersData } from '@/data/trainers';
 
 type PokedexEntry = {
@@ -29,6 +29,8 @@ type PokedexEntry = {
   };
 };
 
+const ALL_TYPE_OPTION = '全部属性';
+
 const pokemonLabels: Record<string, string> = {
   Cranidos: '头盖龙',
   Onix: '大岩蛇',
@@ -54,6 +56,7 @@ const pokemonLabels: Record<string, string> = {
   Azumarill: '玛力露丽',
   Pelipper: '大嘴鸥',
   Poliwrath: '蚊香泳士',
+  Garchomp: '烈咬陆鲨',
 };
 
 const trainerLabels: Record<string, string> = {
@@ -91,7 +94,7 @@ const typeMap: Record<string, string[]> = {
 };
 
 const typeOptions = [
-  '全部属性',
+  ALL_TYPE_OPTION,
   'Rock',
   'Ground',
   'Steel',
@@ -104,12 +107,72 @@ const typeOptions = [
   'Flying',
 ] as const;
 
+const pokemonSearchIndex: Record<string, { zh: string; initials: string }> = {
+  Cranidos: { zh: '头盖龙', initials: 'tgl' },
+  Onix: { zh: '大岩蛇', initials: 'dys' },
+  Geodude: { zh: '小拳石', initials: 'xqs' },
+  Shieldon: { zh: '盾甲龙', initials: 'djl' },
+  Nosepass: { zh: '朝北鼻', initials: 'cbb' },
+  Aron: { zh: '可可多拉', initials: 'kkdl' },
+  Roserade: { zh: '罗丝雷朵', initials: 'lsld' },
+  Breloom: { zh: '斗笠菇', initials: 'dlg' },
+  Tangela: { zh: '蔓藤怪', initials: 'mtg' },
+  Cherrim: { zh: '樱花儿', initials: 'yhe' },
+  Grovyle: { zh: '森林蜥蜴', initials: 'slxy' },
+  Grotle: { zh: '树林龟', initials: 'slg' },
+  Lucario: { zh: '路卡利欧', initials: 'lklo' },
+  Medicham: { zh: '恰雷姆', initials: 'qlm' },
+  Machoke: { zh: '豪力', initials: 'hl' },
+  Hariyama: { zh: '幕下力士', initials: 'mxls' },
+  Toxicroak: { zh: '毒骷蛙', initials: 'dkw' },
+  Heracross: { zh: '赫拉克罗斯', initials: 'hlkls' },
+  Gyarados: { zh: '暴鲤龙', initials: 'bll' },
+  Floatzel: { zh: '浮潜鼬', initials: 'fqy' },
+  Quagsire: { zh: '沼王', initials: 'zw' },
+  Azumarill: { zh: '玛力露丽', initials: 'mlll' },
+  Pelipper: { zh: '大嘴鸥', initials: 'dzo' },
+  Poliwrath: { zh: '蚊香泳士', initials: 'wxys' },
+  Garchomp: { zh: '烈咬陆鲨', initials: 'llls' },
+};
+
+const normalizeQuery = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '');
+
+function filterPokemon(
+  entry: PokedexEntry,
+  query: string,
+  selectedType: string,
+  kaizoOnly: boolean
+) {
+  const typeMatch = selectedType === ALL_TYPE_OPTION || entry.types.includes(selectedType);
+  const kaizoMatch = !kaizoOnly || entry.hasKaizoRevision;
+
+  if (!typeMatch || !kaizoMatch) {
+    return false;
+  }
+
+  const normalizedQuery = normalizeQuery(query);
+
+  if (!normalizedQuery) {
+    return true;
+  }
+
+  const indexedPokemon = pokemonSearchIndex[entry.enName];
+  const searchPool = [
+    entry.name,
+    entry.enName,
+    indexedPokemon?.zh ?? '',
+    indexedPokemon?.initials ?? '',
+  ]
+    .map((value) => normalizeQuery(value))
+    .filter(Boolean);
+
+  return searchPool.some((value) => value.includes(normalizedQuery));
+}
+
 const pokedexEntries: PokedexEntry[] = trainersData.flatMap((trainer) =>
   trainer.pokemon.map((pokemon) => {
     const threatScore =
-      Math.round(
-        (pokemon.stats.atk + pokemon.stats.spA + pokemon.stats.spe + trainer.threatLevel) / 4
-      ) || 50;
+      Math.round((pokemon.stats.atk + pokemon.stats.spA + pokemon.stats.spe + trainer.threatLevel) / 4) || 50;
 
     return {
       id: pokemon.id,
@@ -234,25 +297,17 @@ function DetailDrawer({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-              战术定位
-            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">战术定位</div>
             <div className="mt-2 text-sm text-white">{entry.role}</div>
           </div>
           <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-              威胁等级
-            </div>
-            <div className="mt-2 font-mono text-2xl font-black text-emerald-300">
-              T-{entry.threatScore}
-            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">威胁等级</div>
+            <div className="mt-2 font-mono text-2xl font-black text-emerald-300">T-{entry.threatScore}</div>
           </div>
         </div>
 
         <div className="mt-5 rounded-2xl border border-slate-800 bg-black/20 p-4">
-          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-            种族值截面
-          </div>
+          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">种族值截面</div>
           <div className="grid grid-cols-3 gap-3 font-mono text-xs text-slate-300">
             <div>HP {entry.stats.hp}</div>
             <div>ATK {entry.stats.atk}</div>
@@ -265,36 +320,26 @@ function DetailDrawer({
 
         <div className="mt-5 space-y-4">
           <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-              Kaizo 修订
-            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Kaizo 修订</div>
             <p className="mt-2 text-sm leading-6 text-slate-300">{entry.note}</p>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-              战术建议
-            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">战术建议</div>
             <p className="mt-2 text-sm leading-6 text-slate-300">{entry.tactic}</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                特性
-              </div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">特性</div>
               <div className="mt-2 text-sm text-white">{entry.ability}</div>
             </div>
             <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                道具
-              </div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">道具</div>
               <div className="mt-2 text-sm text-white">{entry.item}</div>
             </div>
             <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                性格
-              </div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">性格</div>
               <div className="mt-2 text-sm text-white">{entry.nature}</div>
             </div>
           </div>
@@ -305,30 +350,34 @@ function DetailDrawer({
 }
 
 export default function PokedexPage(): React.ReactElement {
-  const [selectedType, setSelectedType] = useState<string>('全部属性');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState<string>(ALL_TYPE_OPTION);
   const [kaizoOnly, setKaizoOnly] = useState<boolean>(true);
   const [activeEntry, setActiveEntry] = useState<PokedexEntry | null>(null);
+  const deferredQuery = useDeferredValue(searchQuery);
 
   const filteredEntries = useMemo(() => {
-    return pokedexEntries.filter((entry) => {
-      const typeMatch =
-        selectedType === '全部属性' || entry.types.includes(selectedType);
-      const kaizoMatch = !kaizoOnly || entry.hasKaizoRevision;
-      return typeMatch && kaizoMatch;
-    });
-  }, [kaizoOnly, selectedType]);
+    return pokedexEntries.filter((entry) =>
+      filterPokemon(entry, deferredQuery, selectedType, kaizoOnly)
+    );
+  }, [deferredQuery, kaizoOnly, selectedType]);
 
   return (
     <div className="px-6 py-12 md:px-12">
       <div className="mx-auto max-w-7xl space-y-6">
         <section>
-          <h1 className="title-strong text-4xl text-emerald-300 md:text-5xl">
-            全图鉴战术索引
-          </h1>
+          <h1 className="title-strong text-4xl text-emerald-300 md:text-5xl">全图鉴战术索引</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-            以 Kaizo 环境威胁评估为核心的战术图鉴面板。筛选属性后可快速锁定关键目标，并优先查看已确认改动单位。
+            以 Kaizo 环境威胁评估为核心的战术图鉴面板。支持中文、英文与拼音首字母实时检索，帮助您快速锁定高优先级作战单位。
           </p>
         </section>
+
+        <div className="space-y-3">
+          <PinyinSearchInput onSearch={setSearchQuery} />
+          <div className="inline-flex rounded-full border border-emerald-500/15 bg-slate-950/70 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] text-emerald-400/70">
+            MATCH_FOUND: {filteredEntries.length}_UNITS
+          </div>
+        </div>
 
         <FilterBar
           selectedType={selectedType}
@@ -351,18 +400,14 @@ export default function PokedexPage(): React.ReactElement {
                     <ShieldAlert className="h-3.5 w-3.5" />
                     战术威胁等级
                   </div>
-                  <div className="font-mono text-2xl font-black text-white">
-                    T-{entry.threatScore}
-                  </div>
+                  <div className="font-mono text-2xl font-black text-white">T-{entry.threatScore}</div>
                 </div>
               </div>
 
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-base font-black text-white">{entry.name}</h2>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                    {entry.enName}
-                  </p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{entry.enName}</p>
                 </div>
                 <span className="rounded-full border border-emerald-500/15 bg-emerald-500/10 px-2 py-1 font-mono text-[9px] uppercase text-emerald-300/70">
                   {entry.trainer}
@@ -381,9 +426,7 @@ export default function PokedexPage(): React.ReactElement {
               </div>
 
               <div className="space-y-2">
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                  {entry.role}
-                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{entry.role}</p>
                 <p className="line-clamp-2 text-xs leading-5 text-slate-400">{entry.note}</p>
               </div>
             </button>
@@ -395,4 +438,3 @@ export default function PokedexPage(): React.ReactElement {
     </div>
   );
 }
-
