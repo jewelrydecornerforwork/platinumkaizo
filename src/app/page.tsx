@@ -3,14 +3,14 @@ import Link from 'next/link';
 import {
   BookOpenText,
   Calculator,
-  Github,
   Server,
   Shield,
   TerminalSquare,
   Users,
 } from 'lucide-react';
 import { GlobalStats } from '@/components/home/GlobalStats';
-import { LiveFeed } from '@/components/home/LiveFeed';
+import { CommunityLinks } from '@/components/home/CommunityLinks';
+import { ExternalIntel } from '@/components/home/ExternalIntel';
 import { StatusMedals } from '@/components/home/StatusMedals';
 import { TacticalFrame } from '@/components/ui/TacticalFrame';
 
@@ -25,12 +25,6 @@ const gymQuickAccess = [
   { id: '02', name: 'Gardenia', href: '/trainers', asset: '/silhouettes/gardenia.svg' },
   { id: '03', name: 'Maylene', href: '/trainers', asset: '/silhouettes/maylene.svg' },
   { id: '04', name: 'Wake', href: '/trainers', asset: '/silhouettes/wake.svg' },
-] as const;
-
-const commandLinks = [
-  { label: 'Discord', href: '#' },
-  { label: 'GitHub', href: '#' },
-  { label: 'Docs', href: '#' },
 ] as const;
 
 const nodeEnvelope = [
@@ -262,11 +256,11 @@ export default function Home(): React.ReactElement {
             </TacticalFrame>
 
             <TacticalFrame
-              title="Terminal Log"
-              subtitle="LIVE_FEED"
+              title="Official Intel"
+              subtitle="PK_CORE"
               className="col-span-12 md:col-span-8 lg:col-span-3 shadow-[0_0_28px_rgba(16,185,129,0.06),inset_0_1px_3px_rgba(16,185,129,0.3)]"
             >
-              <LiveFeed />
+              <ExternalIntel />
             </TacticalFrame>
 
             <TacticalFrame
@@ -348,22 +342,11 @@ export default function Home(): React.ReactElement {
             </TacticalFrame>
 
             <TacticalFrame
-              title="Command Links"
-              subtitle="COMMS_PORT"
+              title="Community Hub"
+              subtitle="TACTICAL_COMMS"
               className="col-span-12 lg:col-span-3 shadow-[0_0_22px_rgba(15,23,42,0.7),inset_0_1px_3px_rgba(16,185,129,0.3)]"
             >
-              <div className="flex h-full flex-wrap items-center justify-center gap-3">
-                {commandLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 font-mono text-xs uppercase tracking-[0.24em] text-slate-200 backdrop-blur-md transition-all hover:border-emerald-500/40 hover:text-emerald-300 hover:shadow-[0_0_18px_rgba(16,185,129,0.22)]"
-                  >
-                    {link.label === 'GitHub' ? <Github size={14} /> : null}
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
+              <CommunityLinks />
             </TacticalFrame>
           </section>
         </div>
