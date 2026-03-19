@@ -1,9 +1,33 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ChevronDown, ScanSearch, ShieldAlert } from 'lucide-react';
+import { ChevronDown, ScanSearch, ShieldAlert, X } from 'lucide-react';
 import { TacticalFrame } from '@/components/ui/TacticalFrame';
 import { trainersData } from '@/data/trainers';
+
+type PokedexEntry = {
+  id: string;
+  name: string;
+  enName: string;
+  trainer: string;
+  role: string;
+  note: string;
+  tactic: string;
+  ability: string;
+  item: string;
+  nature: string;
+  types: string[];
+  threatScore: number;
+  hasKaizoRevision: boolean;
+  stats: {
+    hp: number;
+    atk: number;
+    def: number;
+    spA: number;
+    spD: number;
+    spe: number;
+  };
+};
 
 const pokemonLabels: Record<string, string> = {
   Cranidos: '头盖龙',
@@ -80,7 +104,7 @@ const typeOptions = [
   'Flying',
 ] as const;
 
-const pokedexEntries = trainersData.flatMap((trainer) =>
+const pokedexEntries: PokedexEntry[] = trainersData.flatMap((trainer) =>
   trainer.pokemon.map((pokemon) => {
     const threatScore =
       Math.round(
@@ -95,9 +119,13 @@ const pokedexEntries = trainersData.flatMap((trainer) =>
       role: pokemon.role,
       note: pokemon.note,
       tactic: pokemon.tactic,
+      ability: pokemon.ability,
+      item: pokemon.item,
+      nature: pokemon.nature,
       types: typeMap[pokemon.enName] || ['Normal'],
       threatScore,
       hasKaizoRevision: true,
+      stats: pokemon.stats,
     };
   })
 );
@@ -161,9 +189,125 @@ function FilterBar({
   );
 }
 
+function DetailDrawer({
+  entry,
+  onClose,
+}: {
+  entry: PokedexEntry | null;
+  onClose: () => void;
+}) {
+  if (!entry) return null;
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-end justify-end bg-black/65 backdrop-blur-sm">
+      <div className="h-full w-full max-w-xl border-l border-emerald-500/15 bg-slate-950/95 p-6 shadow-[-20px_0_80px_rgba(2,6,23,0.7)]">
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/60">
+              Dex_Unit_Record
+            </p>
+            <h2 className="mt-2 text-3xl font-black text-white">{entry.name}</h2>
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
+              {entry.enName} / {entry.trainer}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-slate-800 bg-black/20 p-3 text-slate-300 transition-all hover:border-emerald-500/35 hover:text-emerald-300"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="mb-5 flex flex-wrap gap-2">
+          {entry.types.map((type) => (
+            <span
+              key={`${entry.id}-${type}`}
+              className="rounded-full border border-slate-700 bg-black/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-300"
+            >
+              {type}
+            </span>
+          ))}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              战术定位
+            </div>
+            <div className="mt-2 text-sm text-white">{entry.role}</div>
+          </div>
+          <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              威胁等级
+            </div>
+            <div className="mt-2 font-mono text-2xl font-black text-emerald-300">
+              T-{entry.threatScore}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-slate-800 bg-black/20 p-4">
+          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+            种族值截面
+          </div>
+          <div className="grid grid-cols-3 gap-3 font-mono text-xs text-slate-300">
+            <div>HP {entry.stats.hp}</div>
+            <div>ATK {entry.stats.atk}</div>
+            <div>DEF {entry.stats.def}</div>
+            <div>SPA {entry.stats.spA}</div>
+            <div>SPD {entry.stats.spD}</div>
+            <div>SPE {entry.stats.spe}</div>
+          </div>
+        </div>
+
+        <div className="mt-5 space-y-4">
+          <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              Kaizo 修订
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{entry.note}</p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              战术建议
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{entry.tactic}</p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                特性
+              </div>
+              <div className="mt-2 text-sm text-white">{entry.ability}</div>
+            </div>
+            <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                道具
+              </div>
+              <div className="mt-2 text-sm text-white">{entry.item}</div>
+            </div>
+            <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                性格
+              </div>
+              <div className="mt-2 text-sm text-white">{entry.nature}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PokedexPage(): React.ReactElement {
   const [selectedType, setSelectedType] = useState<string>('全部属性');
   const [kaizoOnly, setKaizoOnly] = useState<boolean>(true);
+  const [activeEntry, setActiveEntry] = useState<PokedexEntry | null>(null);
 
   const filteredEntries = useMemo(() => {
     return pokedexEntries.filter((entry) => {
@@ -178,7 +322,9 @@ export default function PokedexPage(): React.ReactElement {
     <div className="px-6 py-12 md:px-12">
       <div className="mx-auto max-w-7xl space-y-6">
         <section>
-          <h1 className="title-strong text-4xl text-emerald-300 md:text-5xl">全图鉴战术索引</h1>
+          <h1 className="title-strong text-4xl text-emerald-300 md:text-5xl">
+            全图鉴战术索引
+          </h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
             以 Kaizo 环境威胁评估为核心的战术图鉴面板。筛选属性后可快速锁定关键目标，并优先查看已确认改动单位。
           </p>
@@ -193,9 +339,11 @@ export default function PokedexPage(): React.ReactElement {
 
         <section className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
           {filteredEntries.map((entry) => (
-            <div
+            <button
               key={entry.id}
-              className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 p-4 backdrop-blur-md transition-all duration-300 hover:border-emerald-500/35"
+              type="button"
+              onClick={() => setActiveEntry(entry)}
+              className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 p-4 text-left backdrop-blur-md transition-all duration-300 hover:border-emerald-500/35"
             >
               <div className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-emerald-500/12 via-transparent to-transparent p-3 transition-transform duration-300 group-hover:translate-y-0">
                 <div className="rounded-xl border border-emerald-500/20 bg-black/40 p-3">
@@ -238,10 +386,13 @@ export default function PokedexPage(): React.ReactElement {
                 </p>
                 <p className="line-clamp-2 text-xs leading-5 text-slate-400">{entry.note}</p>
               </div>
-            </div>
+            </button>
           ))}
         </section>
       </div>
+
+      <DetailDrawer entry={activeEntry} onClose={() => setActiveEntry(null)} />
     </div>
   );
 }
+

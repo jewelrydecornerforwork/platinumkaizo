@@ -6,6 +6,17 @@ import { TacticalFrame } from '@/components/ui/TacticalFrame';
 import { SynergyMatrix } from '@/components/teambuilder/SynergyMatrix';
 import { trainersData } from '@/data/trainers';
 
+type CatalogEntry = {
+  id: string;
+  name: string;
+  enName: string;
+  trainer: string;
+  role: string;
+  note: string;
+  tactic: string;
+  types: string[];
+};
+
 const pokemonLabels: Record<string, string> = {
   Cranidos: '头盖龙',
   Onix: '大岩蛇',
@@ -67,7 +78,7 @@ const typeMap: Record<string, string[]> = {
   Poliwrath: ['Water', 'Fighting'],
 };
 
-const catalog = trainersData.flatMap((trainer) =>
+const catalog: CatalogEntry[] = trainersData.flatMap((trainer) =>
   trainer.pokemon.map((pokemon) => ({
     id: pokemon.id,
     name: pokemonLabels[pokemon.enName] || pokemon.enName,
@@ -86,7 +97,7 @@ function TeamSlot({
   onOpen,
 }: {
   index: number;
-  member: (typeof catalog)[number] | null;
+  member: CatalogEntry | null;
   onOpen: () => void;
 }) {
   return (
@@ -127,9 +138,7 @@ function TeamSlot({
 }
 
 export default function TeambuilderPage(): React.ReactElement {
-  const [team, setTeam] = useState<Array<(typeof catalog)[number] | null>>(
-    Array.from({ length: 6 }, () => null)
-  );
+  const [team, setTeam] = useState<Array<CatalogEntry | null>>(Array.from({ length: 6 }, () => null));
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [query, setQuery] = useState<string>('');
 
@@ -145,7 +154,7 @@ export default function TeambuilderPage(): React.ReactElement {
 
   const selectedCount = team.filter(Boolean).length;
 
-  const handleSelect = (member: (typeof catalog)[number]) => {
+  const handleSelect = (member: CatalogEntry) => {
     if (activeSlot === null) return;
     setTeam((prev) => prev.map((slot, index) => (index === activeSlot ? member : slot)));
     setActiveSlot(null);

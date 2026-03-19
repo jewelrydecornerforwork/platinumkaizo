@@ -8,7 +8,7 @@ type TeamMember = {
   types: string[];
 } | null;
 
-const attackTypes = [
+const types = [
   'Fire',
   'Water',
   'Grass',
@@ -36,8 +36,21 @@ function getDefensiveMultiplier(attackType: string, defendTypes: string[]): numb
   );
 }
 
+function getTone(score: number): string {
+  if (score >= 3) return 'from-emerald-500/35 to-emerald-400/10 text-emerald-300';
+  if (score >= 1) return 'from-cyan-500/25 to-cyan-400/10 text-cyan-300';
+  if (score === 0) return 'from-slate-700/30 to-slate-600/10 text-slate-300';
+  if (score <= -3) return 'from-red-500/35 to-red-400/10 text-red-300';
+  return 'from-orange-500/30 to-orange-400/10 text-orange-300';
+}
+
+function getBarWidth(score: number): string {
+  const normalized = Math.min(100, Math.max(12, 50 + score * 12));
+  return `${normalized}%`;
+}
+
 export const SynergyMatrix = ({ team }: { team: TeamMember[] }) => {
-  const analysis = attackTypes.map((attackType) => {
+  const analysis = types.map((attackType) => {
     const activeMembers = team.filter(Boolean) as Exclude<TeamMember, null>[];
 
     const stats = activeMembers.reduce(
@@ -63,35 +76,35 @@ export const SynergyMatrix = ({ team }: { team: TeamMember[] }) => {
         Team_Synergy_Analysis // 联防演算
       </h3>
       <div className="grid grid-cols-6 gap-2 md:grid-cols-9">
-        {analysis.map((entry) => {
-          const tone =
-            entry.score > 0
-              ? 'text-emerald-400'
-              : entry.score < 0
-                ? 'text-red-400'
-                : 'text-slate-300';
-
-          return (
-            <div
-              key={entry.attackType}
-              className="rounded border border-slate-900 bg-black/40 p-2"
-            >
+        {analysis.map((entry) => (
+          <div
+            key={entry.attackType}
+            className="overflow-hidden rounded border border-slate-900 bg-black/40"
+          >
+            <div className="px-2 pt-2">
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-[9px] font-mono text-slate-500">
                   {entry.attackType.slice(0, 3)}
                 </span>
-                <span className={`text-xs font-bold ${tone}`}>
+                <span className={`text-xs font-bold ${getTone(entry.score).split(' ').pop()}`}>
                   {entry.score >= 0 ? `+${entry.score}` : entry.score}
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-1 text-center text-[9px] font-mono text-slate-500">
+              <div className="mb-2 grid grid-cols-3 gap-1 text-center text-[9px] font-mono text-slate-500">
                 <span>W{entry.weak}</span>
                 <span>R{entry.resist}</span>
                 <span>I{entry.immune}</span>
               </div>
             </div>
-          );
-        })}
+
+            <div className="h-1.5 w-full bg-slate-900">
+              <div
+                className={`h-full bg-gradient-to-r ${getTone(entry.score)}`}
+                style={{ width: getBarWidth(entry.score) }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
