@@ -642,6 +642,11 @@ export default function DamageCalculatorPage(): React.ReactElement {
                         </div>
                       </div>
                       <div className="flex max-w-[15rem] flex-col items-end gap-2">
+                        <div className="flex flex-wrap justify-end gap-2">
+                          {attackerTypes.map((type) => (
+                            <TypeIcon key={type} type={type} />
+                          ))}
+                        </div>
                         <ProfileToggleButton
                           active={attackerCustomOpen}
                           label={attackerCustomOpen ? 'Close Custom Profile' : 'Custom Profile'}
