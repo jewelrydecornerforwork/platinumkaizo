@@ -184,9 +184,14 @@ function TrainerPortrait({
 
 function UnitCard({
   unit,
+  index,
 }: {
   unit: TrainerPokemonIntel;
+  index: number;
 }): React.ReactElement {
+  const showTopEdge = index < 3;
+  const showBottomEdge = index >= 3;
+
   return (
     <motion.article
       layout
@@ -208,10 +213,27 @@ function UnitCard({
           backgroundSize: '16px 16px',
         }}
       />
-      <div
-        className="absolute inset-x-0 top-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, var(--trainer-primary), transparent)' }}
-      />
+      {showTopEdge ? (
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, var(--trainer-primary-border), var(--trainer-primary), var(--trainer-primary-border), transparent)',
+            boxShadow: '0 0 10px var(--trainer-primary-faint)',
+          }}
+        />
+      ) : null}
+
+      {showBottomEdge ? (
+        <div
+          className="absolute inset-x-0 bottom-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, var(--trainer-primary-border), var(--trainer-primary), var(--trainer-primary-border), transparent)',
+            boxShadow: '0 0 10px var(--trainer-primary-faint)',
+          }}
+        />
+      ) : null}
 
       <div className="relative z-10">
         <div className="mb-4 flex items-start justify-between gap-3">
@@ -563,8 +585,8 @@ export default function BossIntelPage(): React.ReactElement {
                         },
                       }}
                     >
-                      {currentTrainer.pokemon.map((unit) => (
-                        <UnitCard key={`${currentTrainer.id}-${unit.id}`} unit={unit} />
+                      {currentTrainer.pokemon.map((unit, index) => (
+                        <UnitCard key={`${currentTrainer.id}-${unit.id}`} unit={unit} index={index} />
                       ))}
                     </motion.div>
                   </div>
