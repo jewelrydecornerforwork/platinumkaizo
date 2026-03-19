@@ -280,27 +280,15 @@ function CompactInput({ label, value, onChange, type = 'text' }: { label: string
   );
 }
 
-function ProfileToggleButton({
-  active,
+function ProfileBadge({
   label,
-  onClick,
 }: {
-  active: boolean;
   label: string;
-  onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-full border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] transition-all ${
-        active
-          ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200 shadow-[0_0_18px_rgba(16,185,129,0.12)]'
-          : 'border-slate-700 bg-black/35 text-slate-400 hover:border-emerald-500/25 hover:text-emerald-200'
-      }`}
-    >
+    <div className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-200 shadow-[0_0_18px_rgba(16,185,129,0.08)]">
       {label}
-    </button>
+    </div>
   );
 }
 
@@ -425,8 +413,6 @@ export default function DamageCalculatorPage(): React.ReactElement {
   const [activeTrainerId, setActiveTrainerId] = useState(defaultTrainerId);
   const [activeRosterPokemonId, setActiveRosterPokemonId] = useState(trainersData[0].pokemon[0].id);
   const [activeAttackerId, setActiveAttackerId] = useState('roark-cranidos');
-  const [attackerCustomOpen, setAttackerCustomOpen] = useState(false);
-  const [defenderCustomOpen, setDefenderCustomOpen] = useState(false);
 
   const activeTrainer = useMemo(() => trainersData.find((trainer) => trainer.id === activeTrainerId) ?? trainersData[0], [activeTrainerId]);
   const activeRosterPokemon = useMemo(() => activeTrainer.pokemon.find((pokemon) => pokemon.id === activeRosterPokemonId) ?? activeTrainer.pokemon[0], [activeRosterPokemonId, activeTrainer]);
@@ -664,11 +650,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                             <TypeIcon key={type} type={type} />
                           ))}
                         </div>
-                        <ProfileToggleButton
-                          active={attackerCustomOpen}
-                          label={attackerCustomOpen ? 'Close Custom Profile' : 'Custom Profile'}
-                          onClick={() => setAttackerCustomOpen((prev) => !prev)}
-                        />
+                        <ProfileBadge label="PLAYER DOSSIER" />
                       </div>
                     </div>
 
@@ -709,72 +691,60 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       />
                     </div>
 
-                    <AnimatePresence initial={false}>
-                      {attackerCustomOpen ? (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.22, ease: 'easeOut' }}
-                          className="overflow-hidden"
-                        >
-                          <div className="mt-2.5 rounded-xl border border-emerald-500/10 bg-black/25 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)]">
-                            <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300/70">
-                              Manual Override // use official species and move names
-                            </div>
-                            <div className="grid grid-cols-2 gap-2.5">
-                              <CompactInput
-                                label="Species"
-                                value={attacker.name}
-                                onChange={(value) => setAttacker((prev) => ({ ...prev, name: value }))}
-                              />
-                              <CompactInput
-                                label="Move Name"
-                                value={move}
-                                onChange={setMove}
-                              />
-                              <CompactInput
-                                label="Ability"
-                                value={attacker.ability ?? ''}
-                                onChange={(value) => setAttacker((prev) => ({ ...prev, ability: value }))}
-                              />
-                              <CompactInput
-                                label="Item"
-                                value={attacker.item}
-                                onChange={(value) => setAttacker((prev) => ({ ...prev, item: value }))}
-                              />
-                              <CompactInput
-                                label="Nature"
-                                value={attacker.nature}
-                                onChange={(value) => setAttacker((prev) => ({ ...prev, nature: value }))}
-                              />
-                              <CompactInput
-                                label="SPE EV"
-                                type="number"
-                                value={attacker.evs.spe ?? 0}
-                                onChange={(value) =>
-                                  setAttacker((prev) => ({
-                                    ...prev,
-                                    evs: { ...prev.evs, spe: Math.max(0, Number(value) || 0) },
-                                  }))
-                                }
-                              />
-                              <CompactInput
-                                label="SPA EV"
-                                type="number"
-                                value={attacker.evs.spA ?? 0}
-                                onChange={(value) =>
-                                  setAttacker((prev) => ({
-                                    ...prev,
-                                    evs: { ...prev.evs, spA: Math.max(0, Number(value) || 0) },
-                                  }))
-                                }
-                              />
-                            </div>
-                          </div>
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
+                    <div className="mt-2.5 rounded-xl border border-emerald-500/10 bg-black/25 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)]">
+                      <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300/70">
+                        Manual Override // use official species and move names
+                      </div>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <CompactInput
+                          label="Species"
+                          value={attacker.name}
+                          onChange={(value) => setAttacker((prev) => ({ ...prev, name: value }))}
+                        />
+                        <CompactInput
+                          label="Move Name"
+                          value={move}
+                          onChange={setMove}
+                        />
+                        <CompactInput
+                          label="Ability"
+                          value={attacker.ability ?? ''}
+                          onChange={(value) => setAttacker((prev) => ({ ...prev, ability: value }))}
+                        />
+                        <CompactInput
+                          label="Item"
+                          value={attacker.item}
+                          onChange={(value) => setAttacker((prev) => ({ ...prev, item: value }))}
+                        />
+                        <CompactInput
+                          label="Nature"
+                          value={attacker.nature}
+                          onChange={(value) => setAttacker((prev) => ({ ...prev, nature: value }))}
+                        />
+                        <CompactInput
+                          label="SPE EV"
+                          type="number"
+                          value={attacker.evs.spe ?? 0}
+                          onChange={(value) =>
+                            setAttacker((prev) => ({
+                              ...prev,
+                              evs: { ...prev.evs, spe: Math.max(0, Number(value) || 0) },
+                            }))
+                          }
+                        />
+                        <CompactInput
+                          label="SPA EV"
+                          type="number"
+                          value={attacker.evs.spA ?? 0}
+                          onChange={(value) =>
+                            setAttacker((prev) => ({
+                              ...prev,
+                              evs: { ...prev.evs, spA: Math.max(0, Number(value) || 0) },
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
 
                     <div className="mt-3 grid grid-cols-3 gap-2.5">
                       {[
@@ -821,11 +791,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                             <TypeIcon key={type} type={type} />
                           ))}
                         </div>
-                        <ProfileToggleButton
-                          active={defenderCustomOpen}
-                          label={defenderCustomOpen ? 'Close Custom Profile' : 'Custom Profile'}
-                          onClick={() => setDefenderCustomOpen((prev) => !prev)}
-                        />
+                        <ProfileBadge label={activeTrainer.name.toUpperCase()} />
                       </div>
                     </div>
 
@@ -876,45 +842,33 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       />
                     </div>
 
-                    <AnimatePresence initial={false}>
-                      {defenderCustomOpen ? (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.22, ease: 'easeOut' }}
-                          className="overflow-hidden"
-                        >
-                          <div className="mt-2.5 rounded-xl border border-emerald-500/10 bg-black/25 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)]">
-                            <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300/70">
-                              Manual Override // refine target dossier
-                            </div>
-                            <div className="grid grid-cols-2 gap-2.5">
-                              <CompactInput
-                                label="Species"
-                                value={defender.name}
-                                onChange={(value) => setDefender((prev) => ({ ...prev, name: value }))}
-                              />
-                              <CompactInput
-                                label="Ability"
-                                value={defender.ability ?? ''}
-                                onChange={(value) => setDefender((prev) => ({ ...prev, ability: value }))}
-                              />
-                              <CompactInput
-                                label="Item"
-                                value={defender.item}
-                                onChange={(value) => setDefender((prev) => ({ ...prev, item: value }))}
-                              />
-                              <CompactInput
-                                label="Nature"
-                                value={defender.nature}
-                                onChange={(value) => setDefender((prev) => ({ ...prev, nature: value }))}
-                              />
-                            </div>
-                          </div>
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
+                    <div className="mt-2.5 rounded-xl border border-emerald-500/10 bg-black/25 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)]">
+                      <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300/70">
+                        Manual Override // refine target dossier
+                      </div>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <CompactInput
+                          label="Species"
+                          value={defender.name}
+                          onChange={(value) => setDefender((prev) => ({ ...prev, name: value }))}
+                        />
+                        <CompactInput
+                          label="Ability"
+                          value={defender.ability ?? ''}
+                          onChange={(value) => setDefender((prev) => ({ ...prev, ability: value }))}
+                        />
+                        <CompactInput
+                          label="Item"
+                          value={defender.item}
+                          onChange={(value) => setDefender((prev) => ({ ...prev, item: value }))}
+                        />
+                        <CompactInput
+                          label="Nature"
+                          value={defender.nature}
+                          onChange={(value) => setDefender((prev) => ({ ...prev, nature: value }))}
+                        />
+                      </div>
+                    </div>
 
                     <div className="mt-3 grid grid-cols-3 gap-2.5">
                       {[
