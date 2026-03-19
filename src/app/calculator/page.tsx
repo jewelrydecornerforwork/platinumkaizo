@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { Pokemon } from '@smogon/calc';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Radar, ShieldAlert } from 'lucide-react';
+import { ChevronDown, ChevronUp, Radar, ShieldAlert } from 'lucide-react';
 import { TypeIcon } from '@/components/calc/TypeIcon';
 import { LeaderList } from '@/components/trainers/LeaderList';
 import { TYPE_CHART } from '@/constants/typeChart';
@@ -266,6 +266,32 @@ function getCombatantArt(name: string): string | null {
   return POKEMON_ART_ASSETS[name] || null;
 }
 
+function getAbilityOptions(
+  speciesName: string,
+  fallbackPreset: CombatPreset,
+  currentAbility?: string
+): Array<{ value: string; label: string }> {
+  try {
+    const pokemon = new Pokemon(4, speciesName as never);
+    const abilitySet = new Set<string>(
+      Object.values(((pokemon.species as { abilities?: Record<string, string> }).abilities ?? {})).filter(Boolean)
+    );
+
+    if (currentAbility) {
+      abilitySet.add(currentAbility);
+    }
+
+    return Array.from(abilitySet).map((ability) => ({ value: ability, label: ability }));
+  } catch {
+    const fallback = new Set<string>([fallbackPreset.ability]);
+    if (currentAbility) {
+      fallback.add(currentAbility);
+    }
+
+    return Array.from(fallback).map((ability) => ({ value: ability, label: ability }));
+  }
+}
+
 function CompactInput({ label, value, onChange, type = 'text' }: { label: string; value: string | number; onChange: (value: string) => void; type?: 'text' | 'number' }) {
   return (
     <label className="space-y-1.5">
@@ -276,6 +302,57 @@ function CompactInput({ label, value, onChange, type = 'text' }: { label: string
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all focus:border-emerald-400/40"
       />
+    </label>
+  );
+}
+
+function StepperInput({
+  label,
+  value,
+  onChange,
+  min = 0,
+  max = 999,
+  step = 1,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+}) {
+  const clamp = (nextValue: number) => Math.min(max, Math.max(min, nextValue));
+
+  return (
+    <label className="space-y-1.5">
+      <span className="block font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">{label}</span>
+      <div className="relative">
+        <input
+          type="number"
+          value={value}
+          min={min}
+          max={max}
+          step={step}
+          onChange={(event) => onChange(clamp(Number(event.target.value) || min))}
+          className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 pr-12 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all focus:border-emerald-400/40"
+        />
+        <div className="absolute inset-y-1 right-1 flex w-9 flex-col overflow-hidden rounded border border-slate-700 bg-slate-200/95 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
+          <button
+            type="button"
+            onClick={() => onChange(clamp(value + step))}
+            className="flex flex-1 items-center justify-center border-b border-slate-400/70 text-slate-700 transition-colors hover:bg-slate-300"
+          >
+            <ChevronUp className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onChange(clamp(value - step))}
+            className="flex flex-1 items-center justify-center text-slate-700 transition-colors hover:bg-slate-300"
+          >
+            <ChevronDown className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
     </label>
   );
 }
@@ -449,6 +526,14 @@ export default function DamageCalculatorPage(): React.ReactElement {
   const defenderTypes = defenderIntel.types;
   const attackerDisplayName = attacker.name || selectedAttackerPreset.name;
   const defenderDisplayName = defender.name || selectedDefenderPreset.name;
+  const attackerAbilityOptions = useMemo(
+    () => getAbilityOptions(attacker.name, selectedAttackerPreset, attacker.ability),
+    [attacker.ability, attacker.name, selectedAttackerPreset]
+  );
+  const defenderAbilityOptions = useMemo(
+    () => getAbilityOptions(defender.name, selectedDefenderPreset, defender.ability),
+    [defender.ability, defender.name, selectedDefenderPreset]
+  );
   const minDamage = result?.range[0] ?? 0;
   const maxDamage = result?.range[1] ?? 0;
   const koDisplay = useMemo(() => getKoDisplay(result?.ko), [result?.ko]);
@@ -667,34 +752,34 @@ export default function DamageCalculatorPage(): React.ReactElement {
                         onChange={setMove}
                         options={moveOptions}
                       />
-                      <CompactInput
+                      <StepperInput
                         label="Level"
-                        type="number"
                         value={attacker.level}
+                        min={1}
+                        max={100}
                         onChange={(value) =>
                           setAttacker((prev) => ({
                             ...prev,
-                            level: Math.max(1, Number(value) || 1),
+                            level: value,
                           }))
                         }
                       />
-                      <CompactInput
+                      <StepperInput
                         label="ATK EV"
-                        type="number"
                         value={attacker.evs.atk ?? 0}
+                        min={0}
+                        max={252}
+                        step={4}
                         onChange={(value) =>
                           setAttacker((prev) => ({
                             ...prev,
-                            evs: { ...prev.evs, atk: Math.max(0, Number(value) || 0) },
+                            evs: { ...prev.evs, atk: value },
                           }))
                         }
                       />
                     </div>
 
                     <div className="mt-2.5 rounded-xl border border-emerald-500/10 bg-black/25 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)]">
-                      <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300/70">
-                        Manual Override // use official species and move names
-                      </div>
                       <div className="grid grid-cols-2 gap-2.5">
                         <CompactInput
                           label="Species"
@@ -706,10 +791,11 @@ export default function DamageCalculatorPage(): React.ReactElement {
                           value={move}
                           onChange={setMove}
                         />
-                        <CompactInput
+                        <CompactSelect
                           label="Ability"
-                          value={attacker.ability ?? ''}
+                          value={attacker.ability ?? attackerAbilityOptions[0]?.value ?? ''}
                           onChange={(value) => setAttacker((prev) => ({ ...prev, ability: value }))}
+                          options={attackerAbilityOptions}
                         />
                         <CompactInput
                           label="Item"
@@ -721,25 +807,29 @@ export default function DamageCalculatorPage(): React.ReactElement {
                           value={attacker.nature}
                           onChange={(value) => setAttacker((prev) => ({ ...prev, nature: value }))}
                         />
-                        <CompactInput
+                        <StepperInput
                           label="SPE EV"
-                          type="number"
                           value={attacker.evs.spe ?? 0}
+                          min={0}
+                          max={252}
+                          step={4}
                           onChange={(value) =>
                             setAttacker((prev) => ({
                               ...prev,
-                              evs: { ...prev.evs, spe: Math.max(0, Number(value) || 0) },
+                              evs: { ...prev.evs, spe: value },
                             }))
                           }
                         />
-                        <CompactInput
+                        <StepperInput
                           label="SPA EV"
-                          type="number"
                           value={attacker.evs.spA ?? 0}
+                          min={0}
+                          max={252}
+                          step={4}
                           onChange={(value) =>
                             setAttacker((prev) => ({
                               ...prev,
-                              evs: { ...prev.evs, spA: Math.max(0, Number(value) || 0) },
+                              evs: { ...prev.evs, spA: value },
                             }))
                           }
                         />
@@ -796,66 +886,71 @@ export default function DamageCalculatorPage(): React.ReactElement {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5">
-                      <CompactInput
+                      <StepperInput
                         label="Level"
-                        type="number"
                         value={defender.level}
+                        min={1}
+                        max={100}
                         onChange={(value) =>
                           setDefender((prev) => ({
                             ...prev,
-                            level: Math.max(1, Number(value) || 1),
+                            level: value,
                           }))
                         }
                       />
-                      <CompactInput
+                      <StepperInput
                         label="HP EV"
-                        type="number"
                         value={defender.evs.hp ?? 0}
+                        min={0}
+                        max={252}
+                        step={4}
                         onChange={(value) =>
                           setDefender((prev) => ({
                             ...prev,
-                            evs: { ...prev.evs, hp: Math.max(0, Number(value) || 0) },
+                            evs: { ...prev.evs, hp: value },
                           }))
                         }
                       />
-                      <CompactInput
+                      <StepperInput
                         label="DEF EV"
-                        type="number"
                         value={defender.evs.def ?? 0}
+                        min={0}
+                        max={252}
+                        step={4}
                         onChange={(value) =>
                           setDefender((prev) => ({
                             ...prev,
-                            evs: { ...prev.evs, def: Math.max(0, Number(value) || 0) },
+                            evs: { ...prev.evs, def: value },
                           }))
                         }
                       />
-                      <CompactInput
+                      <StepperInput
                         label="SPD EV"
-                        type="number"
                         value={defender.evs.spD ?? 0}
+                        min={0}
+                        max={252}
+                        step={4}
                         onChange={(value) =>
                           setDefender((prev) => ({
                             ...prev,
-                            evs: { ...prev.evs, spD: Math.max(0, Number(value) || 0) },
+                            evs: { ...prev.evs, spD: value },
                           }))
                         }
                       />
                     </div>
 
                     <div className="mt-2.5 rounded-xl border border-emerald-500/10 bg-black/25 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)]">
-                      <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300/70">
-                        Manual Override // refine target dossier
-                      </div>
                       <div className="grid grid-cols-2 gap-2.5">
                         <CompactInput
                           label="Species"
                           value={defender.name}
                           onChange={(value) => setDefender((prev) => ({ ...prev, name: value }))}
                         />
-                        <CompactInput
+                        <CompactSelect
                           label="Ability"
-                          value={defender.ability ?? ''}
+                          value={defender.ability ?? defenderAbilityOptions[0]?.value ?? ''}
                           onChange={(value) => setDefender((prev) => ({ ...prev, ability: value }))}
+                          options={defenderAbilityOptions}
                         />
                         <CompactInput
                           label="Item"
