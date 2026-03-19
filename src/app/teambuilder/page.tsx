@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState } from 'react';
 import { Search, ShieldCheck, Sparkles, Swords } from 'lucide-react';
@@ -17,38 +17,11 @@ type CatalogEntry = {
   types: string[];
 };
 
-const pokemonLabels: Record<string, string> = {
-  Cranidos: '头盖龙',
-  Onix: '大岩蛇',
-  Geodude: '小拳石',
-  Shieldon: '盾甲龙',
-  Nosepass: '朝北鼻',
-  Aron: '可可多拉',
-  Roserade: '罗丝雷朵',
-  Breloom: '斗笠菇',
-  Tangela: '蔓藤怪',
-  Cherrim: '樱花儿',
-  Grovyle: '森林蜥蜴',
-  Grotle: '树林龟',
-  Lucario: '路卡利欧',
-  Medicham: '恰雷姆',
-  Machoke: '豪力',
-  Hariyama: '幕下力士',
-  Toxicroak: '毒骷蛙',
-  Heracross: '赫拉克罗斯',
-  Gyarados: '暴鲤龙',
-  Floatzel: '浮潜鼬',
-  Quagsire: '沼王',
-  Azumarill: '玛力露丽',
-  Pelipper: '大嘴鸥',
-  Poliwrath: '蚊香泳士',
-};
-
 const trainerLabels: Record<string, string> = {
-  roark: '瓢太',
-  gardenia: '菜种',
-  maylene: '阿李',
-  wake: '吉宪',
+  roark: 'Roark',
+  gardenia: 'Gardenia',
+  maylene: 'Maylene',
+  wake: 'Wake',
 };
 
 const typeMap: Record<string, string[]> = {
@@ -81,7 +54,7 @@ const typeMap: Record<string, string[]> = {
 const catalog: CatalogEntry[] = trainersData.flatMap((trainer) =>
   trainer.pokemon.map((pokemon) => ({
     id: pokemon.id,
-    name: pokemonLabels[pokemon.enName] || pokemon.enName,
+    name: pokemon.enName,
     enName: pokemon.enName,
     trainer: trainerLabels[trainer.id] || trainer.id,
     role: pokemon.role,
@@ -113,14 +86,14 @@ function TeamSlot({
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-3">
           <h2 className="truncate text-base font-black text-white">
-            {member ? member.name : '待命槽位'}
+            {member ? member.name : 'UNASSIGNED SLOT'}
           </h2>
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
             {member ? 'LOCKED' : 'EMPTY'}
           </span>
         </div>
         <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-          {member ? `${member.enName} / ${member.trainer}` : '点击接入战术库'}
+          {member ? `${member.enName} / ${member.trainer}` : 'CLICK TO OPEN THE TACTICAL ARMORY'}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {(member?.types || ['SCAN']).map((type) => (
@@ -165,9 +138,9 @@ export default function TeambuilderPage(): React.ReactElement {
     <div className="px-6 py-12 md:px-12">
       <div className="mx-auto max-w-7xl space-y-6">
         <section>
-          <h1 className="title-strong text-4xl text-emerald-300 md:text-5xl">队伍构建中枢</h1>
+          <h1 className="title-strong text-4xl text-emerald-300 md:text-5xl">STRIKE TEAM ARCHITECT</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-            横向战术条用于快速编排 6 个作战位置，下方联防矩阵会实时评估全队对 18 属性的承压能力。
+            Assemble a six-slot combat shell through horizontal tactical bars. The defensive matrix below recalculates your pressure tolerance across all eighteen offensive types.
           </p>
         </section>
 
@@ -190,7 +163,7 @@ export default function TeambuilderPage(): React.ReactElement {
               <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
                 <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-400/65">
                   <ShieldCheck className="h-4 w-4" />
-                  已锁定作战位
+                  ACTIVE COMBAT SLOTS
                 </div>
                 <div className="font-mono text-4xl font-black text-white">{selectedCount}/6</div>
               </div>
@@ -198,20 +171,20 @@ export default function TeambuilderPage(): React.ReactElement {
               <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
                 <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-400/65">
                   <Sparkles className="h-4 w-4" />
-                  推荐动作
+                  RECOMMENDED ACTION
                 </div>
                 <p className="text-sm leading-6 text-slate-400">
-                  优先补齐地面与格斗抗性，再用高速收尾位锁定残局窗口。
+                  Stabilize Ground and Fighting resist lines first, then reserve at least one fast closer to secure endgame execution windows.
                 </p>
               </div>
 
               <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
                 <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-orange-400/65">
                   <Swords className="h-4 w-4" />
-                  战术库来源
+                  ARMORY SOURCE
                 </div>
                 <p className="font-mono text-xs leading-6 text-slate-400">
-                  点击任意槽位即可从图鉴抓取可用单位，无需跳出当前构建流程。
+                  Select any slot to pull battle-ready units directly from the dex index without breaking the current team construction flow.
                 </p>
               </div>
             </div>
@@ -225,9 +198,9 @@ export default function TeambuilderPage(): React.ReactElement {
             <div className="w-full max-w-4xl rounded-3xl border border-slate-800 bg-slate-950/95 p-6 shadow-[0_30px_80px_rgba(2,6,23,0.7)]">
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-black text-white">战术库选择器</h2>
+                  <h2 className="text-2xl font-black text-white">TACTICAL ARMORY SELECTOR</h2>
                   <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                    {`Slot ${String(activeSlot + 1).padStart(2, '0')} // Direct Dex Link`}
+                    {`SLOT ${String(activeSlot + 1).padStart(2, '0')} // DIRECT DEX LINK`}
                   </p>
                 </div>
                 <button
@@ -238,7 +211,7 @@ export default function TeambuilderPage(): React.ReactElement {
                   }}
                   className="rounded-xl border border-slate-800 bg-black/20 px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-slate-300 transition-all hover:border-emerald-500/35 hover:text-emerald-300"
                 >
-                  关闭
+                  CLOSE
                 </button>
               </div>
 
@@ -247,7 +220,7 @@ export default function TeambuilderPage(): React.ReactElement {
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="搜索战术单位 / 英文名 / 馆主来源"
+                  placeholder="SEARCH UNIT / ENGLISH NAME / ORIGIN LEADER"
                   className="w-full bg-transparent font-mono text-sm text-slate-100 outline-none placeholder:text-slate-600"
                 />
               </div>

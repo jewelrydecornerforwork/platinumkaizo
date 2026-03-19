@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 const navItems = [
-  { name: '首页', href: '/' },
-  { name: '全图鉴', href: '/pokedex' },
-  { name: '伤害演算', href: '/calculator' },
-  { name: '馆主对战', href: '/trainers' },
-  { name: '队伍构建', href: '/teambuilder' },
+  { name: 'COMMAND HUB', href: '/' },
+  { name: 'FULL DEX INDEX', href: '/pokedex' },
+  { name: 'PRECISION BALLISTIC CONSOLE', href: '/calculator' },
+  { name: 'GYM LEADER TACTICAL DOSSIER', href: '/trainers' },
+  { name: 'STRIKE TEAM ARCHITECT', href: '/teambuilder' },
 ];
 
 export default function Navbar(): React.ReactElement {
@@ -26,7 +26,7 @@ export default function Navbar(): React.ReactElement {
         <div className="hidden gap-8 md:flex">
           {navItems.map((item) => (
             <Link key={item.name} href={item.href} className="group relative">
-              <span className="text-sm font-medium text-slate-400 transition-colors group-hover:text-emerald-400">
+              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400 transition-colors group-hover:text-emerald-400">
                 {item.name}
               </span>
               <motion.div

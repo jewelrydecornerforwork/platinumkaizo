@@ -1,10 +1,17 @@
 ﻿'use client';
 
-import { navItems } from '@/lib/navigation';
 import { useSidebar } from '@/components/providers/SidebarProvider';
-import { Radar, X } from 'lucide-react';
+import { Crosshair, Database, Home, Radar, Target, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+
+const navItems = [
+  { label: 'HOME', path: '/', icon: Home },
+  { label: 'CODEX', path: '/pokedex', icon: Database },
+  { label: 'OPS_INTEL', path: '/trainers', icon: Target },
+  { label: 'BALLISTICS', path: '/calculator', icon: Crosshair },
+  { label: 'DEPLOYMENT', path: '/teambuilder', icon: Users },
+] as const;
 
 export function Sidebar(): React.ReactElement {
   const { isOpen, closeSidebar } = useSidebar();
@@ -40,7 +47,7 @@ export function Sidebar(): React.ReactElement {
                   PKZ SYS
                 </h1>
                 <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-emerald-400/45">
-                  Tactical Command
+                  INTEL COMMAND CORE
                 </p>
               </div>
             </div>
@@ -56,24 +63,38 @@ export function Sidebar(): React.ReactElement {
 
         <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const Icon = item.icon;
+            const isActive = pathname === item.path;
+
             return (
               <Link
-                key={item.id}
-                href={item.href}
+                key={item.path}
+                href={item.path}
                 onClick={closeSidebar}
-                className={`group relative flex items-center gap-3 rounded-lg px-4 py-3 transition-all duration-300 ${
+                className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-300 ${
                   isActive
-                    ? 'translate-x-1 border-l-2 border-emerald-500 bg-emerald-500/20 text-emerald-200'
-                    : 'text-slate-200 hover:translate-x-1 hover:bg-black/30 hover:text-emerald-200'
+                    ? 'translate-x-1 border border-emerald-500/35 bg-emerald-500/15 text-emerald-200 shadow-[0_0_18px_rgba(16,185,129,0.08)]'
+                    : 'border border-transparent text-slate-200 hover:translate-x-1 hover:border-emerald-500/20 hover:bg-black/30 hover:text-emerald-200'
                 }`}
               >
-                <span className="flex-1 font-medium">{item.label}</span>
-                {isActive && <div className="h-2 w-2 rounded-full bg-emerald-400" />}
+                <div className={`flex h-9 w-9 items-center justify-center rounded-lg border ${
+                  isActive
+                    ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                    : 'border-slate-800 bg-slate-900/50 text-slate-400 group-hover:border-emerald-500/20 group-hover:text-emerald-300'
+                }`}>
+                  <Icon size={16} />
+                </div>
+
+                <span className="flex-1 font-mono text-[11px] uppercase tracking-[0.22em]">
+                  {item.label}
+                </span>
+
+                {isActive && <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />}
+
                 <span
                   aria-hidden="true"
                   className={`pointer-events-none absolute bottom-1 left-1/2 h-px -translate-x-1/2 bg-emerald-400/90 transition-all duration-300 ${
-                    isActive ? 'w-[78%]' : 'w-0 group-hover:w-[78%]'
+                    isActive ? 'w-[82%]' : 'w-0 group-hover:w-[82%]'
                   }`}
                 />
               </Link>
@@ -83,7 +104,7 @@ export function Sidebar(): React.ReactElement {
 
         <div className="border-t border-emerald-500/25 p-4">
           <p className="text-center font-mono text-[10px] uppercase tracking-[0.22em] text-slate-400">
-            PLATINUM KAIZO INTEL SUITE // V1.0
+            PLATINUM KAIZO INTEL SUITE // V1.1
           </p>
         </div>
       </aside>

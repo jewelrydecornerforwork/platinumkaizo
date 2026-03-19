@@ -849,7 +849,7 @@ export default function DamageCalculatorPage() {
                       {selectedAttackerPreset.stats.atk} / {selectedDefenderPreset.stats.def}
                     </p>
                     <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-slate-400">
-                      Compares the attacker's offensive baseline against the defender's physical wall value for quick setup checks.
+                      Compares the attacker&apos;s offensive baseline against the defender&apos;s physical wall value for quick setup checks.
                     </p>
                   </div>
                 </div>

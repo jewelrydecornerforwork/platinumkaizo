@@ -1,26 +1,10 @@
-﻿import Link from 'next/link';
-
-export const TacticalFooter = (): React.ReactElement => (
-  <footer className="mt-20 w-full border-t border-emerald-500/10 bg-slate-950 px-6 py-8">
-    <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 md:flex-row">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-emerald-500/60">
-        [SYSTEM_STATUS: OPERATIONAL]
-      </div>
-
-      <div className="flex items-center gap-6 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-400">
-        <Link href="#" className="transition-colors hover:text-emerald-400">
-          About
-        </Link>
-        <Link href="#" className="transition-colors hover:text-emerald-400">
-          GitHub
-        </Link>
-        <Link href="#" className="transition-colors hover:text-emerald-400">
-          Discord
-        </Link>
-      </div>
-
-      <div className="text-center font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500 md:text-right">
-        Pokemon is © Nintendo / Creatures Inc. / GAME FREAK
+﻿export const TacticalFooter = (): React.ReactElement => (
+  <footer className="mt-20 w-full border-t border-emerald-500/10 bg-[#020617] py-6 font-mono">
+    <div className="flex flex-col items-center justify-between gap-4 px-8 text-[10px] uppercase tracking-widest text-slate-500 md:flex-row">
+      <div>© 2026 // INTEL_CORE_V1.1</div>
+      <div className="flex flex-wrap items-center gap-6">
+        <span className="text-emerald-500/60">[DATABASE: SYNCED]</span>
+        <span className="animate-pulse text-slate-400">[LIVE_FEED_ACTIVE]</span>
       </div>
     </div>
   </footer>

@@ -5,13 +5,13 @@ export default function CalcPage(): React.ReactElement {
     <div className="px-6 py-12 md:px-12">
       <div className="mx-auto max-w-4xl">
         <section className="glass-card p-8">
-          <h1 className="title-strong mb-3 text-4xl text-emerald-300">伤害计算</h1>
-          <p className="mb-6 text-slate-300">
-            你可以在这里模拟伤害区间、观察击杀线并快速验证战术思路。
+          <h1 className="title-strong mb-3 text-4xl text-emerald-300">PRECISION BALLISTIC CONSOLE</h1>
+          <p className="mb-6 font-mono text-sm uppercase tracking-[0.14em] text-slate-300">
+            SIMULATE DAMAGE WINDOWS, VERIFY KO LINES, AND TEST TACTICAL DECISION PATHS IN A RAPID PREVIEW MODE.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/calculator" className="tech-button">进入高级计算器</Link>
-            <Link href="/trainers" className="tech-button">查看馆主对战</Link>
+            <Link href="/calculator" className="tech-button">OPEN FULL CONSOLE</Link>
+            <Link href="/trainers" className="tech-button">OPEN LEADER DOSSIER</Link>
           </div>
         </section>
       </div>
