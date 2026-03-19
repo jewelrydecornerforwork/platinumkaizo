@@ -34,6 +34,8 @@ type CombatPreset = {
   item: string;
   ability: string;
   nature: string;
+  evs?: { hp?: number; atk?: number; def?: number; spA?: number; spD?: number; spe?: number };
+  ivs?: { hp?: number; atk?: number; def?: number; spA?: number; spD?: number; spe?: number };
   types: string[];
   stats: { hp: number; atk: number; def: number; spA: number; spD: number; spe: number };
   tactic: string;
@@ -183,6 +185,8 @@ function buildPlayerPresets(): CombatPreset[] {
     item: pokemon.item,
     ability: pokemon.ability,
     nature: pokemon.nature,
+    evs: pokemon.evs,
+    ivs: pokemon.ivs,
     tactic: pokemon.tactic,
     note: pokemon.note,
     types: pokemon.types,
@@ -516,8 +520,8 @@ export default function DamageCalculatorPage(): React.ReactElement {
     setAttacker({
       name: preset.enName,
       level: preset.level,
-      evs: { atk: 252, spA: 252, spe: 252 },
-      ivs: { atk: 31, spA: 31, spe: 31 },
+      evs: preset.evs || { hp: 0, atk: 0, def: 0, spA: 0, spD: 0, spe: 0 },
+      ivs: preset.ivs || { hp: 31, atk: 31, def: 31, spA: 31, spD: 31, spe: 31 },
       item: preset.item,
       nature: preset.nature,
       ability: preset.ability,
@@ -553,8 +557,8 @@ export default function DamageCalculatorPage(): React.ReactElement {
     setAttacker({
       name: initialAttacker.enName,
       level: initialAttacker.level,
-      evs: { atk: 252, spA: 252, spe: 252 },
-      ivs: { atk: 31, spA: 31, spe: 31 },
+      evs: initialAttacker.evs || { hp: 0, atk: 0, def: 0, spA: 0, spD: 0, spe: 0 },
+      ivs: initialAttacker.ivs || { hp: 31, atk: 31, def: 31, spA: 31, spD: 31, spe: 31 },
       item: initialAttacker.item,
       nature: initialAttacker.nature,
       ability: initialAttacker.ability,
