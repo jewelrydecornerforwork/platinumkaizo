@@ -4,6 +4,7 @@ import { useDeferredValue, useMemo, useState } from 'react';
 import { ChevronDown, ScanSearch, ShieldAlert, X } from 'lucide-react';
 import { PinyinSearchInput } from '@/components/ui/PinyinSearchInput';
 import { trainersData } from '@/data/trainers';
+import { garchomp } from '@/data/sampleData';
 
 type PokedexEntry = {
   id: string;
@@ -135,6 +136,27 @@ const pokemonSearchIndex: Record<string, { zh: string; initials: string }> = {
   Garchomp: { zh: '烈咬陆鲨', initials: 'llls' },
 };
 
+const typeLabelMap: Record<string, string> = {
+  normal: 'Normal',
+  fire: 'Fire',
+  water: 'Water',
+  grass: 'Grass',
+  electric: 'Electric',
+  ice: 'Ice',
+  fighting: 'Fighting',
+  poison: 'Poison',
+  ground: 'Ground',
+  flying: 'Flying',
+  psychic: 'Psychic',
+  bug: 'Bug',
+  rock: 'Rock',
+  ghost: 'Ghost',
+  dragon: 'Dragon',
+  dark: 'Dark',
+  steel: 'Steel',
+  fairy: 'Fairy',
+};
+
 const normalizeQuery = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '');
 
 function filterPokemon(
@@ -192,6 +214,35 @@ const pokedexEntries: PokedexEntry[] = trainersData.flatMap((trainer) =>
     };
   })
 );
+
+const supplementalDexEntries: PokedexEntry[] = [
+  {
+    id: `dex-${garchomp.id}`,
+    name: pokemonLabels[garchomp.enName] || garchomp.name,
+    enName: garchomp.enName,
+    trainer: '基础数据库',
+    role: '标准图鉴样本',
+    note: '已并入基础图鉴索引，可作为馆主数据之外的检索样本与演算目标。',
+    tactic: '适合用于验证中文名、英文名与拼音首字母的混合搜索链路。',
+    ability: garchomp.abilities.ability1.name,
+    item: '未配置',
+    nature: '标准模板',
+    types: garchomp.types.flatMap((type) => {
+      if (!type) {
+        return [];
+      }
+
+      return [typeLabelMap[type] || type];
+    }),
+    threatScore: Math.round(
+      (garchomp.baseStats.atk + garchomp.baseStats.spA + garchomp.baseStats.spe) / 3
+    ),
+    hasKaizoRevision: true,
+    stats: garchomp.baseStats,
+  },
+];
+
+const dexEntries = [...pokedexEntries, ...supplementalDexEntries];
 
 function FilterBar({
   selectedType,
@@ -357,7 +408,7 @@ export default function PokedexPage(): React.ReactElement {
   const deferredQuery = useDeferredValue(searchQuery);
 
   const filteredEntries = useMemo(() => {
-    return pokedexEntries.filter((entry) =>
+    return dexEntries.filter((entry) =>
       filterPokemon(entry, deferredQuery, selectedType, kaizoOnly)
     );
   }, [deferredQuery, kaizoOnly, selectedType]);
