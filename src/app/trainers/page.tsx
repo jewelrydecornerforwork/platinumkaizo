@@ -327,6 +327,44 @@ export default function BossIntelPage(): React.ReactElement {
           50% { opacity: 0.9; transform: translateX(0); }
           100% { opacity: 0.3; transform: translateX(8px); }
         }
+
+        .trainer-feed-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: var(--trainer-primary-border) rgba(15, 23, 42, 0.78);
+        }
+
+        .trainer-feed-scroll::-webkit-scrollbar {
+          width: 10px;
+        }
+
+        .trainer-feed-scroll::-webkit-scrollbar-track {
+          border-radius: 9999px;
+          background: rgba(15, 23, 42, 0.78);
+          box-shadow: inset 0 0 0 1px rgba(51, 65, 85, 0.65);
+        }
+
+        .trainer-feed-scroll::-webkit-scrollbar-thumb {
+          border: 1px solid var(--trainer-primary-border);
+          border-radius: 9999px;
+          background:
+            linear-gradient(
+              180deg,
+              var(--trainer-primary-soft),
+              var(--trainer-primary)
+            );
+          box-shadow:
+            0 0 12px var(--trainer-primary-glow),
+            inset 0 0 10px rgba(255, 255, 255, 0.06);
+        }
+
+        .trainer-feed-scroll::-webkit-scrollbar-thumb:hover {
+          background:
+            linear-gradient(
+              180deg,
+              var(--trainer-primary),
+              rgba(255, 255, 255, 0.18)
+            );
+        }
       `}</style>
 
       <motion.div
@@ -479,22 +517,31 @@ export default function BossIntelPage(): React.ReactElement {
                   </div>
                 </div>
 
-                <motion.div
-                  className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    hidden: { opacity: 0 },
-                    visible: {
-                      opacity: 1,
-                      transition: { staggerChildren: 0.08, delayChildren: 0.05 },
-                    },
+                <div
+                  className="trainer-feed-scroll max-h-[calc(100vh-22rem)] overflow-y-auto pr-3"
+                  style={{
+                    maskImage: 'linear-gradient(180deg, transparent 0, black 2rem, black calc(100% - 2rem), transparent 100%)',
+                    WebkitMaskImage:
+                      'linear-gradient(180deg, transparent 0, black 2rem, black calc(100% - 2rem), transparent 100%)',
                   }}
                 >
-                  {currentTrainer.pokemon.map((unit) => (
-                    <UnitCard key={`${currentTrainer.id}-${unit.id}`} unit={unit} />
-                  ))}
-                </motion.div>
+                  <motion.div
+                    className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      hidden: { opacity: 0 },
+                      visible: {
+                        opacity: 1,
+                        transition: { staggerChildren: 0.08, delayChildren: 0.05 },
+                      },
+                    }}
+                  >
+                    {currentTrainer.pokemon.map((unit) => (
+                      <UnitCard key={`${currentTrainer.id}-${unit.id}`} unit={unit} />
+                    ))}
+                  </motion.div>
+                </div>
 
                 <div
                   className="relative overflow-hidden rounded-3xl border p-8"
