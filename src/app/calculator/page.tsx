@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { Pokemon } from '@smogon/calc';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Crosshair, Radar, ShieldAlert, Swords } from 'lucide-react';
+import { Radar, ShieldAlert } from 'lucide-react';
 import { TypeIcon } from '@/components/calc/TypeIcon';
 import { LeaderList } from '@/components/trainers/LeaderList';
 import { TYPE_CHART } from '@/constants/typeChart';
@@ -382,18 +382,23 @@ function TacticalDmgHud({ min, max, koDisplay }: { min: number; max: number; koD
 
 function RngMatrix({ rolls }: { rolls: Array<{ factor: number; value: number }> }) {
   return (
-    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
-      <div className="mb-2.5 flex items-center justify-between">
-        <h3 className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-white">16-Step RNG Damage Matrix</h3>
+    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-4 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12),0_0_18px_rgba(16,185,129,0.04)]">
+      <div className="mb-3 flex items-center justify-between border-b border-emerald-500/10 pb-3">
+        <h3 className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white">16-Step RNG Damage Matrix</h3>
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Seed: 0xDEADBEEF</span>
       </div>
-      <div className="grid flex-1 grid-cols-4 gap-2">
-        {rolls.map((roll) => (
-          <div key={`${roll.factor}-${roll.value}`} className="rounded-lg border border-slate-800 bg-black/35 px-2.5 py-1.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.75)]">
-            <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600">R{roll.factor}</div>
-            <div className="mt-0.5 font-mono text-base font-bold text-white">{roll.value.toFixed(1)}%</div>
-          </div>
-        ))}
+      <div className="rng-matrix-scroll min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="grid grid-cols-4 gap-2">
+          {rolls.map((roll) => (
+            <div
+              key={`${roll.factor}-${roll.value}`}
+              className="rounded-xl border border-slate-800 bg-black/35 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.75)]"
+            >
+              <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600">R{roll.factor}</div>
+              <div className="mt-2 font-mono text-lg font-black text-white">{roll.value.toFixed(1)}%</div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -550,7 +555,19 @@ export default function DamageCalculatorPage(): React.ReactElement {
   }, [move, selectedAttackerPreset.moves, setMove]);
 
   return (
-    <main className="relative h-[100dvh] overflow-hidden bg-[#020617] px-4 py-3 text-slate-100 md:px-5">
+    <>
+      <style jsx>{`
+        .rng-matrix-scroll {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .rng-matrix-scroll::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+
+      <main className="relative h-[100dvh] overflow-hidden bg-[#020617] px-4 py-3 text-slate-100 md:px-5">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.06)_1px,transparent_1px)] bg-[size:36px_36px]" />
         <motion.div
@@ -920,7 +937,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-[minmax(0,1fr)_240px] gap-3">
+                <div className="grid min-h-0 grid-cols-[300px_minmax(0,1fr)] gap-3 xl:grid-cols-[320px_minmax(0,1fr)]">
                   <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
                     <div className="flex items-start gap-3">
                       <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-1.5 text-emerald-300">
@@ -936,49 +953,8 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       </div>
                     </div>
                   </div>
-
-                  <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
-                    <div className="mb-2.5 flex items-center justify-between">
-                      <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
-                        Matchup_Status
-                      </div>
-                      <Crosshair className="h-4 w-4 text-emerald-300" />
-                    </div>
-                    <div className="space-y-2.5">
-                      <div>
-                        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                          Type Matrix
-                        </div>
-                        <div className="mt-1 font-mono text-lg font-black text-white">
-                          {getEffectivenessLabel(effectiveness)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                          Offense / Defense
-                        </div>
-                        <div className="mt-1 flex items-center gap-2 font-mono text-lg font-black text-white">
-                          <span>{offenseStatValue}</span>
-                          <Swords className="h-4 w-4 text-emerald-300" />
-                          <span>{defenseStatValue}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                          Move Type
-                        </div>
-                        <div className="mt-1 flex items-center gap-2">
-                          <TypeIcon type={mappedMoveIntel?.type || currentMove?.type || 'Normal'} />
-                          <span className="font-mono text-xs uppercase tracking-[0.14em] text-slate-300">
-                            {currentMove?.category || 'physical'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <RngMatrix rolls={damageRolls} />
                 </div>
-
-                <RngMatrix rolls={damageRolls} />
               </motion.div>
             </AnimatePresence>
           </section>
@@ -1095,6 +1071,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
           </div>
         </footer>
       </div>
-    </main>
+      </main>
+    </>
   );
 }
