@@ -17,7 +17,7 @@ export const PinyinSearchInput = ({ onSearch }: SearchProps) => {
       />
 
       <div className="relative flex items-center overflow-hidden rounded-lg border border-slate-800 bg-[#020617] transition-all duration-300 focus-within:border-emerald-500/50 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)]">
-        <div className="flex min-w-[148px] items-center gap-2 border-r border-slate-800 bg-slate-900/30 px-3 py-2.5">
+        <div className="flex min-w-[118px] items-center gap-2 border-r border-slate-800 bg-slate-900/30 px-2.5 py-2.5">
           <Terminal size={13} className={isFocused ? 'text-emerald-500' : 'text-slate-600'} />
           <span className="hidden font-mono text-[10px] uppercase tracking-widest text-slate-500 md:block">
             {isFocused ? 'SEARCHING...' : 'INPUT_READY'}

@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useDeferredValue, useMemo, useState } from 'react';
-import { X } from 'lucide-react';
+import { ChevronDown, SlidersHorizontal, X } from 'lucide-react';
 import { PinyinSearchInput } from '@/components/ui/PinyinSearchInput';
 import { nationalDexData } from '@/data/nationalDex';
 import { nationalDexNameIndex } from '@/data/nationalDexNames';
@@ -65,6 +65,7 @@ const typeOptions = [
   'Steel',
   'Dragon',
   'Dark',
+  'Fairy',
 ] as const;
 
 const typeOptionMeta: Record<
@@ -183,6 +184,12 @@ const typeOptionMeta: Record<
     accent: 'bg-zinc-400',
     chip: 'border-zinc-500/30 bg-zinc-500/10 text-zinc-200',
     hint: 'Punish reads, trap lines, and deny psychic routes.',
+  },
+  Fairy: {
+    label: 'FAIRY',
+    accent: 'bg-pink-300',
+    chip: 'border-pink-400/30 bg-pink-400/10 text-pink-200',
+    hint: 'Charm denial, dragon suppression, and disruptive tempo control.',
   },
 };
 
@@ -304,16 +311,49 @@ function FilterBar({
   selectedType: string;
   onTypeChange: (value: string) => void;
 }) {
+  const [showTypeGrid, setShowTypeGrid] = useState(true);
+  const activeTypeLabel =
+    selectedType === ALL_TYPE_OPTION ? 'ALL TYPES' : typeOptionMeta[selectedType as (typeof typeOptions)[number]]?.label || selectedType;
+
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-3 backdrop-blur-md">
       <div className="rounded-2xl border border-emerald-500/20 bg-slate-950/95 shadow-[0_24px_60px_rgba(2,6,23,0.72)]">
         <div className="border-b border-emerald-500/10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_60%)] px-3 py-3">
-          <div>
-            <PinyinSearchInput onSearch={onSearch} />
+          <div className="flex items-stretch gap-2">
+            <div className="min-w-0 flex-1">
+              <PinyinSearchInput onSearch={onSearch} />
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowTypeGrid((prev) => !prev)}
+              className={`group flex w-[156px] shrink-0 items-center justify-between rounded-lg border px-3 py-2.5 transition-all ${
+                showTypeGrid
+                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200 shadow-[0_0_18px_rgba(16,185,129,0.08)]'
+                  : 'border-slate-800 bg-black/30 text-slate-300 hover:border-emerald-500/20 hover:text-emerald-200'
+              }`}
+            >
+              <div className="flex min-w-0 items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4 shrink-0" />
+                <div className="min-w-0 text-left">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.18em]">Type Filter</div>
+                  <div className="truncate font-mono text-[9px] uppercase tracking-[0.16em] text-slate-500 group-hover:text-slate-400">
+                    {activeTypeLabel}
+                  </div>
+                </div>
+              </div>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 transition-transform duration-200 ${showTypeGrid ? 'rotate-180' : ''}`}
+              />
+            </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5 p-2 md:grid-cols-3 xl:grid-cols-4">
+        <div
+          className={`grid overflow-hidden transition-all duration-300 ease-out ${
+            showTypeGrid ? 'max-h-[480px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="grid grid-cols-2 gap-1.5 p-2 md:grid-cols-3 xl:grid-cols-4">
           {typeOptions.map((type) => {
             const meta = typeOptionMeta[type];
             const isActive = selectedType === type;
@@ -348,6 +388,7 @@ function FilterBar({
               </button>
             );
           })}
+          </div>
         </div>
       </div>
     </div>
