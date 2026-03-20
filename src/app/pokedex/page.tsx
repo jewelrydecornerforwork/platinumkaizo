@@ -373,7 +373,7 @@ function FilterBar({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-1.5 p-2 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-2 gap-1.5 p-2 md:grid-cols-3 xl:grid-cols-4">
           {typeOptions.map((type) => {
             const meta = typeOptionMeta[type];
             const isActive = selectedType === type;
@@ -405,8 +405,6 @@ function FilterBar({
                     </span>
                   ) : null}
                 </div>
-
-                <div className="mt-2 text-[11px] leading-5 text-slate-400">{meta.hint}</div>
               </button>
             );
           })}
