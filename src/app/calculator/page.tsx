@@ -440,7 +440,7 @@ function CompactInput({ label, value, onChange, type = 'text' }: { label: string
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all focus:border-emerald-400/40"
+        className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all duration-150 hover:border-emerald-500/30 focus:border-emerald-400/40 focus:bg-black/45 focus:shadow-[inset_0_1px_2px_rgba(0,0,0,0.7),0_0_0_1px_rgba(16,185,129,0.12)]"
       />
     </label>
   );
@@ -1060,7 +1060,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       />
                     </div>
 
-                    <div className="mt-2.5 rounded-xl border border-emerald-500/10 bg-black/25 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)]">
+                    <div className="mt-2.5">
                       <div className="grid grid-cols-2 gap-2.5">
                         <CompactInput
                           label="Item"
@@ -1193,7 +1193,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       />
                     </div>
 
-                    <div className="mt-2.5 rounded-xl border border-emerald-500/10 bg-black/25 p-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)]">
+                    <div className="mt-2.5">
                       <div className="grid grid-cols-2 gap-2.5">
                         <CompactInput
                           label="Item"
@@ -1239,9 +1239,15 @@ export default function DamageCalculatorPage(): React.ReactElement {
                         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
                           Tactical_Readout
                         </div>
-                        <div className="mt-1.5 text-xs leading-5 text-slate-300">
+                        <motion.div
+                          key={result?.desc || 'Awaiting synchronized parameters. Select attack vector or deploy a manual custom profile, then refine move package and target dossier.'}
+                          initial={{ opacity: 0.7, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.18, ease: 'easeOut' }}
+                          className="mt-1.5 text-xs leading-5 text-slate-300"
+                        >
                           {result?.desc || 'Awaiting synchronized parameters. Select attack vector or deploy a manual custom profile, then refine move package and target dossier.'}
-                        </div>
+                        </motion.div>
                       </div>
                     </div>
                   </div>
