@@ -213,9 +213,9 @@ function filterPokemon(
   }
 
   const searchPool = [
-    entry.zhName,
     entry.enName,
     entry.initials,
+    entry.id,
   ]
     .map((value) => normalizeQuery(value))
     .filter(Boolean);
@@ -281,7 +281,7 @@ const dexEntries: PokedexEntry[] = nationalDexData.map((pokemon) => {
 
   return {
     id: pokemon.id,
-    name: nationalDexNameIndex[pokemon.enName]?.zh || pokemon.enName,
+    name: pokemon.enName,
     zhName: nationalDexNameIndex[pokemon.enName]?.zh || pokemon.enName,
     enName: pokemon.enName,
     initials: nationalDexNameIndex[pokemon.enName]?.initials || normalizeQuery(pokemon.enName),
@@ -311,7 +311,7 @@ function FilterBar({
   selectedType: string;
   onTypeChange: (value: string) => void;
 }) {
-  const [showTypeGrid, setShowTypeGrid] = useState(true);
+  const [showTypeGrid, setShowTypeGrid] = useState(false);
   const activeTypeLabel =
     selectedType === ALL_TYPE_OPTION ? 'ALL TYPES' : typeOptionMeta[selectedType as (typeof typeOptions)[number]]?.label || selectedType;
 
@@ -410,15 +410,15 @@ function DetailDrawer({
         <div className="mb-6 flex items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="relative h-24 w-24 overflow-hidden rounded-2xl border border-slate-800 bg-black/20">
-              <Image src={entry.art} alt={entry.name} fill className="object-contain p-2" />
+              <Image src={entry.art} alt={entry.enName} fill className="object-contain p-2" />
             </div>
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/60">
                 DEX_UNIT_RECORD
               </p>
-              <h2 className="mt-2 text-3xl font-black text-white">{entry.name}</h2>
+              <h2 className="mt-2 text-3xl font-black text-white">{entry.enName}</h2>
               <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
-                {entry.enName} / {entry.trainer}
+                {entry.trainer}
               </p>
             </div>
           </div>
@@ -513,7 +513,7 @@ export default function PokedexPage(): React.ReactElement {
         <section>
           <h1 className="title-strong text-4xl text-emerald-300 md:text-5xl">FULL DEX TACTICAL INDEX</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-            A Kaizo-first intelligence board for high-risk unit review. Search by localized name, English name, or acronym while filtering by combat type.
+            A Kaizo-first intelligence board for high-risk unit review. Search by English species name, acronym, or indexed unit ID while filtering by combat type.
           </p>
         </section>
 
@@ -530,11 +530,11 @@ export default function PokedexPage(): React.ReactElement {
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <div className="relative h-16 w-16 overflow-hidden rounded-xl border border-slate-800 bg-black/20">
-                    <Image src={entry.art} alt={entry.name} fill className="object-contain p-2" />
+                    <Image src={entry.art} alt={entry.enName} fill className="object-contain p-2" />
                   </div>
                   <div>
-                    <h2 className="text-base font-black text-white">{entry.name}</h2>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{entry.enName}</p>
+                    <h2 className="text-base font-black text-white">{entry.enName}</h2>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{entry.trainer}</p>
                   </div>
                 </div>
               </div>
