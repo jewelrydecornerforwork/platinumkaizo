@@ -365,21 +365,15 @@ function FilterBar({
   onTypeChange: (value: string) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-4 backdrop-blur-md">
+    <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-3 backdrop-blur-md">
       <div className="rounded-2xl border border-emerald-500/20 bg-slate-950/95 shadow-[0_24px_60px_rgba(2,6,23,0.72)]">
-        <div className="border-b border-emerald-500/10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_60%)] px-4 py-4">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/70">
-            Tactical_Search_Grid
-          </div>
-          <div className="mt-1 text-xs text-slate-400">
-            Search by localized name, English name, or initials, then narrow the indexed battlespace by combat type.
-          </div>
-          <div className="mt-4">
+        <div className="border-b border-emerald-500/10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_60%)] px-3 py-3">
+          <div>
             <PinyinSearchInput onSearch={onSearch} />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-1.5 p-2 md:grid-cols-2 xl:grid-cols-3">
           {typeOptions.map((type) => {
             const meta = typeOptionMeta[type];
             const isActive = selectedType === type;
@@ -389,30 +383,30 @@ function FilterBar({
                 key={type}
                 type="button"
                 onClick={() => onTypeChange(type)}
-                className={`rounded-xl border p-3 text-left transition-all ${
+                className={`rounded-lg border px-3 py-2.5 text-left transition-all ${
                   isActive
                     ? 'border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.08)]'
                     : 'border-slate-800 bg-black/25 hover:border-emerald-500/20 hover:bg-slate-900/70'
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className={`h-2.5 w-2.5 rounded-full ${meta.accent}`} />
-                      <span className="text-sm font-bold text-white">{meta.label}</span>
+                      <span className={`h-2 w-2 rounded-full ${meta.accent}`} />
+                      <span className="text-[13px] font-bold text-white">{meta.label}</span>
                     </div>
-                    <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                    <div className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-slate-500">
                       {type}
                     </div>
                   </div>
                   {isActive ? (
-                    <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-emerald-300">
+                    <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-[8px] uppercase tracking-[0.14em] text-emerald-300">
                       ACTIVE
                     </span>
                   ) : null}
                 </div>
 
-                <div className="mt-3 text-xs leading-5 text-slate-400">{meta.hint}</div>
+                <div className="mt-2 text-[11px] leading-5 text-slate-400">{meta.hint}</div>
               </button>
             );
           })}
