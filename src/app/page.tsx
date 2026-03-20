@@ -167,7 +167,7 @@ export default function Home(): React.ReactElement {
             </TacticalFrame>
           </NavCard>
 
-          <NavCard href="/trainers" className="col-span-12 md:col-span-6 lg:col-span-4">
+          <NavCard href="/trainers" className="col-span-12 md:col-span-6 lg:col-span-5">
             <TacticalFrame
               title="Leader Dossier Module"
               subtitle="OPS_NODE"
@@ -187,7 +187,7 @@ export default function Home(): React.ReactElement {
             </TacticalFrame>
           </NavCard>
 
-          <NavCard href="/teambuilder" className="col-span-12 md:col-span-6 lg:col-span-4">
+          <NavCard href="/teambuilder" className="col-span-12 md:col-span-6 lg:col-span-2">
             <TacticalFrame
               title="Formation Matrix"
               subtitle="BUILD_NODE"
@@ -213,7 +213,7 @@ export default function Home(): React.ReactElement {
           <TacticalFrame
             title="Status Medals"
             subtitle="ACCESS_FLAGS"
-            className="col-span-12 lg:col-span-4 shadow-[0_0_28px_rgba(16,185,129,0.06),inset_0_1px_3px_rgba(16,185,129,0.3)]"
+            className="col-span-12 lg:col-span-5 shadow-[0_0_28px_rgba(16,185,129,0.06),inset_0_1px_3px_rgba(16,185,129,0.3)]"
           >
             <StatusMedals />
           </TacticalFrame>
@@ -221,7 +221,7 @@ export default function Home(): React.ReactElement {
           <TacticalFrame
             title="Node Envelope"
             subtitle="NETWORK_CAGE"
-            className="col-span-12 lg:col-span-8 shadow-[0_0_22px_rgba(15,23,42,0.7),inset_0_1px_3px_rgba(16,185,129,0.3)]"
+            className="col-span-12 lg:col-span-10 shadow-[0_0_22px_rgba(15,23,42,0.7),inset_0_1px_3px_rgba(16,185,129,0.3)]"
           >
             <div className="grid gap-4 md:grid-cols-3">
               {nodeEnvelope.map((item) => {
