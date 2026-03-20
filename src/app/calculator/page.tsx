@@ -440,7 +440,7 @@ function CompactInput({ label, value, onChange, type = 'text' }: { label: string
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all duration-150 hover:border-emerald-500/30 focus:border-emerald-400/40 focus:bg-black/45 focus:shadow-[inset_0_1px_2px_rgba(0,0,0,0.7),0_0_0_1px_rgba(16,185,129,0.12)]"
+        className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all duration-150 hover:border-emerald-500/30 focus:border-emerald-400/40 focus:bg-black/45 focus:shadow-[inset_0_1px_2px_rgba(0,0,0,0.7),0_0_0_1px_rgba(16,185,129,0.12)] [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
     </label>
   );
