@@ -173,7 +173,7 @@ export default function TeambuilderPage(): React.ReactElement {
           </p>
         </section>
 
-        <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+        <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <TacticalFrame title="Team Slots">
             <div className="space-y-4">
               {team.map((member, index) => (
@@ -187,40 +187,42 @@ export default function TeambuilderPage(): React.ReactElement {
             </div>
           </TacticalFrame>
 
-          <TacticalFrame title="Build Summary">
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-                <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-400/65">
-                  <ShieldCheck className="h-4 w-4" />
-                  ACTIVE COMBAT SLOTS
+          <div className="space-y-6">
+            <TacticalFrame title="Build Summary">
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
+                  <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-400/65">
+                    <ShieldCheck className="h-4 w-4" />
+                    ACTIVE COMBAT SLOTS
+                  </div>
+                  <div className="font-mono text-4xl font-black text-white">{selectedCount}/6</div>
                 </div>
-                <div className="font-mono text-4xl font-black text-white">{selectedCount}/6</div>
-              </div>
 
-              <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-                <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-400/65">
-                  <Sparkles className="h-4 w-4" />
-                  RECOMMENDED ACTION
+                <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
+                  <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-400/65">
+                    <Sparkles className="h-4 w-4" />
+                    RECOMMENDED ACTION
+                  </div>
+                  <p className="text-sm leading-6 text-slate-400">
+                    Stabilize Ground and Fighting resist lines first, then reserve at least one fast closer to secure endgame execution windows.
+                  </p>
                 </div>
-                <p className="text-sm leading-6 text-slate-400">
-                  Stabilize Ground and Fighting resist lines first, then reserve at least one fast closer to secure endgame execution windows.
-                </p>
-              </div>
 
-              <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
-                <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-orange-400/65">
-                  <Swords className="h-4 w-4" />
-                  ARMORY SOURCE
+                <div className="rounded-2xl border border-slate-800 bg-black/20 p-4">
+                  <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-orange-400/65">
+                    <Swords className="h-4 w-4" />
+                    ARMORY SOURCE
+                  </div>
+                  <p className="font-mono text-xs leading-6 text-slate-400">
+                    Select any slot to pull battle-ready units directly from the dex index without breaking the current team construction flow.
+                  </p>
                 </div>
-                <p className="font-mono text-xs leading-6 text-slate-400">
-                  Select any slot to pull battle-ready units directly from the dex index without breaking the current team construction flow.
-                </p>
               </div>
-            </div>
-          </TacticalFrame>
+            </TacticalFrame>
+
+            <SynergyMatrix team={team} />
+          </div>
         </div>
-
-        <SynergyMatrix team={team} />
 
         {activeSlot !== null ? (
           <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
