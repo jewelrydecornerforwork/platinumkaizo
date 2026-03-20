@@ -101,38 +101,59 @@ function TeamSlot({
     <button
       type="button"
       onClick={onOpen}
-      className="group flex w-full items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/40 px-4 py-4 text-left backdrop-blur-md transition-all hover:border-emerald-500/35 hover:shadow-[0_0_18px_rgba(16,185,129,0.12)]"
+      className="group relative flex w-full items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/40 px-4 py-3 text-left backdrop-blur-md transition-all hover:border-emerald-500/35 hover:bg-emerald-500/5 hover:shadow-[0_0_18px_rgba(16,185,129,0.12)]"
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-500/15 bg-black/20 font-mono text-sm font-black text-emerald-300">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-emerald-500/15 bg-black/20 font-mono text-sm font-black text-emerald-300 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
         {String(index + 1).padStart(2, '0')}
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="truncate text-base font-black text-white">
-            {member ? member.name : 'UNASSIGNED SLOT'}
-          </h2>
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-base font-black text-white">
+              {member ? member.name : 'UNASSIGNED SLOT'}
+            </h2>
+            <p className="mt-1 truncate font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              {member ? `${member.trainer} // ${member.role}` : 'CLICK TO OPEN THE TACTICAL ARMORY'}
+            </p>
+          </div>
+          <span
+            className={`shrink-0 rounded-full border px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.18em] ${
+              member
+                ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+                : 'border-slate-700 bg-black/20 text-slate-500'
+            }`}
+          >
             {member ? 'LOCKED' : 'EMPTY'}
           </span>
         </div>
-        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-          {member ? `${member.enName} / ${member.trainer}` : 'CLICK TO OPEN THE TACTICAL ARMORY'}
-        </p>
-        {member ? (
-          <div className="relative mt-3 h-16 w-16 overflow-hidden rounded-xl border border-slate-800 bg-black/20">
-            <Image src={member.art} alt={member.name} fill className="object-contain p-2" />
+
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            {member ? (
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-slate-800 bg-black/20">
+                <Image src={member.art} alt={member.name} fill className="object-contain p-1.5" />
+              </div>
+            ) : null}
+
+            <div className="min-w-0 flex-1">
+              <div className="hidden h-px w-full bg-gradient-to-r from-emerald-500/20 via-slate-800 to-transparent md:block" />
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(member?.types || ['READY']).map((type) => (
+                  <span
+                    key={`${index}-${type}`}
+                    className="rounded-full border border-slate-700 bg-black/20 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-slate-300"
+                  >
+                    {type}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
-        ) : null}
-        <div className="mt-3 flex flex-wrap gap-2">
-          {(member?.types || ['SCAN']).map((type) => (
-            <span
-              key={`${index}-${type}`}
-              className="rounded-full border border-slate-700 bg-black/20 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-slate-300"
-            >
-              {type}
-            </span>
-          ))}
+
+          <span className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-200 transition-all group-hover:border-emerald-400/35 group-hover:bg-emerald-500/15">
+            {member ? 'REASSIGN' : 'ADD UNIT'}
+          </span>
         </div>
       </div>
     </button>
