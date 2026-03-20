@@ -504,15 +504,21 @@ function SearchableSelect({
   value,
   onChange,
   options,
+  placeholder = 'Search',
+  showSelectedIcon = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: Array<{ value: string; label: string; searchTerms: string[] }>;
+  options: Array<{ value: string; label: string; searchTerms: string[]; iconSrc?: string }>;
+  placeholder?: string;
+  showSelectedIcon?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
   const containerRef = useRef<HTMLLabelElement | null>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const selectedOption = options.find((option) => option.value === value);
   const normalizedQuery = query.trim().toLowerCase().replace(/\s+/g, '');
   const filteredOptions = useMemo(() => {
@@ -530,6 +536,7 @@ function SearchableSelect({
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setQuery('');
+        setHighlightedIndex(0);
       }
     }
 
@@ -537,36 +544,130 @@ function SearchableSelect({
     return () => document.removeEventListener('mousedown', handlePointerDown);
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) {
+      optionRefs.current = [];
+      setHighlightedIndex(0);
+      return;
+    }
+
+    setHighlightedIndex((current) => {
+      if (!filteredOptions.length) return -1;
+      if (current < 0) return 0;
+      return Math.min(current, filteredOptions.length - 1);
+    });
+  }, [filteredOptions.length, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || highlightedIndex < 0) return;
+    optionRefs.current[highlightedIndex]?.scrollIntoView({ block: 'nearest' });
+  }, [highlightedIndex, isOpen]);
+
+  const commitSelection = (nextValue: string) => {
+    onChange(nextValue);
+    setIsOpen(false);
+    setQuery('');
+    setHighlightedIndex(0);
+  };
+
   return (
     <label ref={containerRef} className="relative space-y-1.5">
       <span className="block font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">{label}</span>
-      <input
-        value={isOpen ? query : selectedOption?.label || ''}
-        onFocus={() => {
-          setIsOpen(true);
-          setQuery('');
-        }}
-        onChange={(event) => {
-          setIsOpen(true);
-          setQuery(event.target.value);
-        }}
-        placeholder={selectedOption?.label || 'Search Unit'}
-        className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all placeholder:text-slate-600 focus:border-emerald-400/40"
-      />
+      <div className="relative">
+        {showSelectedIcon && selectedOption?.iconSrc && !isOpen ? (
+          <div className="absolute left-2 top-1/2 z-10 h-8 w-8 -translate-y-1/2 overflow-hidden rounded-md border border-slate-800 bg-slate-950/80">
+            <Image src={selectedOption.iconSrc} alt={selectedOption.label} fill className="object-contain p-1" />
+          </div>
+        ) : null}
+        <input
+          value={isOpen ? query : selectedOption?.label || ''}
+          onFocus={() => {
+            setIsOpen(true);
+            setQuery('');
+            setHighlightedIndex(0);
+          }}
+          onChange={(event) => {
+            setIsOpen(true);
+            setQuery(event.target.value);
+            setHighlightedIndex(0);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowDown') {
+              event.preventDefault();
+              if (!isOpen) {
+                setIsOpen(true);
+                setHighlightedIndex(0);
+                return;
+              }
+              setHighlightedIndex((current) => {
+                if (!filteredOptions.length) return -1;
+                if (current < 0) return 0;
+                return Math.min(current + 1, filteredOptions.length - 1);
+              });
+              return;
+            }
+
+            if (event.key === 'ArrowUp') {
+              event.preventDefault();
+              if (!isOpen) {
+                setIsOpen(true);
+                setHighlightedIndex(filteredOptions.length ? filteredOptions.length - 1 : -1);
+                return;
+              }
+              setHighlightedIndex((current) => {
+                if (!filteredOptions.length) return -1;
+                if (current < 0) return filteredOptions.length - 1;
+                return Math.max(current - 1, 0);
+              });
+              return;
+            }
+
+            if (event.key === 'Enter') {
+              if (!isOpen) return;
+              event.preventDefault();
+              const highlightedOption = filteredOptions[highlightedIndex];
+              if (highlightedOption) {
+                commitSelection(highlightedOption.value);
+              }
+              return;
+            }
+
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              setIsOpen(false);
+              setQuery('');
+              setHighlightedIndex(0);
+            }
+          }}
+          placeholder={selectedOption?.label || placeholder}
+          className={`w-full rounded-lg border border-emerald-500/20 bg-black/35 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all placeholder:text-slate-600 focus:border-emerald-400/40 ${
+            showSelectedIcon && selectedOption?.iconSrc && !isOpen ? 'pl-12 pr-3' : 'px-3'
+          }`}
+        />
+      </div>
       {isOpen ? (
         <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-40 max-h-72 overflow-y-auto rounded-xl border border-emerald-500/15 bg-[#061018]/95 p-1 shadow-[0_18px_40px_rgba(2,6,23,0.82)] backdrop-blur-xl">
           {filteredOptions.length ? (
-            filteredOptions.map((option) => (
+            filteredOptions.map((option, index) => (
               <button
                 key={option.value}
                 type="button"
-                onClick={() => {
-                  onChange(option.value);
-                  setIsOpen(false);
-                  setQuery('');
+                ref={(node) => {
+                  optionRefs.current[index] = node;
                 }}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-all hover:bg-emerald-500/10"
+                onMouseEnter={() => setHighlightedIndex(index)}
+                onClick={() => commitSelection(option.value)}
+                className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition-all ${
+                  index === highlightedIndex
+                    ? 'border-emerald-500/25 bg-emerald-500/10'
+                    : 'border-transparent hover:bg-emerald-500/10'
+                }`}
               >
+                {option.iconSrc ? (
+                  <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-md border border-slate-800 bg-slate-950/80">
+                    <Image src={option.iconSrc} alt={option.label} fill className="object-contain p-1" />
+                  </div>
+                ) : null}
                 <span className="truncate font-mono text-sm text-white">{option.label}</span>
               </button>
             ))
@@ -668,24 +769,41 @@ export default function DamageCalculatorPage(): React.ReactElement {
     () =>
       ATTACK_PRESETS.map((preset) => ({
         value: preset.id,
-        label: `${preset.zhName} / ${preset.enName}`,
-        searchTerms: [preset.zhName, preset.enName, preset.initials]
+        label: preset.enName,
+        searchTerms: [preset.enName, preset.id]
           .map((term) => term.trim().toLowerCase().replace(/\s+/g, ''))
           .filter(Boolean),
+        iconSrc: getPokemonArtAsset(preset.enName),
       })),
     []
   );
   const moveOptions = useMemo(() => {
     const baseOptions = selectedAttackerPreset.moves.map((option) => ({
       value: option.value,
-      label: `${option.label} // ${option.power} BP`,
+      label: `${option.label} ${option.power} BP`,
+      searchTerms: [
+        option.label,
+        option.value,
+        option.type,
+        option.category,
+        String(option.power),
+      ]
+        .map((term) => term.trim().toLowerCase().replace(/\s+/g, ''))
+        .filter(Boolean),
     }));
 
     if (!move || baseOptions.some((option) => option.value === move)) {
       return baseOptions;
     }
 
-    return [{ value: move, label: `${move} // MANUAL` }, ...baseOptions];
+    return [
+      {
+        value: move,
+        label: `${move} Manual`,
+        searchTerms: [move, 'manual'].map((term) => term.trim().toLowerCase().replace(/\s+/g, '')),
+      },
+      ...baseOptions,
+    ];
   }, [move, selectedAttackerPreset.moves]);
   const mappedMoveIntel = useMemo(() => getGymMoveIntelByName(move), [move]);
   const currentMove = useMemo(
@@ -916,12 +1034,15 @@ export default function DamageCalculatorPage(): React.ReactElement {
                         value={activeAttackerId}
                         onChange={applyAttackerPreset}
                         options={attackerPresetOptions}
+                        placeholder="Search Attack Unit"
+                        showSelectedIcon
                       />
-                      <CompactSelect
+                      <SearchableSelect
                         label="Move Package"
                         value={move}
                         onChange={setMove}
                         options={moveOptions}
+                        placeholder="Search Move Package"
                       />
                       <CompactInput
                         label="Level"
