@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pokemon } from '@smogon/calc';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Radar, ShieldAlert } from 'lucide-react';
 import { TypeIcon } from '@/components/calc/TypeIcon';
 import { LeaderList } from '@/components/trainers/LeaderList';
@@ -990,15 +990,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
           <section className="flex min-h-0 flex-col gap-3 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
             <TacticalDmgHud min={minDamage} max={maxDamage} koDisplay={koDisplay} />
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${activeAttackerId}-${activeRosterPokemonId}-${move}-${attacker.name}-${attacker.item}-${attacker.ability}-${attacker.nature}-${defender.name}-${defender.item}-${defender.ability}-${defender.nature}-${attacker.level}-${defender.level}-${attacker.evs.atk}-${attacker.evs.spA}-${attacker.evs.spe}-${defender.evs.hp}-${defender.evs.def}-${defender.evs.spD}`}
-                initial={{ opacity: 0.3, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0.18, y: -10 }}
-                transition={{ duration: 0.26, ease: 'easeOut' }}
-                className="grid min-h-0 flex-1 grid-rows-[auto_auto_minmax(0,1fr)] gap-3"
-              >
+            <div className="grid min-h-0 flex-1 grid-rows-[auto_auto_minmax(0,1fr)] gap-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
                     <div className="mb-2.5 flex items-start justify-between gap-3">
@@ -1255,8 +1247,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                   </div>
                   <RngMatrix rolls={damageRolls} />
                 </div>
-              </motion.div>
-            </AnimatePresence>
+            </div>
           </section>
 
           <aside className="flex min-h-0 flex-col gap-3 rounded-2xl border border-emerald-500/20 bg-[#0a0f16] p-3 shadow-[inset_0_1px_3px_rgba(16,185,129,0.12)]">
