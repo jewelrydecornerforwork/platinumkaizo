@@ -9,8 +9,10 @@ import { TypeIcon } from '@/components/calc/TypeIcon';
 import { LeaderList } from '@/components/trainers/LeaderList';
 import { TYPE_CHART } from '@/constants/typeChart';
 import { GYM_MOVE_INTEL, getGymMoveIntelByName } from '@/data/gymMoveIntel';
+import { nationalDexData } from '@/data/nationalDex';
 import { defaultPlayerPresetId, playerRosterData } from '@/data/playerRoster';
 import { LEADER_ART_ASSETS, POKEMON_ART_ASSETS } from '@/data/remoteAssets';
+import { garchomp } from '@/data/sampleData';
 import { defaultTrainerId, trainersData } from '@/data/trainers';
 import { usePokemonCalc } from '@/hooks/usePokemonCalc';
 
@@ -102,6 +104,7 @@ const POKEMON_TYPE_MAP: Record<string, string[]> = {
   Azumarill: ['Water'],
   Pelipper: ['Water', 'Flying'],
   Poliwrath: ['Water', 'Fighting'],
+  Garchomp: ['Dragon', 'Ground'],
 };
 
 const MOVE_LABELS: Record<string, string> = {
@@ -117,6 +120,26 @@ const MOVE_LABELS: Record<string, string> = {
   Waterfall: 'Waterfall',
   'Ice Fang': 'Ice Fang',
   'Dragon Dance': 'Dragon Dance',
+};
+
+const TYPE_DEFAULT_MOVES: Record<string, MoveOption> = {
+  Normal: { value: 'Return', label: 'Return', power: 102, type: 'Normal', category: 'physical' },
+  Fighting: { value: 'Brick Break', label: 'Brick Break', power: 75, type: 'Fighting', category: 'physical' },
+  Flying: { value: 'Aerial Ace', label: 'Aerial Ace', power: 60, type: 'Flying', category: 'physical' },
+  Poison: { value: 'Sludge Bomb', label: 'Sludge Bomb', power: 90, type: 'Poison', category: 'special' },
+  Ground: { value: 'Earthquake', label: 'Earthquake', power: 100, type: 'Ground', category: 'physical' },
+  Rock: { value: 'Rock Slide', label: 'Rock Slide', power: 75, type: 'Rock', category: 'physical' },
+  Bug: { value: 'X-Scissor', label: 'X-Scissor', power: 80, type: 'Bug', category: 'physical' },
+  Ghost: { value: 'Shadow Ball', label: 'Shadow Ball', power: 80, type: 'Ghost', category: 'special' },
+  Steel: { value: 'Iron Head', label: 'Iron Head', power: 80, type: 'Steel', category: 'physical' },
+  Fire: { value: 'Flamethrower', label: 'Flamethrower', power: 95, type: 'Fire', category: 'special' },
+  Water: { value: 'Surf', label: 'Surf', power: 95, type: 'Water', category: 'special' },
+  Grass: { value: 'Energy Ball', label: 'Energy Ball', power: 80, type: 'Grass', category: 'special' },
+  Electric: { value: 'Thunderbolt', label: 'Thunderbolt', power: 95, type: 'Electric', category: 'special' },
+  Psychic: { value: 'Psychic', label: 'Psychic', power: 90, type: 'Psychic', category: 'special' },
+  Ice: { value: 'Ice Beam', label: 'Ice Beam', power: 95, type: 'Ice', category: 'special' },
+  Dragon: { value: 'Dragon Claw', label: 'Dragon Claw', power: 80, type: 'Dragon', category: 'physical' },
+  Dark: { value: 'Crunch', label: 'Crunch', power: 80, type: 'Dark', category: 'physical' },
 };
 
 const ZERO_STATS = { hp: 0, atk: 0, def: 0, spA: 0, spD: 0, spe: 0 };
@@ -201,15 +224,104 @@ function buildPlayerPresets(): CombatPreset[] {
   }));
 }
 
+function getGenericDexMoves(types: string[]): MoveOption[] {
+  const stabMoves = types
+    .map((type) => TYPE_DEFAULT_MOVES[type])
+    .filter((move): move is MoveOption => Boolean(move));
+  const fallbackMoves: MoveOption[] = [
+    { value: 'Return', label: 'Return', power: 102, type: 'Normal', category: 'physical' },
+    { value: 'Protect', label: 'Protect', power: 0, type: 'Normal', category: 'status' },
+    { value: 'Toxic', label: 'Toxic', power: 0, type: 'Poison', category: 'status' },
+    { value: 'Substitute', label: 'Substitute', power: 0, type: 'Normal', category: 'status' },
+  ];
+
+  return Array.from(
+    new Map([...stabMoves, ...fallbackMoves].map((move) => [move.value, move])).values()
+  ).slice(0, 4);
+}
+
+function getDexRole(stats: CombatPreset['stats']): string {
+  const physical = stats.atk;
+  const special = stats.spA;
+  const speed = stats.spe;
+  const bulk = stats.hp + stats.def + stats.spD;
+
+  if (speed >= 105 && physical >= special) return 'High-Speed Physical Striker';
+  if (speed >= 105 && special > physical) return 'High-Speed Special Striker';
+  if (physical >= 115) return 'Physical Pressure Unit';
+  if (special >= 115) return 'Special Pressure Unit';
+  if (bulk >= 260) return 'Defensive Tactical Anchor';
+  return 'Balanced Combat Unit';
+}
+
+function buildNationalDexPresets(): CombatPreset[] {
+  return nationalDexData.map((pokemon) => ({
+    id: pokemon.id,
+    trainerId: 'dex',
+    trainerCode: 'ND',
+    trainerName: 'National Dex',
+    name: pokemon.enName,
+    enName: pokemon.enName,
+    role: getDexRole(pokemon.stats),
+    level: 50,
+    item: 'None',
+    ability: pokemon.ability || '',
+    nature: 'Hardy',
+    evs: { hp: 0, atk: 0, def: 0, spA: 0, spD: 0, spe: 0 },
+    ivs: { hp: 31, atk: 31, def: 31, spA: 31, spD: 31, spe: 31 },
+    types: pokemon.types,
+    stats: pokemon.stats,
+    tactic: 'National Dex baseline profile for custom ballistic simulation. Adjust item, nature, level, and EV spread to match live field conditions.',
+    note: 'Full National Dex reference slot',
+    moves: getGenericDexMoves(pokemon.types),
+  }));
+}
+
 const TRAINER_PRESETS = buildTrainerPresets();
 const PLAYER_PRESETS = buildPlayerPresets();
+const NATIONAL_DEX_PRESETS = buildNationalDexPresets();
+const SUPPLEMENTAL_ATTACK_PRESETS: CombatPreset[] = [
+  {
+    id: 'dex-garchomp',
+    trainerId: 'dex',
+    trainerCode: 'DX',
+    trainerName: 'Core Database',
+    name: 'Garchomp',
+    enName: 'Garchomp',
+    role: 'Reference Combat Sample',
+    level: 48,
+    item: 'None',
+    ability: 'Sand Stream',
+    nature: 'Hardy',
+    evs: { hp: 0, atk: 0, def: 0, spA: 0, spD: 0, spe: 0 },
+    ivs: { hp: 31, atk: 31, def: 31, spA: 31, spD: 31, spe: 31 },
+    types: ['Dragon', 'Ground'],
+    stats: garchomp.baseStats,
+    tactic: 'Reference benchmark attacker for high-ceiling ballistic simulation.',
+    note: 'Core database validation unit',
+    moves: [
+      { value: 'Earthquake', label: 'Earthquake', power: 100, type: 'Ground', category: 'physical' },
+      { value: 'Outrage', label: 'Outrage', power: 120, type: 'Dragon', category: 'physical' },
+      { value: 'Stone Edge', label: 'Stone Edge', power: 100, type: 'Rock', category: 'physical' },
+      { value: 'Dragon Dance', label: 'Dragon Dance', power: 0, type: 'Dragon', category: 'status' },
+    ],
+  },
+];
+const ATTACK_PRESETS = Array.from(
+  new Map(
+    [...NATIONAL_DEX_PRESETS, ...PLAYER_PRESETS, ...TRAINER_PRESETS, ...SUPPLEMENTAL_ATTACK_PRESETS].map((preset) => [
+      preset.enName,
+      preset,
+    ])
+  ).values()
+);
 
 function getTrainerPreset(presetId: string): CombatPreset {
   return TRAINER_PRESETS.find((preset) => preset.id === presetId) ?? TRAINER_PRESETS[0];
 }
 
-function getPlayerPreset(presetId: string): CombatPreset {
-  return PLAYER_PRESETS.find((preset) => preset.id === presetId) ?? PLAYER_PRESETS[0];
+function getAttackPreset(presetId: string): CombatPreset {
+  return ATTACK_PRESETS.find((preset) => preset.id === presetId) ?? ATTACK_PRESETS[0];
 }
 
 function getEffectiveness(moveType: string, defenderTypes: string[]): number {
@@ -459,9 +571,12 @@ export default function DamageCalculatorPage(): React.ReactElement {
 
   const activeTrainer = useMemo(() => trainersData.find((trainer) => trainer.id === activeTrainerId) ?? trainersData[0], [activeTrainerId]);
   const activeRosterPokemon = useMemo(() => activeTrainer.pokemon.find((pokemon) => pokemon.id === activeRosterPokemonId) ?? activeTrainer.pokemon[0], [activeRosterPokemonId, activeTrainer]);
-  const selectedAttackerPreset = useMemo(() => getPlayerPreset(activeAttackerId), [activeAttackerId]);
+  const selectedAttackerPreset = useMemo(() => getAttackPreset(activeAttackerId), [activeAttackerId]);
   const selectedDefenderPreset = useMemo(() => getTrainerPreset(activeRosterPokemonId), [activeRosterPokemonId]);
-  const attackerPresetOptions = useMemo(() => PLAYER_PRESETS.map((preset) => ({ value: preset.id, label: preset.name })), []);
+  const attackerPresetOptions = useMemo(
+    () => ATTACK_PRESETS.map((preset) => ({ value: preset.id, label: preset.name })),
+    []
+  );
   const moveOptions = useMemo(() => {
     const baseOptions = selectedAttackerPreset.moves.map((option) => ({
       value: option.value,
@@ -515,7 +630,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
   );
 
   const applyAttackerPreset = (presetId: string) => {
-    const preset = getPlayerPreset(presetId);
+    const preset = getAttackPreset(presetId);
     setActiveAttackerId(presetId);
     setAttacker({
       name: preset.enName,
@@ -550,7 +665,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
   };
 
   useEffect(() => {
-    const initialAttacker = getPlayerPreset(defaultPlayerPresetId);
+    const initialAttacker = getAttackPreset(defaultPlayerPresetId);
     const initialDefender = getTrainerPreset(trainersData[0].pokemon[0].id);
 
     setActiveAttackerId(initialAttacker.id);

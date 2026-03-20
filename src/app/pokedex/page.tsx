@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, ScanSearch, ShieldAlert, X } from 'lucide-react';
+import { ChevronDown, ScanSearch, X } from 'lucide-react';
 import { PinyinSearchInput } from '@/components/ui/PinyinSearchInput';
 import { playerRosterData } from '@/data/playerRoster';
 import { POKEMON_ART_ASSETS } from '@/data/remoteAssets';
@@ -256,13 +256,11 @@ const normalizeQuery = (value: string) => value.trim().toLowerCase().replace(/\s
 function filterPokemon(
   entry: PokedexEntry,
   query: string,
-  selectedType: string,
-  kaizoOnly: boolean
+  selectedType: string
 ) {
   const typeMatch = selectedType === ALL_TYPE_OPTION || entry.types.includes(selectedType);
-  const kaizoMatch = !kaizoOnly || entry.hasKaizoRevision;
 
-  if (!typeMatch || !kaizoMatch) {
+  if (!typeMatch) {
     return false;
   }
 
@@ -360,13 +358,9 @@ const dexEntries = [...pokedexEntries, ...supplementalDexEntries];
 function FilterBar({
   selectedType,
   onTypeChange,
-  kaizoOnly,
-  onKaizoToggle,
 }: {
   selectedType: string;
   onTypeChange: (value: string) => void;
-  kaizoOnly: boolean;
-  onKaizoToggle: (value: boolean) => void;
 }) {
   const [isTypeDrawerOpen, setIsTypeDrawerOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement | null>(null);
@@ -384,7 +378,7 @@ function FilterBar({
   }, []);
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/40 p-4 backdrop-blur-md md:flex-row md:items-start md:justify-between">
+    <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-4 backdrop-blur-md">
       <div ref={filterRef} className="relative flex-1">
         <button
           type="button"
@@ -484,31 +478,6 @@ function FilterBar({
           </div>
         </div>
       </div>
-
-      <button
-        type="button"
-        onClick={() => onKaizoToggle(!kaizoOnly)}
-        className={`flex min-w-[240px] items-center justify-between gap-4 rounded-xl border px-4 py-3 font-mono text-xs uppercase tracking-[0.18em] transition-all ${
-          kaizoOnly
-            ? 'border-emerald-500/35 bg-emerald-500/10 text-emerald-300'
-            : 'border-slate-800 bg-black/20 text-slate-400'
-        }`}
-      >
-        KAIZO REVISION PRIORITY
-        <div
-          className={`h-5 w-10 rounded-full border transition-all ${
-            kaizoOnly ? 'border-emerald-500/40 bg-emerald-500/15' : 'border-slate-700 bg-slate-900'
-          }`}
-        >
-          <div
-            className={`mt-[1px] h-4 w-4 rounded-full transition-all ${
-              kaizoOnly
-                ? 'translate-x-[18px] bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]'
-                : 'translate-x-[1px] bg-slate-600'
-            }`}
-          />
-        </div>
-      </button>
     </div>
   );
 }
@@ -618,15 +587,12 @@ function DetailDrawer({
 export default function PokedexPage(): React.ReactElement {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>(ALL_TYPE_OPTION);
-  const [kaizoOnly, setKaizoOnly] = useState<boolean>(true);
   const [activeEntry, setActiveEntry] = useState<PokedexEntry | null>(null);
   const deferredQuery = useDeferredValue(searchQuery);
 
   const filteredEntries = useMemo(() => {
-    return dexEntries.filter((entry) =>
-      filterPokemon(entry, deferredQuery, selectedType, kaizoOnly)
-    );
-  }, [deferredQuery, kaizoOnly, selectedType]);
+    return dexEntries.filter((entry) => filterPokemon(entry, deferredQuery, selectedType));
+  }, [deferredQuery, selectedType]);
 
   return (
     <div className="px-6 py-12 md:px-12">
@@ -634,23 +600,13 @@ export default function PokedexPage(): React.ReactElement {
         <section>
           <h1 className="title-strong text-4xl text-emerald-300 md:text-5xl">FULL DEX TACTICAL INDEX</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-            A Kaizo-first intelligence board for high-risk unit review. Search by localized name, English name, or acronym while filtering by type and revision priority.
+            A Kaizo-first intelligence board for high-risk unit review. Search by localized name, English name, or acronym while filtering by combat type.
           </p>
         </section>
 
-        <div className="space-y-3">
-          <PinyinSearchInput onSearch={setSearchQuery} />
-          <div className="inline-flex rounded-full border border-emerald-500/15 bg-slate-950/70 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] text-emerald-400/70">
-            MATCH_FOUND: {filteredEntries.length}_UNITS
-          </div>
-        </div>
+        <PinyinSearchInput onSearch={setSearchQuery} />
 
-        <FilterBar
-          selectedType={selectedType}
-          onTypeChange={setSelectedType}
-          kaizoOnly={kaizoOnly}
-          onKaizoToggle={setKaizoOnly}
-        />
+        <FilterBar selectedType={selectedType} onTypeChange={setSelectedType} />
 
         <section className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
           {filteredEntries.map((entry) => (
@@ -660,16 +616,6 @@ export default function PokedexPage(): React.ReactElement {
               onClick={() => setActiveEntry(entry)}
               className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 p-4 text-left backdrop-blur-md transition-all duration-300 hover:border-emerald-500/35"
             >
-              <div className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-emerald-500/12 via-transparent to-transparent p-3 transition-transform duration-300 group-hover:translate-y-0">
-                <div className="rounded-xl border border-emerald-500/20 bg-black/40 p-3">
-                  <div className="mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-400/70">
-                    <ShieldAlert className="h-3.5 w-3.5" />
-                    THREAT GRADE
-                  </div>
-                  <div className="font-mono text-2xl font-black text-white">T-{entry.threatScore}</div>
-                </div>
-              </div>
-
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <div className="relative h-16 w-16 overflow-hidden rounded-xl border border-slate-800 bg-black/20">
@@ -680,9 +626,6 @@ export default function PokedexPage(): React.ReactElement {
                     <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{entry.enName}</p>
                   </div>
                 </div>
-                <span className="rounded-full border border-emerald-500/15 bg-emerald-500/10 px-2 py-1 font-mono text-[9px] uppercase text-emerald-300/70">
-                  {entry.trainer}
-                </span>
               </div>
 
               <div className="mb-3 flex flex-wrap gap-2">
