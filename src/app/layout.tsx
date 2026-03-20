@@ -7,6 +7,7 @@ import { TacticalFooter } from '@/components/layout/TacticalFooter';
 import '@/globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://platinumkaizo.wiki'),
   title: 'Platinum Kaizo Tactical Command Grid',
   description: 'Hardcore tactical intelligence support for elite trainers.',
   keywords: ['Pokemon', 'Platinum Kaizo', 'tactical intel', 'pokedex', 'damage calc'],
