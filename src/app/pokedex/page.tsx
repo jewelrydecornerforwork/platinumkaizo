@@ -5,6 +5,7 @@ import { useDeferredValue, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { PinyinSearchInput } from '@/components/ui/PinyinSearchInput';
 import { nationalDexData } from '@/data/nationalDex';
+import { nationalDexNameIndex } from '@/data/nationalDexNames';
 import { playerRosterData } from '@/data/playerRoster';
 import { getPokemonArtAsset } from '@/data/remoteAssets';
 import { trainersData } from '@/data/trainers';
@@ -12,7 +13,9 @@ import { trainersData } from '@/data/trainers';
 type PokedexEntry = {
   id: string;
   name: string;
+  zhName: string;
   enName: string;
+  initials: string;
   trainer: string;
   role: string;
   note: string;
@@ -183,40 +186,6 @@ const typeOptionMeta: Record<
   },
 };
 
-const pokemonSearchIndex: Record<string, { zh: string; initials: string }> = {
-  Turtwig: { zh: '草苗龟', initials: 'cmg' },
-  Chimchar: { zh: '小火焰猴', initials: 'xhyh' },
-  Piplup: { zh: '波加曼', initials: 'bjm' },
-  Starly: { zh: '姆克儿', initials: 'mke' },
-  Shinx: { zh: '小猫怪', initials: 'xmg' },
-  Budew: { zh: '含羞苞', initials: 'hxb' },
-  Cranidos: { zh: '头盖龙', initials: 'tgl' },
-  Onix: { zh: '大岩蛇', initials: 'dys' },
-  Geodude: { zh: '小拳石', initials: 'xqs' },
-  Shieldon: { zh: '盾甲龙', initials: 'djl' },
-  Nosepass: { zh: '朝北鼻', initials: 'cbb' },
-  Aron: { zh: '可可多拉', initials: 'kkdl' },
-  Roserade: { zh: '罗丝雷朵', initials: 'lsld' },
-  Breloom: { zh: '斗笠菇', initials: 'dlg' },
-  Tangela: { zh: '蔓藤怪', initials: 'mtg' },
-  Cherrim: { zh: '樱花儿', initials: 'yhe' },
-  Grovyle: { zh: '森林蜥蜴', initials: 'slxy' },
-  Grotle: { zh: '树林龟', initials: 'slg' },
-  Lucario: { zh: '路卡利欧', initials: 'lklo' },
-  Medicham: { zh: '恰雷姆', initials: 'qlm' },
-  Machoke: { zh: '豪力', initials: 'hl' },
-  Hariyama: { zh: '幕下力士', initials: 'mxls' },
-  Toxicroak: { zh: '毒骷蛙', initials: 'dkw' },
-  Heracross: { zh: '赫拉克罗斯', initials: 'hlkls' },
-  Gyarados: { zh: '暴鲤龙', initials: 'bll' },
-  Floatzel: { zh: '浮潜鼬', initials: 'fqy' },
-  Quagsire: { zh: '沼王', initials: 'zw' },
-  Azumarill: { zh: '玛力露丽', initials: 'mlll' },
-  Pelipper: { zh: '大嘴鸥', initials: 'dzo' },
-  Poliwrath: { zh: '蚊香泳士', initials: 'wxys' },
-  Garchomp: { zh: '烈咬陆鲨', initials: 'llls' },
-};
-
 const normalizeQuery = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '');
 
 function filterPokemon(
@@ -236,12 +205,10 @@ function filterPokemon(
     return true;
   }
 
-  const indexedPokemon = pokemonSearchIndex[entry.enName];
   const searchPool = [
-    entry.name,
+    entry.zhName,
     entry.enName,
-    indexedPokemon?.zh ?? '',
-    indexedPokemon?.initials ?? '',
+    entry.initials,
   ]
     .map((value) => normalizeQuery(value))
     .filter(Boolean);
@@ -307,8 +274,10 @@ const dexEntries: PokedexEntry[] = nationalDexData.map((pokemon) => {
 
   return {
     id: pokemon.id,
-    name: pokemon.enName,
+    name: nationalDexNameIndex[pokemon.enName]?.zh || pokemon.enName,
+    zhName: nationalDexNameIndex[pokemon.enName]?.zh || pokemon.enName,
     enName: pokemon.enName,
+    initials: nationalDexNameIndex[pokemon.enName]?.initials || normalizeQuery(pokemon.enName),
     trainer: override?.trainer || 'National Dex',
     role: override?.role || getNationalDexRole(pokemon.stats),
     note: override?.note || 'Standard national dex profile synchronized for tactical review.',

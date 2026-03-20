@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pokemon } from '@smogon/calc';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Radar, ShieldAlert } from 'lucide-react';
@@ -10,6 +10,7 @@ import { LeaderList } from '@/components/trainers/LeaderList';
 import { TYPE_CHART } from '@/constants/typeChart';
 import { GYM_MOVE_INTEL, getGymMoveIntelByName } from '@/data/gymMoveIntel';
 import { nationalDexData } from '@/data/nationalDex';
+import { nationalDexNameIndex } from '@/data/nationalDexNames';
 import { defaultPlayerPresetId, playerRosterData } from '@/data/playerRoster';
 import { getPokemonArtAsset, LEADER_ART_ASSETS } from '@/data/remoteAssets';
 import { garchomp } from '@/data/sampleData';
@@ -31,6 +32,8 @@ type CombatPreset = {
   trainerName: string;
   name: string;
   enName: string;
+  zhName: string;
+  initials: string;
   role: string;
   level: number;
   item: string;
@@ -181,6 +184,8 @@ function buildTrainerPresets(): CombatPreset[] {
       trainerName: TRAINER_LABELS[trainer.id] || trainer.name,
       name: pokemon.name,
       enName: pokemon.enName,
+      zhName: nationalDexNameIndex[pokemon.enName]?.zh || pokemon.name,
+      initials: nationalDexNameIndex[pokemon.enName]?.initials || '',
       role: pokemon.role || 'TACTICAL SLOT',
       level: Number(pokemon.level.replace(/[^\d]/g, '')) || 100,
       item: pokemon.item,
@@ -203,6 +208,8 @@ function buildPlayerPresets(): CombatPreset[] {
     trainerName: 'Player',
     name: pokemon.name,
     enName: pokemon.enName,
+    zhName: pokemon.zhName,
+    initials: pokemon.initials,
     role: pokemon.role,
     level: pokemon.level,
     item: pokemon.item,
@@ -260,8 +267,10 @@ function buildNationalDexPresets(): CombatPreset[] {
     trainerId: 'dex',
     trainerCode: 'ND',
     trainerName: 'National Dex',
-    name: pokemon.enName,
+    name: nationalDexNameIndex[pokemon.enName]?.zh || pokemon.enName,
     enName: pokemon.enName,
+    zhName: nationalDexNameIndex[pokemon.enName]?.zh || pokemon.enName,
+    initials: nationalDexNameIndex[pokemon.enName]?.initials || '',
     role: getDexRole(pokemon.stats),
     level: 50,
     item: 'None',
@@ -288,6 +297,8 @@ const SUPPLEMENTAL_ATTACK_PRESETS: CombatPreset[] = [
     trainerName: 'Core Database',
     name: 'Garchomp',
     enName: 'Garchomp',
+    zhName: nationalDexNameIndex.Garchomp?.zh || 'Garchomp',
+    initials: nationalDexNameIndex.Garchomp?.initials || '',
     role: 'Reference Combat Sample',
     level: 48,
     item: 'None',
@@ -488,6 +499,86 @@ function CompactSelect({ label, value, onChange, options }: { label: string; val
   );
 }
 
+function SearchableSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string; searchTerms: string[] }>;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const containerRef = useRef<HTMLLabelElement | null>(null);
+  const selectedOption = options.find((option) => option.value === value);
+  const normalizedQuery = query.trim().toLowerCase().replace(/\s+/g, '');
+  const filteredOptions = useMemo(() => {
+    if (!normalizedQuery) {
+      return options.slice(0, 40);
+    }
+
+    return options
+      .filter((option) => option.searchTerms.some((term) => term.includes(normalizedQuery)))
+      .slice(0, 40);
+  }, [normalizedQuery, options]);
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setQuery('');
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, []);
+
+  return (
+    <label ref={containerRef} className="relative space-y-1.5">
+      <span className="block font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">{label}</span>
+      <input
+        value={isOpen ? query : selectedOption?.label || ''}
+        onFocus={() => {
+          setIsOpen(true);
+          setQuery('');
+        }}
+        onChange={(event) => {
+          setIsOpen(true);
+          setQuery(event.target.value);
+        }}
+        placeholder={selectedOption?.label || 'Search Unit'}
+        className="w-full rounded-lg border border-emerald-500/20 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.7)] transition-all placeholder:text-slate-600 focus:border-emerald-400/40"
+      />
+      {isOpen ? (
+        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-40 max-h-72 overflow-y-auto rounded-xl border border-emerald-500/15 bg-[#061018]/95 p-1 shadow-[0_18px_40px_rgba(2,6,23,0.82)] backdrop-blur-xl">
+          {filteredOptions.length ? (
+            filteredOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                  setQuery('');
+                }}
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-all hover:bg-emerald-500/10"
+              >
+                <span className="truncate font-mono text-sm text-white">{option.label}</span>
+              </button>
+            ))
+          ) : (
+            <div className="px-3 py-2 font-mono text-xs uppercase tracking-[0.16em] text-slate-500">No Match</div>
+          )}
+        </div>
+      ) : null}
+    </label>
+  );
+}
+
 function TacticalDmgHud({ min, max, koDisplay }: { min: number; max: number; koDisplay: string }) {
   const ledColor = max >= 100 ? 'text-red-400' : max >= 70 ? 'text-emerald-200' : 'text-emerald-300';
 
@@ -574,7 +665,14 @@ export default function DamageCalculatorPage(): React.ReactElement {
   const selectedAttackerPreset = useMemo(() => getAttackPreset(activeAttackerId), [activeAttackerId]);
   const selectedDefenderPreset = useMemo(() => getTrainerPreset(activeRosterPokemonId), [activeRosterPokemonId]);
   const attackerPresetOptions = useMemo(
-    () => ATTACK_PRESETS.map((preset) => ({ value: preset.id, label: preset.name })),
+    () =>
+      ATTACK_PRESETS.map((preset) => ({
+        value: preset.id,
+        label: `${preset.zhName} / ${preset.enName}`,
+        searchTerms: [preset.zhName, preset.enName, preset.initials]
+          .map((term) => term.trim().toLowerCase().replace(/\s+/g, ''))
+          .filter(Boolean),
+      })),
     []
   );
   const moveOptions = useMemo(() => {
@@ -813,7 +911,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5">
-                      <CompactSelect
+                      <SearchableSelect
                         label="Attack Unit"
                         value={activeAttackerId}
                         onChange={applyAttackerPreset}
