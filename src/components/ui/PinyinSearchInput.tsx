@@ -26,18 +26,13 @@ export const PinyinSearchInput = ({ onSearch }: SearchProps) => {
 
         <input
           type="text"
+          aria-label="Pokedex Search"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onChange={(event) => onSearch(event.target.value)}
-          placeholder="SMART UNIT SEARCH (ACRONYM SUPPORTED) // NAME, ENGLISH, INITIALS..."
+          placeholder=""
           className="w-full bg-transparent px-4 py-3 text-sm font-mono text-white placeholder:text-slate-700 focus:outline-none"
         />
-
-        <div className="hidden items-center gap-2 px-4 sm:flex">
-          <kbd className="rounded border border-slate-800 bg-slate-900 px-1.5 py-0.5 text-[10px] font-mono uppercase text-slate-500 shadow-inner">
-            CMD+K
-          </kbd>
-        </div>
       </div>
 
       {isFocused && (
