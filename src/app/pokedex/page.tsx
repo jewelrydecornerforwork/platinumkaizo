@@ -1,8 +1,8 @@
 ﻿'use client';
 
 import Image from 'next/image';
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, ScanSearch, X } from 'lucide-react';
+import { useDeferredValue, useMemo, useState } from 'react';
+import { X } from 'lucide-react';
 import { PinyinSearchInput } from '@/components/ui/PinyinSearchInput';
 import { playerRosterData } from '@/data/playerRoster';
 import { POKEMON_ART_ASSETS } from '@/data/remoteAssets';
@@ -356,126 +356,66 @@ const supplementalDexEntries: PokedexEntry[] = [
 const dexEntries = [...pokedexEntries, ...supplementalDexEntries];
 
 function FilterBar({
+  onSearch,
   selectedType,
   onTypeChange,
 }: {
+  onSearch: (value: string) => void;
   selectedType: string;
   onTypeChange: (value: string) => void;
 }) {
-  const [isTypeDrawerOpen, setIsTypeDrawerOpen] = useState(false);
-  const filterRef = useRef<HTMLDivElement | null>(null);
-  const selectedTypeMeta = typeOptionMeta[selectedType as keyof typeof typeOptionMeta];
-
-  useEffect(() => {
-    function handlePointerDown(event: MouseEvent) {
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-        setIsTypeDrawerOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
-  }, []);
-
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-4 backdrop-blur-md">
-      <div ref={filterRef} className="relative flex-1">
-        <button
-          type="button"
-          onClick={() => setIsTypeDrawerOpen((prev) => !prev)}
-          className={`group flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
-            isTypeDrawerOpen
-              ? 'border-emerald-500/35 bg-black/40 shadow-[0_0_25px_rgba(16,185,129,0.08)]'
-              : 'border-slate-800 bg-black/20 hover:border-emerald-500/20'
-          }`}
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/15 bg-emerald-500/10 md:h-10 md:w-10 xl:h-11 xl:w-11">
-            <ScanSearch className="h-4 w-4 text-emerald-300" />
+      <div className="rounded-2xl border border-emerald-500/20 bg-slate-950/95 shadow-[0_24px_60px_rgba(2,6,23,0.72)]">
+        <div className="border-b border-emerald-500/10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_60%)] px-4 py-4">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/70">
+            Tactical_Search_Grid
           </div>
+          <div className="mt-1 text-xs text-slate-400">
+            Search by localized name, English name, or initials, then narrow the indexed battlespace by combat type.
+          </div>
+          <div className="mt-4">
+            <PinyinSearchInput onSearch={onSearch} />
+          </div>
+        </div>
 
-          <div className="min-w-0 flex-1">
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
-              Type_Filter_Drawer
-            </div>
-            <div className="mt-1 flex items-center gap-3">
-              <span
-                className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] ${selectedTypeMeta.chip}`}
+        <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-2 xl:grid-cols-3">
+          {typeOptions.map((type) => {
+            const meta = typeOptionMeta[type];
+            const isActive = selectedType === type;
+
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => onTypeChange(type)}
+                className={`rounded-xl border p-3 text-left transition-all ${
+                  isActive
+                    ? 'border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.08)]'
+                    : 'border-slate-800 bg-black/25 hover:border-emerald-500/20 hover:bg-slate-900/70'
+                }`}
               >
-                {selectedTypeMeta.label}
-              </span>
-              <span className="truncate text-xs text-slate-400">{selectedTypeMeta.hint}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600 xl:block">
-              {typeOptions.length}_CHANNELS
-            </span>
-            <ChevronDown
-              className={`h-4 w-4 text-slate-500 transition-transform duration-300 ${
-                isTypeDrawerOpen ? 'rotate-180 text-emerald-300' : ''
-              }`}
-            />
-          </div>
-        </button>
-
-        <div
-          className={`mt-3 overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 ${
-            isTypeDrawerOpen
-              ? 'max-h-[520px] border-emerald-500/20 bg-slate-950/95 opacity-100 shadow-[0_24px_60px_rgba(2,6,23,0.72)]'
-              : 'max-h-0 border-transparent bg-slate-950/70 opacity-0'
-          }`}
-        >
-          <div className="border-b border-emerald-500/10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_60%)] px-4 py-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400/70">
-              Select_Target_Type
-            </div>
-            <div className="mt-1 text-xs text-slate-400">
-              Narrow the indexed battlespace by typing and remove low-value search noise.
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2 p-3 md:grid-cols-2 xl:grid-cols-3">
-            {typeOptions.map((type) => {
-              const meta = typeOptionMeta[type];
-              const isActive = selectedType === type;
-
-              return (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => {
-                    onTypeChange(type);
-                    setIsTypeDrawerOpen(false);
-                  }}
-                  className={`rounded-xl border p-3 text-left transition-all ${
-                    isActive
-                      ? 'border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.08)]'
-                      : 'border-slate-800 bg-black/25 hover:border-emerald-500/20 hover:bg-slate-900/70'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className={`h-2.5 w-2.5 rounded-full ${meta.accent}`} />
-                        <span className="text-sm font-bold text-white">{meta.label}</span>
-                      </div>
-                      <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
-                        {type}
-                      </div>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2.5 w-2.5 rounded-full ${meta.accent}`} />
+                      <span className="text-sm font-bold text-white">{meta.label}</span>
                     </div>
-                    {isActive ? (
-                      <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-emerald-300">
-                        ACTIVE
-                      </span>
-                    ) : null}
+                    <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                      {type}
+                    </div>
                   </div>
+                  {isActive ? (
+                    <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-emerald-300">
+                      ACTIVE
+                    </span>
+                  ) : null}
+                </div>
 
-                  <div className="mt-3 text-xs leading-5 text-slate-400">{meta.hint}</div>
-                </button>
-              );
-            })}
-          </div>
+                <div className="mt-3 text-xs leading-5 text-slate-400">{meta.hint}</div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -604,9 +544,7 @@ export default function PokedexPage(): React.ReactElement {
           </p>
         </section>
 
-        <PinyinSearchInput onSearch={setSearchQuery} />
-
-        <FilterBar selectedType={selectedType} onTypeChange={setSelectedType} />
+        <FilterBar onSearch={setSearchQuery} selectedType={selectedType} onTypeChange={setSelectedType} />
 
         <section className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
           {filteredEntries.map((entry) => (
