@@ -11,7 +11,7 @@ import { TYPE_CHART } from '@/constants/typeChart';
 import { GYM_MOVE_INTEL, getGymMoveIntelByName } from '@/data/gymMoveIntel';
 import { nationalDexData } from '@/data/nationalDex';
 import { defaultPlayerPresetId, playerRosterData } from '@/data/playerRoster';
-import { LEADER_ART_ASSETS, POKEMON_ART_ASSETS } from '@/data/remoteAssets';
+import { getPokemonArtAsset, LEADER_ART_ASSETS } from '@/data/remoteAssets';
 import { garchomp } from '@/data/sampleData';
 import { defaultTrainerId, trainersData } from '@/data/trainers';
 import { usePokemonCalc } from '@/hooks/usePokemonCalc';
@@ -418,7 +418,7 @@ function buildLiveCombatantIntel(
 }
 
 function getCombatantArt(name: string): string | null {
-  return POKEMON_ART_ASSETS[name] || null;
+  return getPokemonArtAsset(name) || null;
 }
 
 function CompactInput({ label, value, onChange, type = 'text' }: { label: string; value: string | number; onChange: (value: string) => void; type?: 'text' | 'number' }) {
@@ -1075,7 +1075,7 @@ export default function DamageCalculatorPage(): React.ReactElement {
                       >
                         <div className="relative mb-2.5 h-16 w-full overflow-hidden rounded-lg border border-slate-800 bg-slate-950/70">
                           <Image
-                            src={POKEMON_ART_ASSETS[pokemon.enName]}
+                            src={getPokemonArtAsset(pokemon.enName)}
                             alt={pokemon.name}
                             fill
                             className="object-contain p-2"

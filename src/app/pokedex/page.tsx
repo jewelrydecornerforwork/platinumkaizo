@@ -4,10 +4,10 @@ import Image from 'next/image';
 import { useDeferredValue, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { PinyinSearchInput } from '@/components/ui/PinyinSearchInput';
+import { nationalDexData } from '@/data/nationalDex';
 import { playerRosterData } from '@/data/playerRoster';
-import { POKEMON_ART_ASSETS } from '@/data/remoteAssets';
+import { getPokemonArtAsset } from '@/data/remoteAssets';
 import { trainersData } from '@/data/trainers';
-import { garchomp } from '@/data/sampleData';
 
 type PokedexEntry = {
   id: string;
@@ -43,56 +43,25 @@ const trainerLabels: Record<string, string> = {
   wake: 'Wake',
 };
 
-const typeMap: Record<string, string[]> = {
-  Turtwig: ['Grass'],
-  Chimchar: ['Fire'],
-  Piplup: ['Water'],
-  Starly: ['Normal', 'Flying'],
-  Shinx: ['Electric'],
-  Budew: ['Grass', 'Poison'],
-  Cranidos: ['Rock'],
-  Onix: ['Rock', 'Ground'],
-  Geodude: ['Rock', 'Ground'],
-  Shieldon: ['Rock', 'Steel'],
-  Nosepass: ['Rock'],
-  Aron: ['Steel', 'Rock'],
-  Roserade: ['Grass', 'Poison'],
-  Breloom: ['Grass', 'Fighting'],
-  Tangela: ['Grass'],
-  Cherrim: ['Grass'],
-  Grovyle: ['Grass'],
-  Grotle: ['Grass'],
-  Lucario: ['Fighting', 'Steel'],
-  Medicham: ['Fighting', 'Psychic'],
-  Machoke: ['Fighting'],
-  Hariyama: ['Fighting'],
-  Toxicroak: ['Poison', 'Fighting'],
-  Heracross: ['Bug', 'Fighting'],
-  Gyarados: ['Water', 'Flying'],
-  Floatzel: ['Water'],
-  Quagsire: ['Water', 'Ground'],
-  Azumarill: ['Water'],
-  Pelipper: ['Water', 'Flying'],
-  Poliwrath: ['Water', 'Fighting'],
-  Garchomp: ['Dragon', 'Ground'],
-};
-
 const typeOptions = [
   ALL_TYPE_OPTION,
   'Normal',
   'Fire',
-  'Rock',
-  'Ground',
-  'Steel',
+  'Water',
   'Grass',
-  'Poison',
   'Electric',
+  'Ice',
   'Fighting',
+  'Poison',
+  'Ground',
+  'Flying',
   'Psychic',
   'Bug',
-  'Water',
-  'Flying',
+  'Rock',
+  'Ghost',
+  'Steel',
   'Dragon',
+  'Dark',
 ] as const;
 
 const typeOptionMeta: Record<
@@ -152,6 +121,12 @@ const typeOptionMeta: Record<
     chip: 'border-yellow-400/30 bg-yellow-400/10 text-yellow-200',
     hint: 'Speed control, anti-water pressure, and clean pivot checks.',
   },
+  Ice: {
+    label: 'ICE',
+    accent: 'bg-cyan-200',
+    chip: 'border-cyan-300/30 bg-cyan-300/10 text-cyan-100',
+    hint: 'Freeze pressure and dragon suppression.',
+  },
   Poison: {
     label: 'POISON',
     accent: 'bg-fuchsia-500',
@@ -188,11 +163,23 @@ const typeOptionMeta: Record<
     chip: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200',
     hint: 'Fast insertion and ground suppression.',
   },
+  Ghost: {
+    label: 'GHOST',
+    accent: 'bg-indigo-400',
+    chip: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-200',
+    hint: 'Immunity abuse and shadow pressure.',
+  },
   Dragon: {
     label: 'DRAGON',
     accent: 'bg-violet-400',
     chip: 'border-violet-500/30 bg-violet-500/10 text-violet-200',
     hint: 'Elite offensive ceiling and sweep threat.',
+  },
+  Dark: {
+    label: 'DARK',
+    accent: 'bg-zinc-400',
+    chip: 'border-zinc-500/30 bg-zinc-500/10 text-zinc-200',
+    hint: 'Punish reads, trap lines, and deny psychic routes.',
   },
 };
 
@@ -230,27 +217,6 @@ const pokemonSearchIndex: Record<string, { zh: string; initials: string }> = {
   Garchomp: { zh: '烈咬陆鲨', initials: 'llls' },
 };
 
-const typeLabelMap: Record<string, string> = {
-  normal: 'Normal',
-  fire: 'Fire',
-  water: 'Water',
-  grass: 'Grass',
-  electric: 'Electric',
-  ice: 'Ice',
-  fighting: 'Fighting',
-  poison: 'Poison',
-  ground: 'Ground',
-  flying: 'Flying',
-  psychic: 'Psychic',
-  bug: 'Bug',
-  rock: 'Rock',
-  ghost: 'Ghost',
-  dragon: 'Dragon',
-  dark: 'Dark',
-  steel: 'Steel',
-  fairy: 'Fairy',
-};
-
 const normalizeQuery = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '');
 
 function filterPokemon(
@@ -283,77 +249,82 @@ function filterPokemon(
   return searchPool.some((value) => value.includes(normalizedQuery));
 }
 
-const pokedexEntries: PokedexEntry[] = trainersData.flatMap((trainer) =>
-  trainer.pokemon.map((pokemon) => {
-    const threatScore =
-      Math.round((pokemon.stats.atk + pokemon.stats.spA + pokemon.stats.spe + trainer.threatLevel) / 4) || 50;
+function getNationalDexRole(stats: PokedexEntry['stats']): string {
+  const physical = stats.atk;
+  const special = stats.spA;
+  const speed = stats.spe;
+  const bulk = stats.hp + stats.def + stats.spD;
 
-    return {
-      id: pokemon.id,
-      name: pokemon.enName,
-      enName: pokemon.enName,
-      trainer: trainerLabels[trainer.id] || trainer.id,
+  if (speed >= 110) return 'Rapid Tactical Unit';
+  if (physical >= 120) return 'Physical Pressure Unit';
+  if (special >= 120) return 'Special Pressure Unit';
+  if (bulk >= 280) return 'Defensive Anchor Unit';
+  return 'Balanced Combat Unit';
+}
+
+function getNationalDexThreatScore(stats: PokedexEntry['stats']): number {
+  return Math.round((stats.atk + stats.spA + stats.spe) / 3) || 50;
+}
+
+const intelOverrides = new Map<string, Partial<PokedexEntry>>([
+  ...trainersData.flatMap((trainer) =>
+    trainer.pokemon.map((pokemon) => [
+      pokemon.enName,
+      {
+        trainer: trainerLabels[trainer.id] || trainer.id,
+        role: pokemon.role,
+        note: pokemon.note,
+        tactic: pokemon.tactic,
+        ability: pokemon.ability,
+        item: pokemon.item,
+        nature: pokemon.nature,
+        art: getPokemonArtAsset(pokemon.enName),
+        threatScore:
+          Math.round((pokemon.stats.atk + pokemon.stats.spA + pokemon.stats.spe + trainer.threatLevel) / 4) || 50,
+        hasKaizoRevision: true,
+      } satisfies Partial<PokedexEntry>,
+    ] as const)
+  ),
+  ...playerRosterData.map((pokemon) => [
+    pokemon.enName,
+    {
+      trainer: 'Player Dossier',
       role: pokemon.role,
       note: pokemon.note,
       tactic: pokemon.tactic,
       ability: pokemon.ability,
       item: pokemon.item,
       nature: pokemon.nature,
-      types: typeMap[pokemon.enName] || ['Normal'],
-      art: POKEMON_ART_ASSETS[pokemon.enName] || '',
-      threatScore,
+      art: getPokemonArtAsset(pokemon.enName),
+      threatScore: Math.round((pokemon.stats.atk + pokemon.stats.spA + pokemon.stats.spe) / 3),
       hasKaizoRevision: true,
-      stats: pokemon.stats,
-    };
-  })
-);
+    } satisfies Partial<PokedexEntry>,
+  ] as const),
+]);
 
-const supplementalDexEntries: PokedexEntry[] = [
-  ...playerRosterData.map((pokemon) => ({
+const dexEntries: PokedexEntry[] = nationalDexData.map((pokemon) => {
+  const override = intelOverrides.get(pokemon.enName);
+
+  return {
     id: pokemon.id,
     name: pokemon.enName,
     enName: pokemon.enName,
-    trainer: 'Player Dossier',
-    role: pokemon.role,
-    note: pokemon.note,
-    tactic: pokemon.tactic,
-    ability: pokemon.ability,
-    item: pokemon.item,
-    nature: pokemon.nature,
+    trainer: override?.trainer || 'National Dex',
+    role: override?.role || getNationalDexRole(pokemon.stats),
+    note: override?.note || 'Standard national dex profile synchronized for tactical review.',
+    tactic:
+      override?.tactic ||
+      'Use this unit as a baseline combat profile, then transfer it into the ballistic console for field-specific damage validation.',
+    ability: override?.ability || pokemon.ability || 'Unassigned',
+    item: override?.item || 'Unassigned',
+    nature: override?.nature || 'Neutral',
     types: pokemon.types,
-    art: POKEMON_ART_ASSETS[pokemon.enName] || '',
-    threatScore: Math.round((pokemon.stats.atk + pokemon.stats.spA + pokemon.stats.spe) / 3),
-    hasKaizoRevision: true,
+    art: override?.art || getPokemonArtAsset(pokemon.enName),
+    threatScore: override?.threatScore || getNationalDexThreatScore(pokemon.stats),
+    hasKaizoRevision: override?.hasKaizoRevision || false,
     stats: pokemon.stats,
-  })),
-  {
-    id: `dex-${garchomp.id}`,
-    name: garchomp.enName,
-    enName: garchomp.enName,
-    trainer: 'Core Database',
-    role: 'Reference Combat Sample',
-    note: 'Integrated into the base dex index as a non-gym tactical benchmark unit.',
-    tactic: 'Useful for validating multilingual search, acronym matching, and cross-page ballistic test flow.',
-    ability: 'Sand Stream',
-    item: 'Unassigned',
-    nature: 'Reference Template',
-    types: garchomp.types.flatMap((type) => {
-      if (!type) {
-        return [];
-      }
-
-      return [typeLabelMap[type] || type];
-    }),
-    art: POKEMON_ART_ASSETS.Garchomp,
-    threatScore: Math.round(
-      (garchomp.baseStats.atk + garchomp.baseStats.spA + garchomp.baseStats.spe) / 3
-    ),
-    hasKaizoRevision: true,
-    stats: garchomp.baseStats,
-  },
-];
-
-const dexEntries = [...pokedexEntries, ...supplementalDexEntries];
+  };
+});
 
 function FilterBar({
   onSearch,

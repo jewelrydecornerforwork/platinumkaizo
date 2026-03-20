@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Crosshair, ShieldAlert, Zap } from 'lucide-react';
-import { LEADER_ART_ASSETS, POKEMON_ART_ASSETS } from '@/data/remoteAssets';
+import { getPokemonArtAsset, LEADER_ART_ASSETS } from '@/data/remoteAssets';
 import { defaultTrainerId, trainersData } from '@/data/trainers';
 import type { TrainerIntelProfile, TrainerPokemonIntel } from '@/types';
 
@@ -228,7 +228,7 @@ function UnitCard({
           <div className="flex items-start gap-3">
             <div className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
               <Image
-                src={POKEMON_ART_ASSETS[unit.enName]}
+                src={getPokemonArtAsset(unit.enName)}
                 alt={unit.name}
                 fill
                 className="object-contain p-2"

@@ -6,7 +6,7 @@ import { Search, ShieldCheck, Sparkles, Swords } from 'lucide-react';
 import { TacticalFrame } from '@/components/ui/TacticalFrame';
 import { SynergyMatrix } from '@/components/teambuilder/SynergyMatrix';
 import { playerRosterData } from '@/data/playerRoster';
-import { POKEMON_ART_ASSETS } from '@/data/remoteAssets';
+import { getPokemonArtAsset } from '@/data/remoteAssets';
 import { trainersData } from '@/data/trainers';
 
 type CatalogEntry = {
@@ -71,7 +71,7 @@ const catalog: CatalogEntry[] = [
     note: pokemon.note,
     tactic: pokemon.tactic,
     types: pokemon.types,
-    art: POKEMON_ART_ASSETS[pokemon.enName] || '',
+    art: getPokemonArtAsset(pokemon.enName),
   })),
   ...trainersData.flatMap((trainer) =>
     trainer.pokemon.map((pokemon) => ({
@@ -83,7 +83,7 @@ const catalog: CatalogEntry[] = [
       note: pokemon.note,
       tactic: pokemon.tactic,
       types: typeMap[pokemon.enName] || ['Normal'],
-      art: POKEMON_ART_ASSETS[pokemon.enName] || '',
+      art: getPokemonArtAsset(pokemon.enName),
     }))
   ),
 ];

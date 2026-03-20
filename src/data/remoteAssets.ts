@@ -38,3 +38,17 @@ export const POKEMON_ART_ASSETS: Record<string, string> = {
   Poliwrath: '/assets/pokemon/poliwrath.png',
   Garchomp: '/assets/pokemon/garchomp.png',
 };
+
+function toSpriteId(name: string): string {
+  return name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/♀/g, 'f')
+    .replace(/♂/g, 'm')
+    .replace(/[^a-zA-Z0-9]+/g, '')
+    .toLowerCase();
+}
+
+export function getPokemonArtAsset(name: string): string {
+  return POKEMON_ART_ASSETS[name] || `https://play.pokemonshowdown.com/sprites/gen5/${toSpriteId(name)}.png`;
+}
