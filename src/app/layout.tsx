@@ -1,4 +1,5 @@
 ﻿import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { SidebarProvider } from '@/components/providers/SidebarProvider';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
@@ -43,6 +44,21 @@ export default function RootLayout({ children }: RootLayoutProps): React.ReactEl
             </main>
           </div>
         </SidebarProvider>
+
+        <div style={{ display: 'none' }} aria-hidden="true">
+          <Script
+            src="https://www.googletagmanager.com/gtag/js?id=G-LDZP7949WH"
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-LDZP7949WH');
+            `}
+          </Script>
+        </div>
       </body>
     </html>
   );
