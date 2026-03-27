@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Web Form Research PoC",
+  "version": "0.1.0",
+  "description": "Analyze forms containing email and URL fields, export metadata to JSON, and autofill whitelisted test sites.",
+  "minimum_chrome_version": "114",
+  "permissions": ["activeTab", "downloads"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "action": {
+    "default_title": "Web Form Research PoC",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content-script.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

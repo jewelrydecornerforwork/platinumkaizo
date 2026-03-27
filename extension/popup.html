@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Form Research PoC</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="panel">
+        <p class="eyebrow">Manifest V3</p>
+        <h1>Web Form Research</h1>
+        <p class="intro">
+          Scan the active page for forms that contain both email and URL fields, then export
+          the form metadata as JSON.
+        </p>
+
+        <div class="actions">
+          <button id="scan-button" class="primary" type="button">Scan Current Page</button>
+          <button id="export-button" type="button" disabled>Export JSON</button>
+        </div>
+
+        <div class="autofill">
+          <h2>Whitelist Test Autofill</h2>
+          <input id="name-input" type="text" value="Research Tester" placeholder="Name" />
+          <input
+            id="email-input"
+            type="email"
+            value="researcher@example.test"
+            placeholder="Email"
+          />
+          <input id="url-input" type="url" value="https://example.test" placeholder="URL" />
+          <textarea id="comment-input" rows="3" placeholder="Comment">Academic comment form structure test.</textarea>
+          <button id="autofill-button" type="button">Autofill Whitelisted Host</button>
+        </div>
+
+        <p id="status" class="status">Waiting for scan.</p>
+      </section>
+
+      <section class="panel results">
+        <div class="results-header">
+          <h2>Matched Forms</h2>
+          <span id="result-count" class="count">0</span>
+        </div>
+        <div id="results-list" class="results-list">
+          <p class="empty">No scan data yet.</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
